@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 
 
 class RydbergHamiltonian1D:
-    def __init__(self, n, a=1, C_6=100, δ=0, rabi=1):
+    def __init__(self, n, a=1, C_6=0, δ=0, rabi=1):
         '''
 
         :param n:
@@ -107,28 +107,36 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
 
         return g
 
-    def time_evolve(self):
+    def time_evolve(self, density_matrix=False, rydberg_fidelity=False):
         ψ = self.ground_state()
-        j = self.basis_vectors(2 ** (self.n - 1))
+        j = self.row_basis_vectors(2 ** (self.n - 1))
         rydberg_fidelity = {}
 
         for k in range(0, self.steps):
             ψ = np.dot(expm(-1j * self.hamiltonian_matrix(self.detunning[k]) * self.dt), ψ)
-            density_matrix = np.dot(ψ, ψ.conj().T)
 
-            if self.n == 2:
-                rydberg_fidelity = self.two_atom_evolve(density_matrix, j)
+            if density_matrix:
+                density_matrix = np.dot(ψ, ψ.conj().T)
 
-            if self.n == 3:
-                rydberg_fidelity = self.three_atom_evolve(density_matrix, j)
+            if rydberg_fidelity:
+                pass
 
-        #return rydberg_fidelity
 
-        plt.plot(self.times, rydberg_fidelity['Atom 1'], label='Atom 1')
-        plt.plot(self.times, rydberg_fidelity['Atom 2'], label='Atom 2')
-        plt.legend(loc='upper right')
 
-        plt.show()
+            # if self.n == 2:
+            #     rydberg_fidelity = self.two_atom_evolve(density_matrix, j)
+            #
+            # if self.n == 3:
+            #     rydberg_fidelity = self.three_atom_evolve(density_matrix, j)
+
+        rdm = self.reduced_density_matrix(ψ, 2)
+        print(rdm)
+
+        # plt.plot(self.times, rydberg_fidelity['Atom 1'], label='Atom 1')
+        # plt.plot(self.times, rydberg_fidelity['Atom 2'], label='Atom 2')
+        # plt.legend(loc='upper right')
+        #
+        # plt.show()
 
     def two_atom_evolve(self, density_matrix, j, rydberg_fidelity={}, n_1list=[], n_2list=[]):
 
@@ -205,63 +213,117 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
 
     @staticmethod
     def comp_basis_vector_to_qubit_states(basis_vector):
-        n = int(np.log2(len(basis_vector)))  # Calculate the number of qubits (n)
 
-        # Convert the basis vector to binary representation
-        basis_int = int(np.log2(int(''.join(map(str, reversed(basis_vector))), 4)))
-        binary_rep = format(basis_int, f'0{n}b')
-        print(binary_rep)
+        rows = np.shape(basis_vector)[0]
+        cols = np.shape(basis_vector)[1]
 
-        # Initialize a list to store individual qubit states
-        qubit_states = []
+        # Case for bra vector
+        if cols > rows:
+            n = int(np.log2(cols))
 
-        # Split the binary representation into n parts
-        for i in range(n):
-            qubit_binary = binary_rep[i]  # Get the binary value for the i-th qubit
-            qubit_states.append([1 - int(qubit_binary), int(qubit_binary)])  # Convert to 2D state vector
+            # Convert the basis vector to binary representation
+            basis_int = int(np.log2(int(''.join(map(str, reversed(basis_vector[0]))), 2)))
+            binary_rep = format(basis_int, f'0{n}b')
+
+            # Initialize a list to store individual qubit states
+            qubit_states = []
+
+            # Split the binary representation into n parts
+            for i in range(n):
+                qubit_binary = binary_rep[i]  # Get the binary value for the i-th qubit
+                qubit_states.append(np.array([1 - int(qubit_binary), int(qubit_binary)]))  # Convert to 2D state vector
+
+        # Case for ket vector
+        if rows > cols:
+            n = int(np.log2(rows))
+
+            # Convert the basis vector to binary representation
+            basis_int = int(np.log2(int(''.join(map(str, reversed(basis_vector[:, 0]))), 2)))
+            binary_rep = format(basis_int, f'0{n}b')
+
+            # Initialize a list to store individual qubit states
+            qubit_states = []
+
+            # Split the binary representation into n parts
+            for i in range(n):
+                qubit_binary = binary_rep[i]  # Get the binary value for the i-th qubit
+                qubit_states += [np.array([[1 - int(qubit_binary), int(qubit_binary)]]).T]  # Convert to 2D state vector
 
         return qubit_states
 
     @staticmethod
-    def basis_vectors(n):
-        return [np.array([np.eye(n)[i]]) for i in range(n)]
+    def row_basis_vectors(n):
+        return [np.array([np.eye(n)[i]]).astype(int) for i in range(n)]
+
+    @staticmethod
+    def col_basis_vectors(n):
+        return [np.array([np.eye(n)[i]]).astype(int).T for i in range(n)]
+
+    def reduced_density_matrix(self, ψ, i):
+        dim_sub = 2 ** (self.n - 1)
+
+        m_left_list = []
+        m_right_list = []
+
+        # Produce list of matrices on left side of sum
+        row_basis_vectors = self.row_basis_vectors(dim_sub)
+        for row_vector in row_basis_vectors:
+            bra_vectors = self.comp_basis_vector_to_qubit_states(row_vector)
+            bra_vectors.insert(i-1, self.id)
+
+            m_left = bra_vectors[0]  # initialise left matrix
+
+            for bra in bra_vectors[1:]:
+                m_left = np.kron(m_left, bra)  # taking tensor product left to right
+
+            m_left_list += [m_left]
+
+        # Produce list of matrices on right side of sum
+        col_basis_vectors = self.col_basis_vectors(dim_sub)
+        for col_vector in col_basis_vectors:
+            ket_vectors = self.comp_basis_vector_to_qubit_states(col_vector)
+            ket_vectors.insert(i-1, self.id)
+
+            m_right = ket_vectors[0]  # initialise right matrix
+
+            for ket in ket_vectors[1:]:
+                m_right = np.kron(m_right, ket)  # taking tensor product left to right
+
+            m_right_list += [m_right]
+
+        reduced_density_matrix = np.zeros((dim_sub,dim_sub))
+
+        for j in range(0, dim_sub):
+            m_left = m_left_list[j]
+            m_right = m_right_list[j]
+            reduced_density_matrix = reduced_density_matrix + np.dot(np.dot(m_left, ψ), np.dot(ψ.conj().T, m_right))
+
+        return reduced_density_matrix
+
+    def rydberg_fidelity(self,ψ):
 
 
-    def reduced_density_matrix(self, density_matrix, i):
-        j_bra = [np.array([[1, 0]]), np.array([[0, 1]])]
-        j_ket = [np.array([[1, 0]]).T, np.array([[0, 1]]).T]
+        for i in range(1, self.n+1):
+            rdm = self.reduced_density_matrix(ψ, i)
+            rf = np.trace(np.dot(rdm, self.ni_op))
 
-        m = [1]
 
-        for j in range(0, 2 ** (self.n - 1)):
 
-            if i == 1:
-                m_ll = [1]
-                m_rl = [1]
-            else:
-                m_ll = self.basis_vectors(i - 1)[j]
-                m_rl = self.basis_vectors(i - 1)[j].T
 
-            if i == self.n:
-                m_lr = [1]
-                m_rr = [1]
 
-            else:
-                m_lr = self.basis_vectors(self.n - i - 1)[j]
-                m_rr = self.basis_vectors(self.n - i - 1)[j].T
 
-            m_l = sparse.kron(m_ll, sparse.kron(self.id, m_lr))
-            m_r = sparse.kron(m_rl, sparse.kron(self.id, m_lr))
+
+
 
 
 if __name__ == "__main__":
-    two = RydbergHamiltonian1D(2)
-    #
-    h_m = two.hamiltonian_matrix(0)
-    #
-    # eigenvalues = np.linalg.eigvals(h_m)
-    #
-    print(h_m)
+    # two = RydbergHamiltonian1D(2)
+    # #
+    # h_m = two.hamiltonian_matrix(0)
+    # #
+    # # eigenvalues = np.linalg.eigvals(h_m)
+    # #
+    # print(h_m)
 
 
     #
@@ -271,12 +333,14 @@ if __name__ == "__main__":
     t = 30
     # #
     evol = AdiabaticEvolution(2, t, dt, rabi_osc=True)
-    # #
-    #rydberg = evol.time_evolve()
-    #
-    #evol.comp_basis_vector_to_qubit_states()
+    # #rydberg = evol.time_evolve()
 
-    basis
+    basis_vector = np.array([[0, 0, 0, 1, 0, 0, 0, 0]])
+
+    evol.time_evolve()
+
+
+
 
 
 
