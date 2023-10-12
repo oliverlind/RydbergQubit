@@ -6,8 +6,9 @@ from matplotlib import pyplot as plt
 from rydberg_hamiltonian_1d import RydbergHamiltonian1D
 
 
+
 class AdiabaticEvolution(RydbergHamiltonian1D):
-    def __init__(self, n, t, dt, δ_start=-1, δ_end=1, rabi_osc=False):
+    def __init__(self, n, t, dt, δ_start=-10, δ_end=30, rabi_osc=False):
         super().__init__(n)
         self.t = t
         self.dt = dt
@@ -28,7 +29,7 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
     def time_evolve(self, density_matrix=False, rydberg_fidelity=False):
         ψ = self.ground_state()
         j = self.row_basis_vectors(2 ** (self.n - 1))
-        rydberg_fidelity = {}
+        rydberg_fidelity_list = [[] for _ in range(self.n)]
 
         for k in range(0, self.steps):
             ψ = np.dot(expm(-1j * self.hamiltonian_matrix(self.detunning[k]) * self.dt), ψ)
@@ -37,22 +38,59 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
                 density_matrix = np.dot(ψ, ψ.conj().T)
 
             if rydberg_fidelity:
-                pass
+                self.rydberg_fidelity(rydberg_fidelity_list,ψ)
 
-            # if self.n == 2:
-            #     rydberg_fidelity = self.two_atom_evolve(density_matrix, j)
-            #
-            # if self.n == 3:
-            #     rydberg_fidelity = self.three_atom_evolve(density_matrix, j)
+        if rydberg_fidelity:
+            return rydberg_fidelity_list
 
-        rdm = self.reduced_density_matrix(ψ, 2)
-        print(rdm)
+    def plot(self):
 
-        # plt.plot(self.times, rydberg_fidelity['Atom 1'], label='Atom 1')
-        # plt.plot(self.times, rydberg_fidelity['Atom 2'], label='Atom 2')
-        # plt.legend(loc='upper right')
+        rydberg_fidelity_list = self.time_evolve(rydberg_fidelity=True)
+
+        for i in range(self.n):
+            n_i = rydberg_fidelity_list[i]
+            plt.plot(self.times, n_i, label=f'Atom {i+1}')
+
+        plt.legend(loc='upper right')
+
+        plt.show()
+
+    def plot_colour_bar(self):
+
+        rydberg_fidelity_data = self.time_evolve(rydberg_fidelity=True)
+
+        # Labels for the bars
+        labels = [f'Atom {i + 1}' for i in range(self.n)]
+
+        # Create a horizontal bar with changing colors for each data set
+        fig, ax = plt.subplots()
+
+        cmap = plt.get_cmap('viridis')  # Choose a colormap for data sets
+
+        for i, ind_data in enumerate(rydberg_fidelity_data):
+            for j, value in enumerate(ind_data):
+                color = cmap(value)  # Map value to color using the colormap
+                ax.barh(i, 1, left=j, height=1, color=color, align='center')
+
+
+        # Set the y-axis ticks and labels
+        ax.set_yticks(np.arange(self.n))
+        ax.set_yticklabels(labels)
+
+        # Fill whole figure
+        ax.set_xlim(0, self.steps)  # Set the x-axis limits
+        ax.set_ylim(-0.5, self.n-0.5)  # Set the y-axis limits
+
+        # # Set the y-axis ticks and labels
+        # ax.set_xticks(np.arange(self.steps))
+        # ax.set_xticklabels(self.times)
         #
-        # plt.show()
+        cbar_ax = fig.add_axes([0.2, 0.02, 0.6, 0.02])  # Adjust the [x, y, width, height] values
+        #
+        bar = plt.colorbar(plt.cm.ScalarMappable(cmap=cmap), cax=cbar_ax, orientation='horizontal')
+
+        plt.show()
+
 
     def two_atom_evolve(self, density_matrix, j, rydberg_fidelity={}, n_1list=[], n_2list=[]):
 
@@ -206,7 +244,7 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
 
             m_right_list += [m_right]
 
-        reduced_density_matrix = np.zeros((dim_sub, dim_sub))
+        reduced_density_matrix = np.zeros((2, 2))
 
         for j in range(0, dim_sub):
             m_left = m_left_list[j]
@@ -215,11 +253,30 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
 
         return reduced_density_matrix
 
-    def rydberg_fidelity(self, ψ):
+    def rydberg_fidelity(self, rydberg_fidelity_list, ψ):
 
         for i in range(1, self.n + 1):
             rdm = self.reduced_density_matrix(ψ, i)
             rf = np.trace(np.dot(rdm, self.ni_op))
 
+            if rf.imag > 0.01:
+                raise ValueError("Rydberg Fidelity has a non-zero imaginary part")
+
+            else:
+                rf = abs(rf)
+
+            rydberg_fidelity_list[i-1] += [rf]
+
+
 if __name__ == "__main__":
-    print(AdiabaticEvolution.row_basis_vectors(3))
+
+    t = 50
+    dt = 0.1
+    n = 3
+
+    evol = AdiabaticEvolution(n, t, dt)
+
+    evol.plot_colour_bar()
+
+
+
