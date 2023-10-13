@@ -93,7 +93,7 @@ def main_ui():
 
         return h_m''', language="python")
 
-    image = Image.open('Figure_1.png')
+    image = Image.open('Plots/Figure_1.png')
 
     st.image(image)
 
