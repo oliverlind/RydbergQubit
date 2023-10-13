@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 
 
 class RydbergHamiltonian1D:
-    def __init__(self, n, a=1, C_6=10, rabi=1):
+    def __init__(self, n, a=1, C_6=0.75, rabi=1):
         '''
 
         :param n:

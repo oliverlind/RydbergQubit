@@ -1,4 +1,5 @@
 import streamlit as st
+from PIL import Image
 
 def main_ui():
     """
@@ -91,6 +92,10 @@ def main_ui():
         h_m = ((self.rabi / 2) * self.sum_sigma_xi()) - (δ * self.sum_n_i()) + self.vdw()
 
         return h_m''', language="python")
+
+    image = Image.open('Figure_1.png')
+
+    st.image(image)
 
 if __name__ == "__main__":
     main_ui()
