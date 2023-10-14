@@ -6,18 +6,19 @@ from matplotlib import pyplot as plt
 
 
 class RydbergHamiltonian1D:
-    def __init__(self, n, a=1, C_6=0.75, rabi=1):
+    def __init__(self, n, a=5.48, C_6= 2*np.pi*862690, Rabi=2*np.pi*4):
         '''
 
-        :param n:
-        :param a:
-        :param C_6:
-        :param rabi:
+        :param n: Number of atoms
+        :param a: Separation between atoms (μm)
+        :param C_6: Interaction strength
+        :param Rabi: Rabi frequency (Mhz)
         '''
         self.n = n
         self.a = a
         self.C_6 = C_6
-        self.rabi = rabi
+        self.Rabi = Rabi
+        self.r_b = (C_6/Rabi)**(1/6)
         self.id = np.identity(2)
         self.σx = np.array([[0, 1], [1, 0]])
         self.ni_op = np.array([[0, 0], [0, 1]])
@@ -80,7 +81,7 @@ class RydbergHamiltonian1D:
         return m_vdw
 
     def hamiltonian_matrix(self, δ):
-        h_m = ((self.rabi / 2) * self.sum_sigma_xi()) - (δ * self.sum_n_i()) + self.vdw()
+        h_m = ((self.Rabi / 2) * self.sum_sigma_xi()) - (δ * self.sum_n_i()) + self.vdw()
 
         return h_m
 
