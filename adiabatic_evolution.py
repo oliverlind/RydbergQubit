@@ -6,19 +6,23 @@ from matplotlib import pyplot as plt
 from rydberg_hamiltonian_1d import RydbergHamiltonian1D
 
 
-
 class AdiabaticEvolution(RydbergHamiltonian1D):
-    def __init__(self, n, t, dt, δ_start=-10, δ_end=30, rabi_osc=False):
+    def __init__(self, n, t, dt, δ_start, δ_end, rabi_osc=False, no_int=False):
         super().__init__(n)
         self.t = t
         self.dt = dt
         self.steps = int(t / dt)
+        self.δ_start = δ_start
+        self.δ_end = δ_end
         self.detunning = np.linspace(δ_start, δ_end, self.steps)
         self.times = np.linspace(0, t, self.steps)
         self.reduced_den_initial = np.zeros((2, 2))
 
         if rabi_osc:
             self.detunning = np.zeros(self.steps)
+
+        if no_int:
+            self.C_6 = 0
 
     def ground_state(self):
         g = np.zeros((2 ** self.n, 1))
@@ -38,59 +42,136 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
                 density_matrix = np.dot(ψ, ψ.conj().T)
 
             if rydberg_fidelity:
-                self.rydberg_fidelity(rydberg_fidelity_list,ψ)
+                self.rydberg_fidelity(rydberg_fidelity_list, ψ)
 
         if rydberg_fidelity:
             return rydberg_fidelity_list
 
-    def plot(self):
+        else:
+            return ψ
 
-        rydberg_fidelity_list = self.time_evolve(rydberg_fidelity=True)
+    def expectation_vals(self,eval,evec):
+        expec_vals = []
+        for i in range(0, self.dimension):
+            v = self.row_basis_vectors(self.dimension)[i]
+            expec_val = 0
+            for j in range(0, self.dimension):
+                expec_val = expec_val + (eval[j] * np.dot(v, evec[:, j]))[0]
 
-        for i in range(self.n):
-            n_i = rydberg_fidelity_list[i]
-            plt.plot(self.times, n_i, label=f'Atom {i+1}')
+            expec_vals += [expec_val]
 
-        plt.legend(loc='upper right')
+        return expec_vals
+
+
+    def eigenvalue_evolve(self, show=False):
+        eigenvalues = []
+        expectation_vals = []
+        #self.linear_step_detunning()
+
+        for k in range(0, self.steps):
+            h_m = self.hamiltonian_matrix(self.detunning[k])
+            eval, evec = np.linalg.eigh(h_m)
+            expectation_val = self.expectation_vals(eval,evec)
+            #eigenvalue = np.sort(eigenvalue)
+            #eigenvalues += [eval]
+            expectation_vals += [expectation_val]
+
+        # g = np.array([1,0])
+        # expec_val = eval[0]*np.dot(g,evec[:,0]) + eval[1]*np.dot(g,evec[:,1])
+        # print(expec_val)
+        #
+        # print(self.expectation_vals(eval,evec))
+
+        expectation_vals = np.array(expectation_vals)
+
+        if show:
+
+            if self.n == 1:
+
+                for i in range(0, self.dimension):
+                    if i == 0:
+                        plt.plot(self.times, expectation_vals[:, i], label=f'|g⟩')
+
+                    else:
+                        plt.plot(self.times, expectation_vals[:, i], label=f'|r⟩')
+
+                plt.xlabel('Δ (2πxMHz)')
+                plt.ylabel('Energy Eigenvalue')
+
+                plt.legend()
+
+                plt.show()
+
+            if n == 2:
+                states = ['|g⟩']
+                for i in range(0, self.dimension):
+                    plt.plot(self.detunning, eigenvalues[:, i], label=f'{i}')
+
+                plt.title(f'Rabi Oscillations ( {"$R_{b}$"}={round(self.r_b,2)}μm, a={self.a}μm)')
+                plt.xlabel('Time')  # 'Δ (2πxMHz)')
+                plt.ylabel('Energy Eigenvalue')
+
+                # plt.legend()
+
+                plt.show()
+
+    def linear_detunning(self):
+        start_steps = int(0.1 * self.steps)
+
+        start_detuning = [self.δ_start] * start_steps
+
+        sweep = np.linspace(self.δ_start, self.δ_end, self.steps - 2 * start_steps)
+
+        end_detuning = [self.δ_end] * start_steps
+
+        detunning = np.hstack((start_detuning, sweep, end_detuning))
+
+        self.detunning = detunning
+
+        # x = np.arange(0,self.steps)
+        #
+        # plt.plot(x, detunning)
+        #
+        # plt.show()
+
+    def linear_step_detunning(self, show=False):
+
+        steps = int(self.steps / 3)
+        remainder = self.steps - (3 * steps)
+
+        sweep_1 = np.linspace(self.δ_start, 0, steps)
+
+        flat = [0] * steps
+
+        sweep_2 = np.linspace(0, self.δ_end, steps + remainder)
+
+        detunning = np.hstack((sweep_1, flat, sweep_2))
+
+        self.detunning = detunning
+
+        if show:
+            x = np.arange(0, self.steps)
+
+            plt.plot(x, detunning)
+
+            plt.show()
+
+    def cubic_detunning(self):
+        start_steps = int(0.1 * self.steps)
+
+        start_detuning = [self.δ_start] * start_steps
+
+        sweep = np.linspace(self.δ_start, self.δ_end, self.steps - 2 * start_steps)
+
+        end_detuning = [self.δ_end] * start_steps
+
+        detunning = np.hstack((start_detuning, sweep, end_detuning))
+
+        x = np.arange(0, self.steps - 2)
+
+        plt.plot(x, detunning)
 
         plt.show()
-
-    def plot_colour_bar(self):
-
-        rydberg_fidelity_data = self.time_evolve(rydberg_fidelity=True)
-
-        # Labels for the bars
-        labels = [f'Atom {i + 1}' for i in range(self.n)]
-
-        # Create a horizontal bar with changing colors for each data set
-        fig, ax = plt.subplots()
-
-        cmap = plt.get_cmap('viridis')  # Choose a colormap for data sets
-
-        for i, ind_data in enumerate(rydberg_fidelity_data):
-            for j, value in enumerate(ind_data):
-                color = cmap(value)  # Map value to color using the colormap
-                ax.barh(i, 1, left=j, height=1, color=color, align='center')
-
-
-        # Set the y-axis ticks and labels
-        ax.set_yticks(np.arange(self.n))
-        ax.set_yticklabels(labels)
-
-        # Fill whole figure
-        ax.set_xlim(0, self.steps)  # Set the x-axis limits
-        ax.set_ylim(-0.5, self.n-0.5)  # Set the y-axis limits
-
-        # # Set the y-axis ticks and labels
-        # ax.set_xticks(np.arange(self.steps))
-        # ax.set_xticklabels(self.times)
-        #
-        cbar_ax = fig.add_axes([0.2, 0.02, 0.6, 0.02])  # Adjust the [x, y, width, height] values
-        #
-        bar = plt.colorbar(plt.cm.ScalarMappable(cmap=cmap), cax=cbar_ax, orientation='horizontal')
-
-        plt.show()
-
 
     def two_atom_evolve(self, density_matrix, j, rydberg_fidelity={}, n_1list=[], n_2list=[]):
 
@@ -265,18 +346,16 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
             else:
                 rf = abs(rf)
 
-            rydberg_fidelity_list[i-1] += [rf]
+            rydberg_fidelity_list[i - 1] += [rf]
 
 
 if __name__ == "__main__":
+    t = 2
+    dt = 0.01
+    n = 1
+    δ_start = -20
+    δ_end = 20
 
-    t = 50
-    dt = 0.1
-    n = 3
+    evol = AdiabaticEvolution(n, t, dt, δ_start, δ_end, no_int=True)
 
-    evol = AdiabaticEvolution(n, t, dt)
-
-    evol.plot_colour_bar()
-
-
-
+    evol.eigenvalue_evolve(show=True)

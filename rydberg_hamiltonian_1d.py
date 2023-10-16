@@ -86,9 +86,9 @@ class RydbergHamiltonian1D:
         return h_m
 
 if __name__ == "__main__":
-    two_atoms = RydbergHamiltonian1D(2)
+    two_atoms = RydbergHamiltonian1D(1)
 
-    print(two_atoms.hamiltonian_matrix(1))
+    print(two_atoms.hamiltonian_matrix(0))
 
 
 
