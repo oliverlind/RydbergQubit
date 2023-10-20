@@ -7,7 +7,7 @@ from scipy.constants import Planck
 
 
 class RydbergHamiltonian1D:
-    def __init__(self, n, a=5.48, C_6= 862690*2*np.pi, Rabi=4*2*np.pi):
+    def __init__(self, n, a=5.48, C_6=862690 * 2 * np.pi, Rabi=4 * 2 * np.pi):
         '''
 
         :param n: Number of atoms
@@ -19,14 +19,14 @@ class RydbergHamiltonian1D:
         self.a = a
         self.C_6 = C_6
         self.Rabi = Rabi
-        self.r_b = (C_6/Rabi)**(1/6)
+        self.r_b = (C_6 / Rabi) ** (1 / 6)
         self.id = np.identity(2)
         self.σx = np.array([[0, 1], [1, 0]])
         self.ni_op = np.array([[0, 0], [0, 1]])
         self.dimension = 2 ** n
         self.zeros = np.zeros((self.dimension, self.dimension))
         self.h = Planck * 1e6
-        self.h_bar = self.h/(2*np.pi)
+        self.h_bar = self.h / (2 * np.pi)
 
     def tensor_prod_id(self, i, matrix):
         m0 = [1]
@@ -60,11 +60,16 @@ class RydbergHamiltonian1D:
 
         return m
 
-    def sum_n_i(self):
+    def sum_n_i(self, δ=None):
         m = self.zeros
 
-        for j in range(1, self.n + 1):
-            m = m + self.n_i(j)
+        if δ is None:
+            for j in range(1, self.n + 1):
+                m = m + self.n_i(j)
+
+        else:
+            for j in range(1, self.n + 1):
+                m = m + (δ[j - 1] * self.n_i(j))
 
         return m
 
@@ -83,29 +88,16 @@ class RydbergHamiltonian1D:
 
         return m_vdw
 
-    def hamiltonian_matrix(self, δ):
-        h_m = ((self.Rabi / 2) * self.sum_sigma_xi()) - (δ * self.sum_n_i()) + self.vdw()
+    def hamiltonian_matrix(self, δ, single_addressing_list=None):
+        if single_addressing_list is None:
+            h_m = ((self.Rabi / 2) * self.sum_sigma_xi()) - (δ * self.sum_n_i()) + self.vdw()
+        else:
+            h_m = ((self.Rabi / 2) * self.sum_sigma_xi()) - self.sum_n_i(δ=single_addressing_list) + self.vdw()
 
         return h_m
+
 
 if __name__ == "__main__":
     two_atoms = RydbergHamiltonian1D(1)
 
     print(two_atoms.hamiltonian_matrix(0))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

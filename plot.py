@@ -15,18 +15,20 @@ import time
 from scipy.linalg import expm
 import math
 import plotly.graph_objects as go
+import data_analysis as da
 
 
 
 class Plot(AdiabaticEvolution):
-    def __init__(self, n, t, dt, δ_start, δ_end, rabi_osc=False, no_int=False):
-        super().__init__(n, t, dt, δ_start=δ_start, δ_end=δ_end, rabi_osc=rabi_osc)
+    def __init__(self, n, t, dt, δ_start, δ_end, no_int=False, detuning_type=None):
+        super().__init__(n, t, dt, δ_start=δ_start, δ_end=δ_end, detuning_type=detuning_type)
         if no_int:
             self.C_6 = 0
 
     def plot_colour_bar(self):
 
         #self.linear_detunning()
+        #self.linear_detunning_quench()
 
         rydberg_fidelity_data = self.time_evolve(rydberg_fidelity=True)
 
@@ -218,9 +220,13 @@ class Plot(AdiabaticEvolution):
 
                 plt.show()
 
-    def single_atom_eigenstates(self, show=False):
+    def single_atom_eigenstates(self, quench=False, expect_values=False, show=False):
+
+        if quench:
+            self.linear_detunning_quench()
 
         eigenvalues = []
+        expectation_values = []
 
         density_matrices = self.time_evolve(density_matrix=True)
 
@@ -240,11 +246,13 @@ class Plot(AdiabaticEvolution):
         fig, axes = plt.subplots(nrows=1, ncols=11, figsize=(12, 3))
 
         for i, ax in enumerate(axes):
-            print(self.detunning[step[i]])
-            matrix = density_matrices[step[i]]
+            δ = self.detunning[step[i]]
+            h_m = self.hamiltonian_matrix(δ)
+            density_matrix = density_matrices[step[i]]
 
-            abs_matrix = np.abs(matrix)
-            phase_matrix = np.abs(np.angle(matrix))
+            abs_matrix = np.abs(density_matrix)
+            phase_matrix = np.abs(np.angle(density_matrix))
+
 
             # print(matrix)
             # print(phase_matrix)
@@ -269,15 +277,15 @@ class Plot(AdiabaticEvolution):
 
 
 
-
-
         for k in range(0, self.steps):
             h_m = self.hamiltonian_matrix(self.detunning[k])
-            # eigenvalue = np.linalg.eigvals(h_m)
-            # eigenvalue = np.sort(eigenvalue)
-            # eigenvalues += [eigenvalue]
+            density_matrix = density_matrices[k]
+
+            expectation_value = da.expectation_value(density_matrix, h_m)
+
             eigenvalue, eigenvector = np.linalg.eigh(h_m)
             eigenvalues += [eigenvalue]
+            expectation_values += [expectation_value]
 
         eigenvalues = np.array(eigenvalues)
 
@@ -285,11 +293,13 @@ class Plot(AdiabaticEvolution):
         fig, ax = plt.subplots(figsize=(10, 5))
 
         plt.title(f'Single Atom Linear Detuning')
+        ax.plot(self.times, expectation_values)
+
         for i in range(0, self.dimension):
             if i == 0:
-                ax.plot(self.detunning, eigenvalues[:, i], label=f'{"$E_{0}$"}')
+                ax.plot(self.times, eigenvalues[:, i], label=f'{"$E_{0}$"}')
             else:
-                ax.plot(self.detunning, eigenvalues[:, i], label=f'{"$E_{1}$"}')
+                ax.plot(self.times, eigenvalues[:, i], label=f'{"$E_{1}$"}')
 
         plt.show()
 
@@ -389,19 +399,25 @@ class Plot(AdiabaticEvolution):
 
             plt.show()
 
+        def play(self):
+            pass
+
 
 if __name__ == "__main__":
     start_time = time.time()
 
     t = 5.00
-    dt = 0.005
+    dt = 0.01
     n = 2
-    δ_start = -100
-    δ_end = 300
+    δ_start = -200
+    δ_end = 200
 
     evol = Plot(n, t, dt, δ_start, δ_end)
 
+    #evol.single_atom_eigenstates()
+
     evol.single_atom_eigenstates()
+
 
     end_time = time.time()
     execution_time = end_time - start_time

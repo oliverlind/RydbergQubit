@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 import scipy as sc
 from scipy import sparse
@@ -5,19 +6,22 @@ from scipy.linalg import expm
 from matplotlib import pyplot as plt
 from rydberg_hamiltonian_1d import RydbergHamiltonian1D
 
+import detuning_regimes
+import data_analysis as da
+
 
 class AdiabaticEvolution(RydbergHamiltonian1D):
-    def __init__(self, n, t, dt, δ_start, δ_end, rabi_osc=False, no_int=False):
+    def __init__(self, n, t, dt, δ_start, δ_end, rabi_osc=False, no_int=False, detuning_type=None):
         super().__init__(n)
         self.t = t
         self.dt = dt
         self.steps = int(t / dt)
         self.δ_start = δ_start
         self.δ_end = δ_end
-        self.detunning = np.linspace(δ_start, δ_end, self.steps)
+        self.detunning = detuning_regimes.global_detuning(t, dt, δ_start, δ_end, detuning_type)
         self.times = np.linspace(0, t, self.steps)
         self.reduced_den_initial = np.zeros((2, 2))
-        self.two_π = 2*np.pi
+        self.two_π = 2 * np.pi
 
         if rabi_osc:
             self.detunning = np.zeros(self.steps)
@@ -31,11 +35,14 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
 
         return g
 
-    def time_evolve(self, density_matrix=False, rydberg_fidelity=False):
+    def time_evolve(self, density_matrix=False, rydberg_fidelity=False, single_addressing=None):
         ψ = self.ground_state()
         j = self.row_basis_vectors(2 ** (self.n - 1))
         rydberg_fidelity_list = [[] for _ in range(self.n)]
         density_matrices = []
+
+        if single_addressing is not None:
+            pass
 
         for k in range(0, self.steps):
             ψ = np.dot(expm(-1j * self.hamiltonian_matrix(self.detunning[k]) * self.dt), ψ)
@@ -56,7 +63,7 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
         else:
             return ψ
 
-    def expectation_vals(self,eval,evec):
+    def expectation_vals(self, eval, evec):
         expec_vals = []
         for i in range(0, self.dimension):
             v = self.row_basis_vectors(self.dimension)[i]
@@ -68,18 +75,17 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
 
         return expec_vals
 
-
     def eigenvalue_evolve(self, show=False):
         eigenvalues = []
         expectation_vals = []
-        #self.linear_step_detunning()
+        # self.linear_step_detunning()
 
         for k in range(0, self.steps):
             h_m = self.hamiltonian_matrix(self.detunning[k])
             eval, evec = np.linalg.eigh(h_m)
-            expectation_val = self.expectation_vals(eval,evec)
-            #eigenvalue = np.sort(eigenvalue)
-            #eigenvalues += [eval]
+            expectation_val = self.expectation_vals(eval, evec)
+            # eigenvalue = np.sort(eigenvalue)
+            # eigenvalues += [eval]
             expectation_vals += [expectation_val]
 
         # g = np.array([1,0])
@@ -113,7 +119,7 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
                 for i in range(0, self.dimension):
                     plt.plot(self.detunning, eigenvalues[:, i], label=f'{i}')
 
-                plt.title(f'Rabi Oscillations ( {"$R_{b}$"}={round(self.r_b,2)}μm, a={self.a}μm)')
+                plt.title(f'Rabi Oscillations ( {"$R_{b}$"}={round(self.r_b, 2)}μm, a={self.a}μm)')
                 plt.xlabel('Time')  # 'Δ (2πxMHz)')
                 plt.ylabel('Energy Eigenvalue')
 
@@ -161,6 +167,44 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
             plt.plot(x, detunning)
 
             plt.show()
+
+    def linear_detunning_quench(self, show=False):
+
+        linear_steps = self.steps // 2
+
+        sweep = np.linspace(self.δ_start, self.δ_end, linear_steps)
+
+        quench = np.linspace(0, 0, self.steps - linear_steps)
+
+        detunning = np.hstack((sweep, quench))
+
+        if show:
+            x = np.arange(0, self.steps)
+
+            plt.plot(x, detunning)
+
+            plt.show()
+
+        return detunning
+
+    def linear_detunning_flat(self, show=False):
+
+        linear_steps = self.steps // 2
+
+        sweep = np.linspace(self.δ_start, self.δ_end, linear_steps)
+
+        quench = np.linspace(self.δ_end, self.δ_end, self.steps - linear_steps)
+
+        detunning = np.hstack((sweep, quench))
+
+        if show:
+            x = np.arange(0, self.steps)
+
+            plt.plot(x, detunning)
+
+            plt.show()
+
+        return detunning
 
     def cubic_detunning(self):
         start_steps = int(0.1 * self.steps)
@@ -349,13 +393,8 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
 
         for i in range(1, self.n + 1):
             rdm = self.reduced_density_matrix(ψ, i)
-            rf = np.trace(np.dot(rdm, self.ni_op))
 
-            if rf.imag > 0.01:
-                raise ValueError("Rydberg Fidelity has a non-zero imaginary part")
-
-            else:
-                rf = abs(rf)
+            rf = da.expectation_value(rdm, self.ni_op)
 
             rydberg_fidelity_list[i - 1] += [rf]
 
@@ -369,4 +408,4 @@ if __name__ == "__main__":
 
     evol = AdiabaticEvolution(n, t, dt, δ_start, δ_end)
 
-    evol.eigenvalue_evolve(show=True)
+    evol.linear_detunning_quench()
