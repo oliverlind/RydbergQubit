@@ -17,6 +17,7 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
         self.detunning = np.linspace(δ_start, δ_end, self.steps)
         self.times = np.linspace(0, t, self.steps)
         self.reduced_den_initial = np.zeros((2, 2))
+        self.two_π = 2*np.pi
 
         if rabi_osc:
             self.detunning = np.zeros(self.steps)
@@ -34,18 +35,23 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
         ψ = self.ground_state()
         j = self.row_basis_vectors(2 ** (self.n - 1))
         rydberg_fidelity_list = [[] for _ in range(self.n)]
+        density_matrices = []
 
         for k in range(0, self.steps):
             ψ = np.dot(expm(-1j * self.hamiltonian_matrix(self.detunning[k]) * self.dt), ψ)
 
             if density_matrix:
-                density_matrix = np.dot(ψ, ψ.conj().T)
+                density_m = np.dot(ψ, ψ.conj().T)
+                density_matrices += [density_m]
 
             if rydberg_fidelity:
                 self.rydberg_fidelity(rydberg_fidelity_list, ψ)
 
         if rydberg_fidelity:
             return rydberg_fidelity_list
+
+        if density_matrix:
+            return density_matrices
 
         else:
             return ψ
@@ -294,43 +300,48 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
         return [np.array([np.eye(n)[i]]).astype(int).T for i in range(n)]
 
     def reduced_density_matrix(self, ψ, i):
-        dim_sub = 2 ** (self.n - 1)
 
-        m_left_list = []
-        m_right_list = []
+        if self.n == 1:
+            reduced_density_matrix = np.dot(ψ, ψ.conj().T)
 
-        # Produce list of matrices on left side of sum
-        row_basis_vectors = self.row_basis_vectors(dim_sub)
-        for row_vector in row_basis_vectors:
-            bra_vectors = self.comp_basis_vector_to_qubit_states(row_vector)
-            bra_vectors.insert(i - 1, self.id)
+        else:
+            dim_sub = 2 ** (self.n - 1)
 
-            m_left = bra_vectors[0]  # initialise left matrix
+            m_left_list = []
+            m_right_list = []
 
-            for bra in bra_vectors[1:]:
-                m_left = np.kron(m_left, bra)  # taking tensor product left to right
+            # Produce list of matrices on left side of sum
+            row_basis_vectors = self.row_basis_vectors(dim_sub)
+            for row_vector in row_basis_vectors:
+                bra_vectors = self.comp_basis_vector_to_qubit_states(row_vector)
+                bra_vectors.insert(i - 1, self.id)
 
-            m_left_list += [m_left]
+                m_left = bra_vectors[0]  # initialise left matrix
 
-        # Produce list of matrices on right side of sum
-        col_basis_vectors = self.col_basis_vectors(dim_sub)
-        for col_vector in col_basis_vectors:
-            ket_vectors = self.comp_basis_vector_to_qubit_states(col_vector)
-            ket_vectors.insert(i - 1, self.id)
+                for bra in bra_vectors[1:]:
+                    m_left = np.kron(m_left, bra)  # taking tensor product left to right
 
-            m_right = ket_vectors[0]  # initialise right matrix
+                m_left_list += [m_left]
 
-            for ket in ket_vectors[1:]:
-                m_right = np.kron(m_right, ket)  # taking tensor product left to right
+            # Produce list of matrices on right side of sum
+            col_basis_vectors = self.col_basis_vectors(dim_sub)
+            for col_vector in col_basis_vectors:
+                ket_vectors = self.comp_basis_vector_to_qubit_states(col_vector)
+                ket_vectors.insert(i - 1, self.id)
 
-            m_right_list += [m_right]
+                m_right = ket_vectors[0]  # initialise right matrix
 
-        reduced_density_matrix = np.zeros((2, 2))
+                for ket in ket_vectors[1:]:
+                    m_right = np.kron(m_right, ket)  # taking tensor product left to right
 
-        for j in range(0, dim_sub):
-            m_left = m_left_list[j]
-            m_right = m_right_list[j]
-            reduced_density_matrix = reduced_density_matrix + np.dot(np.dot(m_left, ψ), np.dot(ψ.conj().T, m_right))
+                m_right_list += [m_right]
+
+            reduced_density_matrix = np.zeros((2, 2))
+
+            for j in range(0, dim_sub):
+                m_left = m_left_list[j]
+                m_right = m_right_list[j]
+                reduced_density_matrix = reduced_density_matrix + np.dot(np.dot(m_left, ψ), np.dot(ψ.conj().T, m_right))
 
         return reduced_density_matrix
 
@@ -356,6 +367,6 @@ if __name__ == "__main__":
     δ_start = -20
     δ_end = 20
 
-    evol = AdiabaticEvolution(n, t, dt, δ_start, δ_end, no_int=True)
+    evol = AdiabaticEvolution(n, t, dt, δ_start, δ_end)
 
     evol.eigenvalue_evolve(show=True)

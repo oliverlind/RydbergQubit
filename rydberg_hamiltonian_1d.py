@@ -3,15 +3,16 @@ import scipy as sc
 from scipy import sparse
 from scipy.linalg import expm
 from matplotlib import pyplot as plt
+from scipy.constants import Planck
 
 
 class RydbergHamiltonian1D:
-    def __init__(self, n, a=5.48, C_6= 2*np.pi*862690, Rabi=2*np.pi*4):
+    def __init__(self, n, a=5.48, C_6= 862690*2*np.pi, Rabi=4*2*np.pi):
         '''
 
         :param n: Number of atoms
         :param a: Separation between atoms (μm)
-        :param C_6: Interaction strength
+        :param C_6: Interaction strength (Mhz μm^6)
         :param Rabi: Rabi frequency (Mhz)
         '''
         self.n = n
@@ -24,6 +25,8 @@ class RydbergHamiltonian1D:
         self.ni_op = np.array([[0, 0], [0, 1]])
         self.dimension = 2 ** n
         self.zeros = np.zeros((self.dimension, self.dimension))
+        self.h = Planck * 1e6
+        self.h_bar = self.h/(2*np.pi)
 
     def tensor_prod_id(self, i, matrix):
         m0 = [1]
