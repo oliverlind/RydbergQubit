@@ -21,7 +21,7 @@ import math
 #             self.detunning = np.zeros(self.steps)
 
 
-def global_detuning(t, dt, δ_start, δ_end, type=None, position=0.6):
+def global_detuning(t, dt, δ_start, δ_end, type=None, position=0.5):
     steps = int(t / dt)
 
     if type is None:

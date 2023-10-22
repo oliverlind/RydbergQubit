@@ -73,7 +73,7 @@ class Plot(AdiabaticEvolution):
 
         plt.show()
 
-    def plot(self):
+    def plot_line_rydberg_prob(self):
 
         rydberg_fidelity_list = self.time_evolve(rydberg_fidelity=True)
 
@@ -83,6 +83,7 @@ class Plot(AdiabaticEvolution):
 
         plt.title(f'Rabi Oscillations ( {"$R_{b}$"}={round(self.r_b,2)}μm, a={self.a}μm)') #Ω={int(self.Rabi/(2*np.pi))}(2πxMHz),
         plt.ylabel('Rydberg Probability')
+        plt.ylim(0,1)
         plt.xlabel('Time (μs)')
 
         for i in range(self.n-1):
@@ -220,17 +221,15 @@ class Plot(AdiabaticEvolution):
 
                 plt.show()
 
-    def single_atom_eigenstates(self, quench=False, expect_values=False, show=False):
+    def single_atom_eigenstates(self, num_of_plots=17, showtime=False, expect_values=False, show=False):
 
-        if quench:
-            self.linear_detunning_quench()
-
+        legend_labels = ["$E_{0}$", "$E_{1}$", "$E_{2}$", "$E_{3}$"]
         eigenvalues = []
         expectation_values = []
+        density_matrices = {'QS':{}}
 
-        density_matrices = self.time_evolve(density_matrix=True)
+        qs_density_matrices = self.time_evolve(density_matrix=True)
 
-        num_of_plots = 11
 
         int_list = np.array(self.detunning, dtype=int)
         zero_position = np.where(int_list == 0)
@@ -243,34 +242,68 @@ class Plot(AdiabaticEvolution):
         print(step)
 
         # Create a figure and axes
-        fig, axes = plt.subplots(nrows=1, ncols=11, figsize=(12, 3))
+        fig, axes = plt.subplots(nrows=self.dimension+1, ncols=num_of_plots, figsize=(12, 8))
 
-        for i, ax in enumerate(axes):
+        for i in range(0,num_of_plots):
             δ = self.detunning[step[i]]
             h_m = self.hamiltonian_matrix(δ)
-            density_matrix = density_matrices[step[i]]
 
-            abs_matrix = np.abs(density_matrix)
-            phase_matrix = np.abs(np.angle(density_matrix))
+            qs_density_matrix = qs_density_matrices[step[i]]
+            abs_matrix = np.abs(qs_density_matrix)
+            phase_matrix = np.abs(np.angle(qs_density_matrix))
 
+            density_matrices['QS']['Abs'] = abs_matrix
+            density_matrices['QS']['Phase'] = phase_matrix
 
-            # print(matrix)
-            # print(phase_matrix)
+            eigenvalue, eigenvector = np.linalg.eigh(h_m)
 
+            for j in range(0, self.dimension):
+                v = eigenvector[:,j]
+                v = v.reshape(-1,1)
+                es_dm = np.dot(v,v.conj().T)
+                abs_matrix = np.abs(es_dm)
+                phase_matrix = np.abs(np.angle(es_dm))
+
+                density_matrices[f'E{j}'] = {}
+                density_matrices[f'E{j}']['Abs'] = abs_matrix
+                density_matrices[f'E{j}']['Phase'] = phase_matrix
 
             # Create a colormap (you can choose a different colormap if desired)
             cmap = plt.get_cmap('RdYlGn')
 
             # Set the extent of the heatmap to match the dimensions of the matrix
-            extent = [0, 4, 0, 4]
+            extent = [0, self.dimension, 0, self.dimension]
 
-            # Display the matrix as a heatmap
-            im = ax.imshow(phase_matrix, cmap=cmap, extent=extent, alpha=abs_matrix, vmin=0, vmax=np.pi)
+            # Display the qs matrix as a heatmap
+            ax = axes[0,i]
 
+            ax.imshow(density_matrices['QS']['Phase'], cmap=cmap, extent=extent, alpha=density_matrices['QS']['Abs'], vmin=0, vmax=np.pi)
             ax.set_xticks([])
             ax.set_yticks([])
-            ax.set_xlabel(f'Δ={round(self.detunning[step[i]])}')  # Empty x-label
+            #ax.set_xlabel(f'Δ={round(self.detunning[step[i]])}')
             ax.set_ylabel('')  # Empty y-label
+
+
+            if i==0:
+                ax.set_ylabel('QS', rotation='horizontal', labelpad=40, fontsize=16, verticalalignment='center')
+
+
+            # Display eigenstates matrices as heatmap
+            for j in (0, self.dimension):
+                ax = axes[j+1, i]
+                ax.imshow(density_matrices[f'E{j}']['Phase'], cmap=cmap, extent=extent, alpha=density_matrices[f'E{j}']['Abs'], vmin=0, vmax=np.pi)
+
+                ax.set_xticks([])
+                ax.set_yticks([])
+                ax.set_ylabel('')
+
+                if i == 0:
+                    ax.set_ylabel(legend_labels[j], rotation='horizontal', labelpad=40, fontsize=16, verticalalignment='center')
+
+                if j == self.dimension-1:
+
+                    ax.set_xlabel(f'Δ={round(self.detunning[step[i]])}')
+
 
 
         plt.show()
@@ -279,11 +312,12 @@ class Plot(AdiabaticEvolution):
 
         for k in range(0, self.steps):
             h_m = self.hamiltonian_matrix(self.detunning[k])
-            density_matrix = density_matrices[k]
+            density_matrix = qs_density_matrices[k]
 
             expectation_value = da.expectation_value(density_matrix, h_m)
 
             eigenvalue, eigenvector = np.linalg.eigh(h_m)
+
             eigenvalues += [eigenvalue]
             expectation_values += [expectation_value]
 
@@ -293,13 +327,15 @@ class Plot(AdiabaticEvolution):
         fig, ax = plt.subplots(figsize=(10, 5))
 
         plt.title(f'Single Atom Linear Detuning')
-        ax.plot(self.times, expectation_values)
+
 
         for i in range(0, self.dimension):
-            if i == 0:
+            if showtime:
+                ax.plot(self.times, expectation_values)
                 ax.plot(self.times, eigenvalues[:, i], label=f'{"$E_{0}$"}')
             else:
-                ax.plot(self.times, eigenvalues[:, i], label=f'{"$E_{1}$"}')
+                ax.plot(self.detunning, expectation_values)
+                ax.plot(self.detunning, eigenvalues[:, i], label=f'{"$E_{1}$"}')
 
         plt.show()
 
@@ -412,11 +448,15 @@ if __name__ == "__main__":
     δ_start = -200
     δ_end = 200
 
-    evol = Plot(n, t, dt, δ_start, δ_end)
+    evol = Plot(n, t, dt, δ_start, δ_end, detuning_type='quench')
 
     #evol.single_atom_eigenstates()
 
-    evol.single_atom_eigenstates()
+    evol.single_atom_eigenstates(showtime=True)
+
+    evol.plot_line_rydberg_prob()
+
+    evol.plot_colour_bar()
 
 
     end_time = time.time()
