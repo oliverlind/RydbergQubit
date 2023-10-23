@@ -54,3 +54,14 @@ def linear_detuning_quench(δ_start, δ_end, steps, position=0.5, show=False):
         plt.show()
 
     return detuning
+
+
+def single_addressing(t, dt, δ_start, δ_end, single_addressing_list):
+    detunning = []
+    for i in single_addressing_list:
+        indiv_d = global_detuning(t, dt, δ_start, δ_end, type=i)
+        detunning += [indiv_d]
+
+    detunning = np.array(detunning)
+
+    return detunning

@@ -11,14 +11,14 @@ import data_analysis as da
 
 
 class AdiabaticEvolution(RydbergHamiltonian1D):
-    def __init__(self, n, t, dt, δ_start, δ_end, rabi_osc=False, no_int=False, detuning_type=None):
+    def __init__(self, n, t, dt, δ_start, δ_end, rabi_osc=False, no_int=False, detuning_type=None,
+                 single_addressing_list=None):
         super().__init__(n)
         self.t = t
         self.dt = dt
         self.steps = int(t / dt)
         self.δ_start = δ_start
         self.δ_end = δ_end
-        self.detunning = detuning_regimes.global_detuning(t, dt, δ_start, δ_end, detuning_type)
         self.times = np.linspace(0, t, self.steps)
         self.reduced_den_initial = np.zeros((2, 2))
         self.two_π = 2 * np.pi
@@ -29,23 +29,35 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
         if no_int:
             self.C_6 = 0
 
+        if single_addressing_list is None:
+            self.detunning = detuning_regimes.global_detuning(t, dt, δ_start, δ_end, detuning_type)
+            self.single_detunnings = None
+        else:
+            self.detunning = None
+            self.single_detunnings = detuning_regimes.single_addressing(self.t, self.dt, self.δ_start, self.δ_end,
+                                                                       single_addressing_list)
+
     def ground_state(self):
         g = np.zeros((2 ** self.n, 1))
         g[0, 0] = 1
 
         return g
 
-    def time_evolve(self, density_matrix=False, rydberg_fidelity=False, single_addressing=None):
+    def time_evolve(self, density_matrix=False, rydberg_fidelity=False):
         ψ = self.ground_state()
         j = self.row_basis_vectors(2 ** (self.n - 1))
         rydberg_fidelity_list = [[] for _ in range(self.n)]
         density_matrices = []
 
-        if single_addressing is not None:
-            pass
-
         for k in range(0, self.steps):
-            ψ = np.dot(expm(-1j * self.hamiltonian_matrix(self.detunning[k]) * self.dt), ψ)
+
+            if self.single_detunnings is None:
+                ψ = np.dot(expm(-1j * self.hamiltonian_matrix(self.detunning[k]) * self.dt), ψ)
+
+            else:
+                print(self.single_detunnings)
+                ψ = np.dot(
+                    expm(-1j * self.hamiltonian_matrix(self.detunning, single_addressing_list=self.single_detunnings[:,k]) * self.dt), ψ)
 
             if density_matrix:
                 density_m = np.dot(ψ, ψ.conj().T)
