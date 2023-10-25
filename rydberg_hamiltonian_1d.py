@@ -5,6 +5,8 @@ from scipy.linalg import expm
 from matplotlib import pyplot as plt
 from scipy.constants import Planck
 
+import data_analysis
+
 
 class RydbergHamiltonian1D:
     def __init__(self, n, a=5.48, C_6=862690 * 2 * np.pi, Rabi=4 * 2 * np.pi):
@@ -89,10 +91,18 @@ class RydbergHamiltonian1D:
         return m_vdw
 
     def hamiltonian_matrix(self, δ, single_addressing_list=None):
-        if single_addressing_list is None:
-            h_m = ((self.Rabi / 2) * self.sum_sigma_xi()) - (δ * self.sum_n_i()) + self.vdw()
+        # if single_addressing_list is None:
+        #     h_m = ((self.Rabi / 2) * self.sum_sigma_xi()) - (δ * self.sum_n_i()) + self.vdw()
+        # else:
+        #     h_m = ((self.Rabi / 2) * self.sum_sigma_xi()) - self.sum_n_i(δ=single_addressing_list) + self.vdw()
+        #
+        # return h_m
+
+        if len(δ) > 1:
+            h_m = ((self.Rabi / 2) * self.sum_sigma_xi()) - self.sum_n_i(δ=δ) + self.vdw()
+
         else:
-            h_m = ((self.Rabi / 2) * self.sum_sigma_xi()) - self.sum_n_i(δ=single_addressing_list) + self.vdw()
+            h_m = ((self.Rabi / 2) * self.sum_sigma_xi()) - (δ * self.sum_n_i()) + self.vdw()
 
         return h_m
 

@@ -3,6 +3,7 @@ import numpy as np
 import scipy as sc
 from scipy import sparse
 from scipy.linalg import expm
+from scipy.linalg import logm
 from matplotlib import pyplot as plt
 from rydberg_hamiltonian_1d import RydbergHamiltonian1D
 
@@ -29,13 +30,11 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
         if no_int:
             self.C_6 = 0
 
-        if single_addressing_list is None:
-            self.detunning = detuning_regimes.global_detuning(t, dt, δ_start, δ_end, detuning_type)
-            self.single_detunnings = None
-        else:
-            self.detunning = None
-            self.single_detunnings = detuning_regimes.single_addressing(self.t, self.dt, self.δ_start, self.δ_end,
-                                                                       single_addressing_list)
+        self.detunning = detuning_regimes.global_detuning(t, dt, δ_start, δ_end, detuning_type)
+
+        if single_addressing_list is not None:
+            self.detunning = detuning_regimes.single_addressing(self.t, self.dt, self.δ_start, self.δ_end,
+                                                                single_addressing_list)
 
     def ground_state(self):
         g = np.zeros((2 ** self.n, 1))
@@ -43,21 +42,16 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
 
         return g
 
-    def time_evolve(self, density_matrix=False, rydberg_fidelity=False):
+    def time_evolve(self, density_matrix=False, rydberg_fidelity=False, states_list=False):
         ψ = self.ground_state()
         j = self.row_basis_vectors(2 ** (self.n - 1))
         rydberg_fidelity_list = [[] for _ in range(self.n)]
         density_matrices = []
+        states = []
 
         for k in range(0, self.steps):
 
-            if self.single_detunnings is None:
-                ψ = np.dot(expm(-1j * self.hamiltonian_matrix(self.detunning[k]) * self.dt), ψ)
-
-            else:
-                print(self.single_detunnings)
-                ψ = np.dot(
-                    expm(-1j * self.hamiltonian_matrix(self.detunning, single_addressing_list=self.single_detunnings[:,k]) * self.dt), ψ)
+            ψ = np.dot(expm(-1j * self.hamiltonian_matrix(self.detunning[:, k]) * self.dt), ψ)
 
             if density_matrix:
                 density_m = np.dot(ψ, ψ.conj().T)
@@ -66,11 +60,17 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
             if rydberg_fidelity:
                 self.rydberg_fidelity(rydberg_fidelity_list, ψ)
 
+            if states_list:
+                states += [ψ]
+
         if rydberg_fidelity:
             return rydberg_fidelity_list
 
         if density_matrix:
             return density_matrices
+
+        if states_list:
+            return states
 
         else:
             return ψ
@@ -414,10 +414,28 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
 if __name__ == "__main__":
     t = 2
     dt = 0.01
-    n = 1
+    n = 2
     δ_start = -20
     δ_end = 20
 
     evol = AdiabaticEvolution(n, t, dt, δ_start, δ_end)
 
-    evol.linear_detunning_quench()
+    ψ = (1 / (2**0.5))*(evol.col_basis_vectors(4)[0] + evol.col_basis_vectors(4)[3])
+
+    dm = np.dot(ψ, ψ.conj().T)
+    dm =np.diag([0.5]*4)
+
+    print(dm)
+
+    vne = -np.trace(np.dot(dm, logm(dm)/np.log(2)))
+
+    print(vne)
+
+    v = evol.reduced_density_matrix(ψ,1)
+
+    print(v)
+
+    vne = -np.trace(np.dot(v, logm(v)/np.log(2)))
+
+    print(vne)
+
