@@ -42,11 +42,12 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
 
         return g
 
-    def time_evolve(self, density_matrix=False, rydberg_fidelity=False, states_list=False):
+    def time_evolve(self, density_matrix=False, rydberg_fidelity=False, bell_fidelity=False, states_list=False):
         ψ = self.ground_state()
         j = self.row_basis_vectors(2 ** (self.n - 1))
         rydberg_fidelity_list = [[] for _ in range(self.n)]
         density_matrices = []
+        bell_fidelity_list = [[] for _ in range(self.n - 1)]
         states = []
 
         for k in range(0, self.steps):
@@ -63,14 +64,26 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
             if states_list:
                 states += [ψ]
 
-        if rydberg_fidelity:
+            if bell_fidelity:
+                self.bell_positive_superposition_fidelity(bell_fidelity_list, ψ)
+
+        if rydberg_fidelity and states_list:
+            return rydberg_fidelity_list, states
+
+        elif rydberg_fidelity and bell_fidelity:
+            return rydberg_fidelity_list, bell_fidelity_list
+
+        elif rydberg_fidelity:
             return rydberg_fidelity_list
 
-        if density_matrix:
+        elif density_matrix:
             return density_matrices
 
-        if states_list:
+        elif states_list:
             return states
+
+        elif bell_fidelity:
+            return bell_fidelity_list
 
         else:
             return ψ
@@ -401,41 +414,90 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
 
         return reduced_density_matrix
 
+    def reduced_density_matrix_pair(self, ψ, i, j):
+
+        if self.n == 1:
+            sys.exit()
+
+        dim_sub = 2 ** (self.n - 2)
+
+        m_left_list = []
+        m_right_list = []
+
+        # Produce list of matrices on left side of sum
+        row_basis_vectors = self.row_basis_vectors(dim_sub)
+        for row_vector in row_basis_vectors:
+            bra_vectors = self.comp_basis_vector_to_qubit_states(row_vector)
+            bra_vectors.insert(i - 1, self.id)
+            bra_vectors.insert(j - 1, self.id)
+
+            m_left = bra_vectors[0]  # initialise left matrix
+
+            for bra in bra_vectors[1:]:
+                m_left = np.kron(m_left, bra)  # taking tensor product left to right
+
+            m_left_list += [m_left]
+
+        # Produce list of matrices on right side of sum
+        col_basis_vectors = self.col_basis_vectors(dim_sub)
+        for col_vector in col_basis_vectors:
+            ket_vectors = self.comp_basis_vector_to_qubit_states(col_vector)
+            ket_vectors.insert(i - 1, self.id)
+            ket_vectors.insert(j - 1, self.id)
+
+            m_right = ket_vectors[0]  # initialise right matrix
+
+            for ket in ket_vectors[1:]:
+                m_right = np.kron(m_right, ket)  # taking tensor product left to right
+
+            m_right_list += [m_right]
+
+        reduced_density_matrix = np.zeros((4, 4))
+
+        for j in range(0, dim_sub):
+            m_left = m_left_list[j]
+            m_right = m_right_list[j]
+            reduced_density_matrix = reduced_density_matrix + np.dot(np.dot(m_left, ψ), np.dot(ψ.conj().T, m_right))
+
+        return reduced_density_matrix
+
     def rydberg_fidelity(self, rydberg_fidelity_list, ψ):
 
         for i in range(1, self.n + 1):
             rdm = self.reduced_density_matrix(ψ, i)
-
             rf = da.expectation_value(rdm, self.ni_op)
-
             rydberg_fidelity_list[i - 1] += [rf]
+
+    def bell_positive_superposition_fidelity(self, bell_fidelity_list, ψ):
+
+        positive_bell_state = 0.5 * np.array([[0, 0, 0, 0],
+                                              [0, 1, 1, 0],
+                                              [0, 1, 1, 0],
+                                              [0, 0, 0, 0]])
+
+        for i in range(1, self.n):
+            rdm = self.reduced_density_matrix_pair(ψ, i, i + 1)
+            bf = da.expectation_value(rdm, positive_bell_state)
+            bell_fidelity_list[i - 1] += [bf]
 
 
 if __name__ == "__main__":
-    t = 2
+    t = 5
     dt = 0.01
-    n = 2
-    δ_start = -20
-    δ_end = 20
+    n = 3
+    δ_start = -200
+    δ_end = 200
 
     evol = AdiabaticEvolution(n, t, dt, δ_start, δ_end)
 
-    ψ = (1 / (2**0.5))*(evol.col_basis_vectors(4)[0] + evol.col_basis_vectors(4)[3])
+    states = evol.time_evolve(states_list=True)
 
-    dm = np.dot(ψ, ψ.conj().T)
-    dm =np.diag([0.5]*4)
+    state = states[0]
 
-    print(dm)
+    rdm = evol.reduced_density_matrix_pair(state, 1, 3)
 
-    vne = -np.trace(np.dot(dm, logm(dm)/np.log(2)))
+    bfs = evol.time_evolve(bell_fidelity=True)
 
-    print(vne)
+    plt.plot(evol.times, bfs)
 
-    v = evol.reduced_density_matrix(ψ,1)
-
-    print(v)
-
-    vne = -np.trace(np.dot(v, logm(v)/np.log(2)))
-
-    print(vne)
-
+    plt.show()
