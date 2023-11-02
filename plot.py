@@ -108,22 +108,23 @@ class Plot(AdiabaticEvolution):
 
         plt.show()
 
-    def plot_line_bell_pos_sup_prob(self):
-        bell_fidelity_list = self.time_evolve(bell_fidelity=True)
+    def plot_line_bell_pos_sup_prob(self, bell_fidelity_types=['psi minus']):
+        bell_fidelity_data = self.time_evolve(bell_fidelity_types=bell_fidelity_types)
 
         plt.figure(figsize=(9, 4))
 
-        # plt.title(
-        #     f'Two Atom System: Linear increase and global quench ( {"$R_{b}$"}={round(self.r_b, 2)}μm, a={self.a}μm)')  # Ω={int(self.Rabi/(2*np.pi))}(2πxMHz),
-        plt.ylabel(f'Bell Probability')
+
+        plt.ylabel(f'|{"$Ψ^{-}$"}⟩ Probability')
         plt.ylim(0, 1)
         plt.xlabel('Time (μs)')
 
-        for i in range(self.n-1):
-            bf = bell_fidelity_list[i]
-            plt.plot(self.times, bf, label=f'Atom {i+1} and {i+2}')
+        for bell_type in bell_fidelity_types:
+            for i in range(self.n-1):
+                bf = bell_fidelity_data[bell_type][i]
+                print(bf)
+                plt.plot(self.times, bf, label=f'Atom {i+1} and {i+2}')
 
-        plt.legend(loc='upper right')
+        plt.legend(loc='upper left')
 
         plt.show()
 
@@ -546,6 +547,50 @@ class Plot(AdiabaticEvolution):
 
         plt.show()
 
+    def bell_fidelity_colorbars(self):
+        bell_fidelity_data = self.time_evolve(bell_fidelity_types=['psi plus', 'psi minus'])
+
+        # Create subplots with shared x-axis
+        fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(11, 8))
+
+        ploting_tools.set_up_color_bar(self.n, bell_fidelity_data['psi plus'], self.times, ax1,  type='psi plus', color='cool')
+
+        ploting_tools.set_up_color_bar(self.n, bell_fidelity_data['psi minus'], self.times, ax2, type='psi minus', color='cool')
+
+        # Adjust spacing between subplots and remove vertical space
+        plt.subplots_adjust(hspace=0)
+
+        # Set x axis label
+        plt.xlabel('Time (μs)')
+
+        plt.show()
+
+    def rydberg_bell_fidelity_colorbars(self):
+
+        rydberg_fidelity_data, bell_fidelity_data = self.time_evolve(rydberg_fidelity=True, bell_fidelity_types=['psi plus', 'psi minus'])
+
+        # Create subplots with shared x-axis
+        fig, (ax1, ax2, ax3) = plt.subplots(3, 1, sharex=True, figsize=(15, 8))
+
+        ploting_tools.set_up_color_bar(self.n, rydberg_fidelity_data, self.times, ax1)
+
+        ploting_tools.set_up_color_bar(self.n, bell_fidelity_data['psi plus'], self.times, ax2, type='psi plus',
+                                       color='cool')
+
+        ploting_tools.set_up_color_bar(self.n, bell_fidelity_data['psi minus'], self.times, ax3, type='psi minus',
+                                       color='cool')
+
+        # Adjust spacing between subplots and remove vertical space
+        plt.subplots_adjust(hspace=0)
+
+        # Set x axis label
+        plt.xlabel('Time (μs)')
+
+        plt.show()
+
+    def rdm_heatmaps(self):
+        density_matrices = self.time_evolve(reduced_density_matrix_pair=True)
+
     def two_atom_eigenstates(self, probabilities=False, show=False):
 
         if self.n != 2:
@@ -647,9 +692,9 @@ class Plot(AdiabaticEvolution):
 if __name__ == "__main__":
     start_time = time.time()
 
-    t = 5.00
-    dt = 0.005
-    n = 3
+    t = 7.00
+    dt = 0.01
+    n = 6
     δ_start = -200
     δ_end = 200
 
@@ -657,14 +702,18 @@ if __name__ == "__main__":
     three = ['quench', 'linear flat', 'linear flat']
     four = ['quench', 'linear flat', 'linear flat', 'linear flat']
     five = ['quench', 'linear flat', 'linear flat', 'linear flat', 'linear flat']
+    six = ['quench'] + 5 * ['linear flat']
     seven = ['quench'] + 6 * ['linear flat']
     nine = ['quench'] + 8 * ['linear flat']
 
     evol = Plot(n, t, dt, δ_start, δ_end, detuning_type=None,
-                single_addressing_list=seven
+                single_addressing_list=six
                 )
 
-    evol.rf_bf_colorbars()
+
+    evol.plot_line_bell_pos_sup_prob()
+
+    evol.rydberg_bell_fidelity_colorbars()
 
     evol.entanglement_entropy_and_colorbar()
 

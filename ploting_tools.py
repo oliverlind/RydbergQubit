@@ -13,11 +13,18 @@ def set_up_color_bar(n, data, times, ax, type='rydberg', color='viridis', colorb
         norm = mcolors.Normalize(vmin=0, vmax=1)
         bar_label = "Rydberg Probability"
 
-    elif type == 'bell':
+    elif type == 'psi plus':
         n = n-1
         labels = [f'Atom {i + 1}, {i+2}' for i in range(n)]
-        norm = mcolors.Normalize(vmin=0, vmax=0.6)
+        norm = mcolors.Normalize(vmin=0, vmax=0.8)
         bar_label = f'|{"$Ψ^{+}$"}⟩ Probability'
+
+    elif type == 'psi minus':
+        n = n - 1
+        labels = [f'Atom {i + 1}, {i + 2}' for i in range(n)]
+
+        norm = mcolors.Normalize(vmin=0, vmax=0.8)
+        bar_label = f'|{"$Ψ^{-}$"}⟩ Probability'
 
     else:
         sys.exit()
@@ -45,5 +52,40 @@ def set_up_color_bar(n, data, times, ax, type='rydberg', color='viridis', colorb
         sm.set_array([])  # fake up the array
         cbar = plt.colorbar(sm, ax=ax, orientation='vertical', shrink=0.7)
         cbar.set_label(bar_label)
+
+def colormap_density_matrices(density_matrices, steps, num_of_plots=17, showtime=False):
+
+    # Create a figure and axes
+    fig, axes = plt.subplots(nrows=1, ncols=num_of_plots, figsize=(12, 3))
+
+    plot_step = steps // (num_of_plots - 1)
+    step = np.arange(0, steps + 1, plot_step)
+    step[-1] = step[-1] - 1
+    print(step)
+
+    for i in range(0, num_of_plots):
+
+        density_matrix = density_matrices[step[i]]
+        abs_matrix = np.abs(density_matrix)
+        phase_matrix = np.abs(np.angle(density_matrix))
+
+        # Create a colormap (you can choose a different colormap if desired)
+        cmap = plt.get_cmap('RdYlGn')
+
+        # Set the extent of the heatmap to match the dimensions of the matrix
+        extent = [0, 4, 0, 4]
+
+        # Display the rdm matrix as a heatmap
+        ax = axes[0, i]
+
+        ax.imshow(density_matrices['QS']['Phase'], cmap=cmap, extent=extent, alpha=density_matrices['QS']['Abs'],
+                  vmin=0, vmax=np.pi)
+        ax.set_xticks([])
+        ax.set_yticks([])
+        ax.set_ylabel('')
+
+    plt.show()
+
+
 
 

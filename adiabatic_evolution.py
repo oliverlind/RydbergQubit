@@ -42,13 +42,15 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
 
         return g
 
-    def time_evolve(self, density_matrix=False, rydberg_fidelity=False, bell_fidelity=False, states_list=False):
+    def time_evolve(self, density_matrix=False, rydberg_fidelity=False, bell_fidelity=False, bell_fidelity_types=None, states_list=False, reduced_density_matrix_pair=False):
         ψ = self.ground_state()
         j = self.row_basis_vectors(2 ** (self.n - 1))
         rydberg_fidelity_list = [[] for _ in range(self.n)]
         density_matrices = []
         bell_fidelity_list = [[] for _ in range(self.n - 1)]
+        bell_fidelity_dict = {'psi plus': [[] for _ in range(self.n - 1)], 'psi minus': [[] for _ in range(self.n - 1)], 'phi plus': [[] for _ in range(self.n - 1)], 'phi minus': [[] for _ in range(self.n - 1)]}
         states = []
+        rdms_pairs = []
 
         for k in range(0, self.steps):
 
@@ -65,10 +67,24 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
                 states += [ψ]
 
             if bell_fidelity:
-                self.bell_positive_superposition_fidelity(bell_fidelity_list, ψ)
+                self.bell_state_fidelity(bell_fidelity_list, ψ)
+
+            if bell_fidelity_types is not None:
+                for i in bell_fidelity_types:
+                    self.bell_state_fidelity(bell_fidelity_dict[i], ψ, bell_type=i)
+
+            if reduced_density_matrix_pair:
+                rdm = self.reduced_density_matrix_pair(ψ, 1, 2)
+                rdms_pairs += [rdm]
+
+
+
 
         if rydberg_fidelity and states_list:
             return rydberg_fidelity_list, states
+
+        elif bell_fidelity_types and rydberg_fidelity:
+            return rydberg_fidelity_list, bell_fidelity_dict
 
         elif rydberg_fidelity and bell_fidelity:
             return rydberg_fidelity_list, bell_fidelity_list
@@ -84,6 +100,12 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
 
         elif bell_fidelity:
             return bell_fidelity_list
+
+        elif bell_fidelity_types:
+            return bell_fidelity_dict
+
+        elif reduced_density_matrix_pair:
+            return rdms_pairs
 
         else:
             return ψ
@@ -468,16 +490,38 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
             rf = da.expectation_value(rdm, self.ni_op)
             rydberg_fidelity_list[i - 1] += [rf]
 
-    def bell_positive_superposition_fidelity(self, bell_fidelity_list, ψ):
+    def bell_state_fidelity(self, bell_fidelity_list, ψ, bell_type='psi minus'):
 
-        positive_bell_state = 0.5 * np.array([[0, 0, 0, 0],
-                                              [0, 1, 1, 0],
-                                              [0, 1, 1, 0],
-                                              [0, 0, 0, 0]])
+        if bell_type == 'psi plus':
+            bell_state = 0.5 * np.array([[0, 0, 0, 0],
+                                         [0, 1, 1, 0],
+                                         [0, 1, 1, 0],
+                                         [0, 0, 0, 0]])
+
+        elif bell_type == 'psi minus':
+            bell_state = 0.5 * np.array([[0, 0, 0, 0],
+                                         [0, 1, -1, 0],
+                                         [0, -1, 1, 0],
+                                         [0, 0, 0, 0]])
+
+        elif bell_type == 'phi plus':
+            bell_state = 0.5 * np.array([[1, 0, 0, 1],
+                                         [0, 0, 0, 0],
+                                         [0, 0, 0, 0],
+                                         [1, 0, 0, 1]])
+
+        elif bell_type == 'phi minus':
+            bell_state = 0.5 * np.array([[1, 0, 0, -1],
+                                         [0, 0, 0, 0],
+                                         [0, 0, 0, 0],
+                                         [-1, 0, 0, 1]])
+
+        else:
+            sys.exit()
 
         for i in range(1, self.n):
             rdm = self.reduced_density_matrix_pair(ψ, i, i + 1)
-            bf = da.expectation_value(rdm, positive_bell_state)
+            bf = da.expectation_value(rdm, bell_state)
             bell_fidelity_list[i - 1] += [bf]
 
 
@@ -490,14 +534,4 @@ if __name__ == "__main__":
 
     evol = AdiabaticEvolution(n, t, dt, δ_start, δ_end)
 
-    states = evol.time_evolve(states_list=True)
-
-    state = states[0]
-
-    rdm = evol.reduced_density_matrix_pair(state, 1, 3)
-
-    bfs = evol.time_evolve(bell_fidelity=True)
-
-    plt.plot(evol.times, bfs)
-
-    plt.show()
+    rdms = evol.time_evolve(reduced_density_matrix_pair=True)
