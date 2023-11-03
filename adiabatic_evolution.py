@@ -42,15 +42,17 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
 
         return g
 
-    def time_evolve(self, density_matrix=False, rydberg_fidelity=False, bell_fidelity=False, bell_fidelity_types=None, states_list=False, reduced_density_matrix_pair=False):
+    def time_evolve(self, density_matrix=False, rydberg_fidelity=False, bell_fidelity=False, bell_fidelity_types=None,
+                    states_list=False, reduced_density_matrix_pair=False):
         ψ = self.ground_state()
         j = self.row_basis_vectors(2 ** (self.n - 1))
         rydberg_fidelity_list = [[] for _ in range(self.n)]
         density_matrices = []
         bell_fidelity_list = [[] for _ in range(self.n - 1)]
-        bell_fidelity_dict = {'psi plus': [[] for _ in range(self.n - 1)], 'psi minus': [[] for _ in range(self.n - 1)], 'phi plus': [[] for _ in range(self.n - 1)], 'phi minus': [[] for _ in range(self.n - 1)]}
+        bell_fidelity_dict = {'psi plus': [[] for _ in range(self.n - 1)], 'psi minus': [[] for _ in range(self.n - 1)],
+                              'phi plus': [[] for _ in range(self.n - 1)], 'phi minus': [[] for _ in range(self.n - 1)]}
         states = []
-        rdms_pairs = []
+        rdms_pairs_list = [[] for _ in range(self.n - 1)]
 
         for k in range(0, self.steps):
 
@@ -74,11 +76,9 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
                     self.bell_state_fidelity(bell_fidelity_dict[i], ψ, bell_type=i)
 
             if reduced_density_matrix_pair:
-                rdm = self.reduced_density_matrix_pair(ψ, 1, 2)
-                rdms_pairs += [rdm]
-
-
-
+                for i in range(1, self.n):
+                    rdm = self.reduced_density_matrix_pair(ψ, i, i + 1)
+                    rdms_pairs_list[i - 1] += [rdm]
 
         if rydberg_fidelity and states_list:
             return rydberg_fidelity_list, states
@@ -105,7 +105,7 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
             return bell_fidelity_dict
 
         elif reduced_density_matrix_pair:
-            return rdms_pairs
+            return rdms_pairs_list
 
         else:
             return ψ

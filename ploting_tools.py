@@ -53,36 +53,54 @@ def set_up_color_bar(n, data, times, ax, type='rydberg', color='viridis', colorb
         cbar = plt.colorbar(sm, ax=ax, orientation='vertical', shrink=0.7)
         cbar.set_label(bar_label)
 
-def colormap_density_matrices(density_matrices, steps, num_of_plots=17, showtime=False):
+def colormap_density_matrices(density_matrices, dt, times, num_of_plots=25, showtime=False):
+
+    num_of_pairs = len(density_matrices)
 
     # Create a figure and axes
-    fig, axes = plt.subplots(nrows=1, ncols=num_of_plots, figsize=(12, 3))
+    fig, axes = plt.subplots(nrows=num_of_pairs, ncols=num_of_plots, figsize=(12, 3))
 
-    plot_step = steps // (num_of_plots - 1)
-    step = np.arange(0, steps + 1, plot_step)
+    steps = int(times[-1]/dt)
+
+    times_range = np.array([2.42, 2.95])
+    steps_range = times_range/dt
+    diff = steps_range[1] - steps_range[0]
+
+    plot_step = diff // (num_of_plots - 1)
+    step = np.arange(steps_range[0], steps_range[1]+1, plot_step).astype(int)
     step[-1] = step[-1] - 1
-    print(step)
 
-    for i in range(0, num_of_plots):
+    for j in range(num_of_pairs):
+        density_matrices_pair = density_matrices[j]
 
-        density_matrix = density_matrices[step[i]]
-        abs_matrix = np.abs(density_matrix)
-        phase_matrix = np.abs(np.angle(density_matrix))
+        for i in range(0, num_of_plots):
 
-        # Create a colormap (you can choose a different colormap if desired)
-        cmap = plt.get_cmap('RdYlGn')
+            density_matrix = density_matrices_pair[step[i]]
+            abs_matrix = np.abs(density_matrix)
+            phase_matrix = np.abs(np.angle(density_matrix))
 
-        # Set the extent of the heatmap to match the dimensions of the matrix
-        extent = [0, 4, 0, 4]
+            print(np.angle(density_matrix))
 
-        # Display the rdm matrix as a heatmap
-        ax = axes[0, i]
+            # Create a colormap (you can choose a different colormap if desired)
+            cmap = plt.get_cmap('viridis')
 
-        ax.imshow(density_matrices['QS']['Phase'], cmap=cmap, extent=extent, alpha=density_matrices['QS']['Abs'],
-                  vmin=0, vmax=np.pi)
-        ax.set_xticks([])
-        ax.set_yticks([])
-        ax.set_ylabel('')
+            # Set the extent of the heatmap to match the dimensions of the matrix
+            extent = [0, 4, 0, 4]
+
+            # Display the rdm matrix as a heatmap
+            ax = axes[1-j, i]
+
+            ax.imshow(phase_matrix, cmap=cmap, extent=extent, alpha=abs_matrix,
+                      vmin=0, vmax=np.pi)
+            ax.set_xticks([])
+            ax.set_yticks([])
+            ax.set_ylabel('')
+
+            ax.set_xlabel(f'{round(times[step[i]], 2)}', fontsize=9)
+
+            if i == 0:
+                ax.set_ylabel(f'Atom {j+1}, {j+2}', rotation='horizontal', labelpad=40, fontsize=16, verticalalignment='center')
+
 
     plt.show()
 

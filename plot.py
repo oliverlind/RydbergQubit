@@ -591,6 +591,8 @@ class Plot(AdiabaticEvolution):
     def rdm_heatmaps(self):
         density_matrices = self.time_evolve(reduced_density_matrix_pair=True)
 
+        ploting_tools.colormap_density_matrices(density_matrices, self.dt, self.times)
+
     def two_atom_eigenstates(self, probabilities=False, show=False):
 
         if self.n != 2:
@@ -694,7 +696,7 @@ if __name__ == "__main__":
 
     t = 7.00
     dt = 0.01
-    n = 6
+    n = 3
     δ_start = -200
     δ_end = 200
 
@@ -707,11 +709,11 @@ if __name__ == "__main__":
     nine = ['quench'] + 8 * ['linear flat']
 
     evol = Plot(n, t, dt, δ_start, δ_end, detuning_type=None,
-                single_addressing_list=six
+                single_addressing_list=three
                 )
 
 
-    evol.plot_line_bell_pos_sup_prob()
+    evol.rdm_heatmaps()
 
     evol.rydberg_bell_fidelity_colorbars()
 
