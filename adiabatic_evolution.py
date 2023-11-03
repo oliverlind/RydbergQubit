@@ -13,7 +13,7 @@ import data_analysis as da
 
 class AdiabaticEvolution(RydbergHamiltonian1D):
     def __init__(self, n, t, dt, δ_start, δ_end, rabi_osc=False, no_int=False, detuning_type=None,
-                 single_addressing_list=None):
+                 single_addressing_list=None, initial_state_list=None):
         super().__init__(n)
         self.t = t
         self.dt = dt
@@ -35,6 +35,14 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
         if single_addressing_list is not None:
             self.detunning = detuning_regimes.single_addressing(self.t, self.dt, self.δ_start, self.δ_end,
                                                                 single_addressing_list)
+        if initial_state_list is not None:
+            # if len(initial_state_list) == self.n:
+            self.initial_psi = self.initial_state(initial_state_list)
+            # else:
+            #     sys.exit()
+
+        else:
+            self.initial_psi = self.ground_state()
 
     def ground_state(self):
         g = np.zeros((2 ** self.n, 1))
@@ -42,9 +50,29 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
 
         return g
 
+    def bel_psi_minus(self):
+        v = np.zeros((4, 1))
+        v[1, 0] = 1/(2 ** 0.5)
+        v[2, 0] = -1 / (2 ** 0.5)
+
+        return v
+
+    def initial_state(self, state_list):
+        state_list = list(reversed(state_list))
+        v = self.bel_psi_minus() #self.col_basis_vectors(2)[state_list[0]]
+        print(v)
+
+        for i in state_list:
+            u = self.col_basis_vectors(2)[i]
+            v = np.kron(v, u)
+
+        return v
+
+
     def time_evolve(self, density_matrix=False, rydberg_fidelity=False, bell_fidelity=False, bell_fidelity_types=None,
                     states_list=False, reduced_density_matrix_pair=False):
-        ψ = self.ground_state()
+
+        ψ = self.initial_psi
         j = self.row_basis_vectors(2 ** (self.n - 1))
         rydberg_fidelity_list = [[] for _ in range(self.n)]
         density_matrices = []
@@ -534,4 +562,8 @@ if __name__ == "__main__":
 
     evol = AdiabaticEvolution(n, t, dt, δ_start, δ_end)
 
-    rdms = evol.time_evolve(reduced_density_matrix_pair=True)
+    # rdms = evol.time_evolve(reduced_density_matrix_pair=True)
+
+    v = evol.bel_psi_minus()
+
+    print(v)

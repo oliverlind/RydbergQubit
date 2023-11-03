@@ -16,15 +16,29 @@ def set_up_color_bar(n, data, times, ax, type='rydberg', color='viridis', colorb
     elif type == 'psi plus':
         n = n-1
         labels = [f'Atom {i + 1}, {i+2}' for i in range(n)]
-        norm = mcolors.Normalize(vmin=0, vmax=0.8)
+        norm = mcolors.Normalize(vmin=0, vmax=1.0)
         bar_label = f'|{"$Ψ^{+}$"}⟩ Probability'
 
     elif type == 'psi minus':
         n = n - 1
         labels = [f'Atom {i + 1}, {i + 2}' for i in range(n)]
 
-        norm = mcolors.Normalize(vmin=0, vmax=0.8)
+        norm = mcolors.Normalize(vmin=0, vmax=1.0)
         bar_label = f'|{"$Ψ^{-}$"}⟩ Probability'
+
+    elif type == 'phi plus':
+        n = n - 1
+        labels = [f'Atom {i + 1}, {i + 2}' for i in range(n)]
+
+        norm = mcolors.Normalize(vmin=0, vmax=1.0)
+        bar_label = f'|{"$Φ^{+}$"}⟩ Probability'
+
+    elif type == 'phi minus':
+        n = n - 1
+        labels = [f'Atom {i + 1}, {i + 2}' for i in range(n)]
+
+        norm = mcolors.Normalize(vmin=0, vmax=1.0)
+        bar_label = f'|{"$Φ^{-}$"}⟩ Probability'
 
     else:
         sys.exit()
@@ -43,7 +57,7 @@ def set_up_color_bar(n, data, times, ax, type='rydberg', color='viridis', colorb
     # Fill whole figure
     ax.set_xlim(0, times[-1])  # Set the x-axis limits
     ax.set_ylim(-0.5, n - 0.5)  # Set the y-axis limits
-    ax.xaxis.set_minor_locator(MultipleLocator(0.2))
+    ax.xaxis.set_minor_locator(MultipleLocator(0.05))
     ax.tick_params(which='minor', size=4)
 
     if colorbar:

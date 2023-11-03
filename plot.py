@@ -30,9 +30,9 @@ mpl.rcParams['axes.linewidth'] = 1.0
 
 
 class Plot(AdiabaticEvolution):
-    def __init__(self, n, t, dt, δ_start, δ_end, no_int=False, detuning_type=None, single_addressing_list=None):
+    def __init__(self, n, t, dt, δ_start, δ_end, no_int=False, detuning_type=None, single_addressing_list=None, initial_state_list=None):
         super().__init__(n, t, dt, δ_start=δ_start, δ_end=δ_end, detuning_type=detuning_type,
-                         single_addressing_list=single_addressing_list)
+                         single_addressing_list=single_addressing_list, initial_state_list=initial_state_list)
         if no_int:
             self.C_6 = 0
 
@@ -108,7 +108,7 @@ class Plot(AdiabaticEvolution):
 
         plt.show()
 
-    def plot_line_bell_pos_sup_prob(self, bell_fidelity_types=['psi minus']):
+    def plot_line_bell_pos_sup_prob(self, bell_fidelity_types=['psi plus']):
         bell_fidelity_data = self.time_evolve(bell_fidelity_types=bell_fidelity_types)
 
         plt.figure(figsize=(9, 4))
@@ -567,7 +567,7 @@ class Plot(AdiabaticEvolution):
 
     def rydberg_bell_fidelity_colorbars(self):
 
-        rydberg_fidelity_data, bell_fidelity_data = self.time_evolve(rydberg_fidelity=True, bell_fidelity_types=['psi plus', 'psi minus'])
+        rydberg_fidelity_data, bell_fidelity_data = self.time_evolve(rydberg_fidelity=True, bell_fidelity_types=['psi plus', 'psi minus', 'phi plus', 'phi minus'])
 
         # Create subplots with shared x-axis
         fig, (ax1, ax2, ax3) = plt.subplots(3, 1, sharex=True, figsize=(15, 8))
@@ -579,6 +579,13 @@ class Plot(AdiabaticEvolution):
 
         ploting_tools.set_up_color_bar(self.n, bell_fidelity_data['psi minus'], self.times, ax3, type='psi minus',
                                        color='cool')
+
+        # ploting_tools.set_up_color_bar(self.n, bell_fidelity_data['phi plus'], self.times, ax4, type='phi plus',
+        #                                color='cool')
+        #
+        # ploting_tools.set_up_color_bar(self.n, bell_fidelity_data['phi minus'], self.times, ax5, type='phi minus',
+        #                                color='cool')
+
 
         # Adjust spacing between subplots and remove vertical space
         plt.subplots_adjust(hspace=0)
@@ -694,28 +701,33 @@ class Plot(AdiabaticEvolution):
 if __name__ == "__main__":
     start_time = time.time()
 
-    t = 7.00
-    dt = 0.01
-    n = 3
-    δ_start = -200
+    t = 2
+    dt = 0.001
+    n = 5
+    δ_start = 200
     δ_end = 200
 
     two = ['quench', 'linear flat']
-    three = ['quench', 'linear flat', 'linear flat']
+    three = ['quench'] + ['linear flat', 'linear flat']
     four = ['quench', 'linear flat', 'linear flat', 'linear flat']
+    four2 = ['flat positive']*4
     five = ['quench', 'linear flat', 'linear flat', 'linear flat', 'linear flat']
+    five2 = ['flat zero'] + ['flat positive']*4
     six = ['quench'] + 5 * ['linear flat']
     seven = ['quench'] + 6 * ['linear flat']
     nine = ['quench'] + 8 * ['linear flat']
 
-    evol = Plot(n, t, dt, δ_start, δ_end, detuning_type=None,
-                single_addressing_list=three
+    evol = Plot(n, t, dt, δ_start, δ_end, detuning_type='rabi osc',
+                single_addressing_list=five2,
+                initial_state_list=[1, 0, 1]
                 )
 
 
-    evol.rdm_heatmaps()
+    #evol.rdm_heatmaps()
 
     evol.rydberg_bell_fidelity_colorbars()
+
+    evol.plot_line_bell_pos_sup_prob()
 
     evol.entanglement_entropy_and_colorbar()
 

@@ -90,6 +90,9 @@ class RydbergHamiltonian1D:
 
         return m_vdw
 
+    def vdw_ideal_z2(self):
+        pass
+
     def hamiltonian_matrix(self, δ, single_addressing_list=None):
         # if single_addressing_list is None:
         #     h_m = ((self.Rabi / 2) * self.sum_sigma_xi()) - (δ * self.sum_n_i()) + self.vdw()

@@ -21,7 +21,7 @@ import math
 #             self.detunning = np.zeros(self.steps)
 
 
-def global_detuning(t, dt, δ_start, δ_end, type=None, position=0.35):
+def global_detuning(t, dt, δ_start, δ_end, type=None, position=0):
     steps = int(t / dt)
 
     if type is None:
@@ -49,12 +49,22 @@ def global_detuning(t, dt, δ_start, δ_end, type=None, position=0.35):
         detuning = np.array([detuning])
         return detuning
 
+    elif type == 'flat zero':
+        detuning = flat_zero(steps)
+        detuning = np.array([detuning])
+        return detuning
+
+    elif type == 'flat positive':
+        detuning = flat_positive(δ_end, steps)
+        detuning = np.array([detuning])
+        return detuning
+
     else:
         raise ValueError('Detuning type not here')
         sys.exit()
 
 
-def linear_detuning_quench(δ_start, δ_end, steps, position=0.5, show=False):
+def linear_detuning_quench(δ_start, δ_end, steps, position=0, show=False):
     linear_steps = math.floor(steps * position)
 
     sweep = np.linspace(δ_start, δ_end, linear_steps)
@@ -82,6 +92,19 @@ def linear_detuning_flat(δ_start, δ_end, steps, position=0.5, show=False):
         plt.show()
 
     return detuning
+
+def flat_zero(steps):
+
+    detuning = np.linspace(0, 0, steps)
+
+    return detuning
+
+
+def flat_positive(δ_end, steps):
+    detuning = np.linspace(δ_end,  δ_end, steps)
+
+    return detuning
+
 
 
 def linear_quench_negative(δ_start, δ_end, steps, position=0.5, show=False):
