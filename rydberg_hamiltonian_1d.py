@@ -9,18 +9,18 @@ import data_analysis
 
 
 class RydbergHamiltonian1D:
-    def __init__(self, n, a=5.48, C_6=862690 * 2 * np.pi, Rabi=4 * 2 * np.pi):
+    def __init__(self, n, a=5.48, C_6=862690*2 * np.pi, Rabi=4*2 * np.pi):
         '''
 
         :param n: Number of atoms
         :param a: Separation between atoms (μm)
-        :param C_6: Interaction strength (Mhz μm^6)
-        :param Rabi: Rabi frequency (Mhz)
+        :param C_6: Interaction strength (2π x Mhz μm^6)
+        :param Rabi: Rabi frequency (2π x Mhz)
         '''
         self.n = n
         self.a = a
         self.C_6 = C_6
-        self.Rabi = Rabi
+        self.Rabi = Rabi #np.hstack((np.linspace(Rabi, Rabi,250), np.linspace(Rabi,0,100), np.linspace(0,0,150)))
         self.r_b = (C_6 / Rabi) ** (1 / 6)
         self.id = np.identity(2)
         self.σx = np.array([[0, 1], [1, 0]])
@@ -29,6 +29,7 @@ class RydbergHamiltonian1D:
         self.zeros = np.zeros((self.dimension, self.dimension))
         self.h = Planck * 1e6
         self.h_bar = self.h / (2 * np.pi)
+        self.two_pi = 2 * np.pi
 
     def tensor_prod_id(self, i, matrix):
         m0 = [1]
@@ -75,7 +76,7 @@ class RydbergHamiltonian1D:
 
         return m
 
-    def vdw(self):
+    def vdw(self, first_atom_move=0, NN=False ):
 
         m_vdw = self.zeros
 
@@ -83,29 +84,41 @@ class RydbergHamiltonian1D:
 
             for i in range(1, self.n + 1):
                 for k in range(1, i):
-                    r = self.a * abs(i - k)
-                    v = self.C_6 / r ** 6
+                    if k == 1:
+                        r = self.a * (abs(i - k) + first_atom_move)
+                    else:
+                        r = self.a * (abs(i - k))
+                        
+                    if NN:
+                        if i-k == 1:
+                            v = self.C_6 / r ** 6
+    
+                        else:
+                            v=0
+
+                    else:
+                        v = self.C_6 / r ** 6
+
                     m_ik = v * np.dot(self.n_i(i), self.n_i(k))
                     m_vdw = m_vdw + m_ik
 
         return m_vdw
 
-    def vdw_ideal_z2(self):
-        pass
-
-    def hamiltonian_matrix(self, δ, single_addressing_list=None):
-        # if single_addressing_list is None:
-        #     h_m = ((self.Rabi / 2) * self.sum_sigma_xi()) - (δ * self.sum_n_i()) + self.vdw()
-        # else:
-        #     h_m = ((self.Rabi / 2) * self.sum_sigma_xi()) - self.sum_n_i(δ=single_addressing_list) + self.vdw()
-        #
-        # return h_m
+    def hamiltonian_matrix(self, δ, first_atom_move=None, step=None):
 
         if len(δ) > 1:
-            h_m = ((self.Rabi / 2) * self.sum_sigma_xi()) - self.sum_n_i(δ=δ) + self.vdw()
+            if first_atom_move is None:
+                h_m = (((self.Rabi / 2) * self.sum_sigma_xi()) - self.sum_n_i(δ=δ) + self.vdw())
+            else:
+                h_m = (((self.Rabi / 2) * self.sum_sigma_xi()) - self.sum_n_i(δ=δ) + self.vdw(first_atom_move=first_atom_move))
+
+
 
         else:
-            h_m = ((self.Rabi / 2) * self.sum_sigma_xi()) - (δ * self.sum_n_i()) + self.vdw()
+            if first_atom_move is None:
+                h_m = (((self.Rabi / 2) * self.sum_sigma_xi()) - δ*self.sum_n_i() + self.vdw())
+            else:
+                h_m = (((self.Rabi / 2) * self.sum_sigma_xi()) - δ*self.sum_n_i() + self.vdw(first_atom_move=first_atom_move))
 
         return h_m
 
@@ -113,4 +126,3 @@ class RydbergHamiltonian1D:
 if __name__ == "__main__":
     two_atoms = RydbergHamiltonian1D(1)
 
-    print(two_atoms.hamiltonian_matrix(0))

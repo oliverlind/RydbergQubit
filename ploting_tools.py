@@ -16,28 +16,28 @@ def set_up_color_bar(n, data, times, ax, type='rydberg', color='viridis', colorb
     elif type == 'psi plus':
         n = n-1
         labels = [f'Atom {i + 1}, {i+2}' for i in range(n)]
-        norm = mcolors.Normalize(vmin=0, vmax=1.0)
+        norm = mcolors.Normalize(vmin=0, vmax=0.7)
         bar_label = f'|{"$Ψ^{+}$"}⟩ Probability'
 
     elif type == 'psi minus':
         n = n - 1
         labels = [f'Atom {i + 1}, {i + 2}' for i in range(n)]
 
-        norm = mcolors.Normalize(vmin=0, vmax=1.0)
+        norm = mcolors.Normalize(vmin=0, vmax=0.7)
         bar_label = f'|{"$Ψ^{-}$"}⟩ Probability'
 
     elif type == 'phi plus':
         n = n - 1
         labels = [f'Atom {i + 1}, {i + 2}' for i in range(n)]
 
-        norm = mcolors.Normalize(vmin=0, vmax=1.0)
+        norm = mcolors.Normalize(vmin=0, vmax=0.7)
         bar_label = f'|{"$Φ^{+}$"}⟩ Probability'
 
     elif type == 'phi minus':
         n = n - 1
         labels = [f'Atom {i + 1}, {i + 2}' for i in range(n)]
 
-        norm = mcolors.Normalize(vmin=0, vmax=1.0)
+        norm = mcolors.Normalize(vmin=0, vmax=0.7)
         bar_label = f'|{"$Φ^{-}$"}⟩ Probability'
 
     else:
@@ -57,7 +57,7 @@ def set_up_color_bar(n, data, times, ax, type='rydberg', color='viridis', colorb
     # Fill whole figure
     ax.set_xlim(0, times[-1])  # Set the x-axis limits
     ax.set_ylim(-0.5, n - 0.5)  # Set the y-axis limits
-    ax.xaxis.set_minor_locator(MultipleLocator(0.05))
+    ax.xaxis.set_minor_locator(MultipleLocator(0.2))
     ax.tick_params(which='minor', size=4)
 
     if colorbar:
@@ -117,6 +117,32 @@ def colormap_density_matrices(density_matrices, dt, times, num_of_plots=25, show
 
 
     plt.show()
+
+def state_label(state):
+
+    label = ''
+
+    for num in state:
+        if num == 1:
+            label += 'r'
+
+        elif num == 0:
+            label += '0'
+
+        else:
+            pass
+
+    label = f'|{label}⟩'
+
+    return label
+
+if __name__ == "__main__":
+    print(state_label([1,1,0,1]))
+
+
+
+
+
 
 
 

@@ -5,6 +5,8 @@ from scipy import sparse
 from scipy.linalg import expm
 from scipy.linalg import logm
 from matplotlib import pyplot as plt
+
+import data_analysis
 from rydberg_hamiltonian_1d import RydbergHamiltonian1D
 
 import detuning_regimes
@@ -22,7 +24,6 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
         self.δ_end = δ_end
         self.times = np.linspace(0, t, self.steps)
         self.reduced_den_initial = np.zeros((2, 2))
-        self.two_π = 2 * np.pi
 
         if rabi_osc:
             self.detunning = np.zeros(self.steps)
@@ -59,10 +60,9 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
 
     def initial_state(self, state_list):
         state_list = list(reversed(state_list))
-        v = self.bel_psi_minus() #self.col_basis_vectors(2)[state_list[0]]
-        print(v)
+        v = self.col_basis_vectors(2)[state_list[0]] #self.bel_psi_minus(
 
-        for i in state_list:
+        for i in state_list[1:]:
             u = self.col_basis_vectors(2)[i]
             v = np.kron(v, u)
 
@@ -70,25 +70,47 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
 
 
     def time_evolve(self, density_matrix=False, rydberg_fidelity=False, bell_fidelity=False, bell_fidelity_types=None,
-                    states_list=False, reduced_density_matrix_pair=False):
+                    states_list=False, reduced_density_matrix_pair=False, hms=False, expec_energy=False, eigen_list=False):
 
         ψ = self.initial_psi
         j = self.row_basis_vectors(2 ** (self.n - 1))
         rydberg_fidelity_list = [[] for _ in range(self.n)]
         density_matrices = []
+        hamiltonian_matrices = []
+        eigenvalues = []
+        eigenvectors = []
+        expectation_energies = []
         bell_fidelity_list = [[] for _ in range(self.n - 1)]
         bell_fidelity_dict = {'psi plus': [[] for _ in range(self.n - 1)], 'psi minus': [[] for _ in range(self.n - 1)],
                               'phi plus': [[] for _ in range(self.n - 1)], 'phi minus': [[] for _ in range(self.n - 1)]}
         states = []
         rdms_pairs_list = [[] for _ in range(self.n - 1)]
+        first_atom_move = np.linspace(0, 0, self.steps) #np.hstack((np.linspace(0,0, int(self.steps/2)), np.linspace(0,10, int(self.steps/2))))
 
         for k in range(0, self.steps):
 
-            ψ = np.dot(expm(-1j * self.hamiltonian_matrix(self.detunning[:, k]) * self.dt), ψ)
+            h_m = self.hamiltonian_matrix(self.detunning[:, k], first_atom_move=first_atom_move[k], step=k)
+            ψ = np.dot(expm(-1j * h_m * self.dt), ψ)
 
             if density_matrix:
                 density_m = np.dot(ψ, ψ.conj().T)
                 density_matrices += [density_m]
+                if expec_energy:
+                    ee = data_analysis.expectation_value(density_m, h_m)
+                    expectation_energies += [ee]
+
+            elif expec_energy:
+                density_m = np.dot(ψ, ψ.conj().T)
+                ee = data_analysis.expectation_value(density_m, h_m)
+                expectation_energies += [ee]
+
+            if eigen_list:
+                eigenvalue, eigenvector = np.linalg.eigh(h_m)
+                eigenvalues += [eigenvalue]
+                eigenvectors += [eigenvector]
+
+            if hms:
+                hamiltonian_matrices += [h_m]
 
             if rydberg_fidelity:
                 self.rydberg_fidelity(rydberg_fidelity_list, ψ)
@@ -108,20 +130,34 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
                     rdm = self.reduced_density_matrix_pair(ψ, i, i + 1)
                     rdms_pairs_list[i - 1] += [rdm]
 
-        if rydberg_fidelity and states_list:
-            return rydberg_fidelity_list, states
-
-        elif bell_fidelity_types and rydberg_fidelity:
-            return rydberg_fidelity_list, bell_fidelity_dict
-
-        elif rydberg_fidelity and bell_fidelity:
-            return rydberg_fidelity_list, bell_fidelity_list
-
-        elif rydberg_fidelity:
-            return rydberg_fidelity_list
+        if rydberg_fidelity:
+            if states_list:
+                return rydberg_fidelity_list, states
+            elif bell_fidelity_types:
+                return rydberg_fidelity_list, bell_fidelity_dict
+            elif bell_fidelity:
+                return rydberg_fidelity_list, bell_fidelity_list
+            elif hms:
+                return rydberg_fidelity_list, hamiltonian_matrices
+            else:
+                return rydberg_fidelity_list
 
         elif density_matrix:
-            return density_matrices
+            if hms:
+                return density_matrices, hamiltonian_matrices
+            elif expec_energy:
+                return density_matrices, expectation_energies
+            else:
+                return density_matrices
+
+        elif eigen_list:
+            if expec_energy:
+                return eigenvalues, eigenvectors, expectation_energies
+            else:
+                return eigenvalues, eigenvectors
+
+        elif hms:
+            return hamiltonian_matrices
 
         elif states_list:
             return states
@@ -137,6 +173,36 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
 
         else:
             return ψ
+
+        # if rydberg_fidelity and states_list:
+        #     return rydberg_fidelity_list, states
+        #
+        # elif bell_fidelity_types and rydberg_fidelity:
+        #     return rydberg_fidelity_list, bell_fidelity_dict
+        #
+        # elif rydberg_fidelity and bell_fidelity:
+        #     return rydberg_fidelity_list, bell_fidelity_list
+        #
+        # elif rydberg_fidelity:
+        #     return rydberg_fidelity_list
+        #
+        # elif density_matrix:
+        #     return density_matrices
+        #
+        # elif states_list:
+        #     return states
+        #
+        # elif bell_fidelity:
+        #     return bell_fidelity_list
+        #
+        # elif bell_fidelity_types:
+        #     return bell_fidelity_dict
+        #
+        # elif reduced_density_matrix_pair:
+        #     return rdms_pairs_list
+        #
+        # else:
+        #     return ψ
 
     def expectation_vals(self, eval, evec):
         expec_vals = []
