@@ -46,9 +46,12 @@ def quantum_relative_entropy(density_matrix_1, density_matrix_2):
         return qre.real
 
 def state_prob(v,ψ):
-    p = (abs(np.dot(v, ψ)) ** 2)[0][0]
+    p = (abs(np.dot(v.conj().T, ψ)) ** 2)[0][0]
 
     return p
+
+
+
 
 
 if __name__ == "__main__":

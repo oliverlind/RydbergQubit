@@ -4,6 +4,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MultipleLocator
 import matplotlib.colors as mcolors
+import config.config as cf
 
 
 def set_up_color_bar(n, data, times, ax, type='rydberg', color='viridis', colorbar=True):
@@ -39,6 +40,12 @@ def set_up_color_bar(n, data, times, ax, type='rydberg', color='viridis', colorb
 
         norm = mcolors.Normalize(vmin=0, vmax=0.7)
         bar_label = f'|{"$Φ^{-}$"}⟩ Probability'
+
+    elif type == 'eigen energies':
+        labels = [f'E{i}' for i in range(n)]
+
+        norm = mcolors.Normalize(vmin=0, vmax=1)
+        bar_label = f'Eigenstate Probability'
 
     else:
         sys.exit()
