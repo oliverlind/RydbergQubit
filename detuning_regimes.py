@@ -21,7 +21,7 @@ import math
 #             self.detunning = np.zeros(self.steps)
 
 
-def global_detuning(t, dt, δ_start, δ_end, type=None, position=0.1):
+def global_detuning(t, dt, δ_start, δ_end, type=None, position=0.05):
     steps = int(t / dt)
 
     if type is None:
@@ -56,6 +56,11 @@ def global_detuning(t, dt, δ_start, δ_end, type=None, position=0.1):
 
     elif type == 'flat positive':
         detuning = flat_positive(δ_end, steps)
+        detuning = np.array([detuning])
+        return detuning
+
+    elif type == 'flat start':
+        detuning = flat_start(δ_start, steps)
         detuning = np.array([detuning])
         return detuning
 
@@ -126,6 +131,11 @@ def flat_zero(steps):
 
 def flat_positive(δ_end, steps):
     detuning = np.linspace(δ_end,  δ_end, steps)
+
+    return detuning
+
+def flat_start(δ_start, steps):
+    detuning = np.linspace(δ_start,  δ_start, steps)
 
     return detuning
 

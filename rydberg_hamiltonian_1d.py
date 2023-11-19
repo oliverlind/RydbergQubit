@@ -9,7 +9,7 @@ import data_analysis
 
 
 class RydbergHamiltonian1D:
-    def __init__(self, n, a=5.48, C_6=862690*2 * np.pi, Rabi=4*2 * np.pi):
+    def __init__(self, n, a=5.48, C_6=862690*2 * np.pi, Rabi=8*2 * np.pi):
         '''
 
         :param n: Number of atoms

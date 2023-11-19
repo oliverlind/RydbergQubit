@@ -17,28 +17,28 @@ def set_up_color_bar(n, data, times, ax, type='rydberg', color='viridis', colorb
     elif type == 'psi plus':
         n = n-1
         labels = [f'Atom {i + 1}, {i+2}' for i in range(n)]
-        norm = mcolors.Normalize(vmin=0, vmax=0.7)
+        norm = mcolors.Normalize(vmin=0, vmax=1)
         bar_label = f'|{"$Ψ^{+}$"}⟩ Probability'
 
     elif type == 'psi minus':
         n = n - 1
         labels = [f'Atom {i + 1}, {i + 2}' for i in range(n)]
 
-        norm = mcolors.Normalize(vmin=0, vmax=0.7)
+        norm = mcolors.Normalize(vmin=0, vmax=1)
         bar_label = f'|{"$Ψ^{-}$"}⟩ Probability'
 
     elif type == 'phi plus':
         n = n - 1
         labels = [f'Atom {i + 1}, {i + 2}' for i in range(n)]
 
-        norm = mcolors.Normalize(vmin=0, vmax=0.7)
+        norm = mcolors.Normalize(vmin=0, vmax=1)
         bar_label = f'|{"$Φ^{+}$"}⟩ Probability'
 
     elif type == 'phi minus':
         n = n - 1
         labels = [f'Atom {i + 1}, {i + 2}' for i in range(n)]
 
-        norm = mcolors.Normalize(vmin=0, vmax=0.7)
+        norm = mcolors.Normalize(vmin=0, vmax=1)
         bar_label = f'|{"$Φ^{-}$"}⟩ Probability'
 
     elif type == 'eigen energies':
@@ -143,8 +143,17 @@ def state_label(state):
 
     return label
 
+def ascending_binary_strings(n):
+    result = ['0', '1']
+
+    while len(result[0]) < n:
+        result = [s + '0' for s in result] + [s + '1' for s in result]
+
+    return [s.zfill(n) for s in result]
+
+
 if __name__ == "__main__":
-    print(state_label([1,1,0,1]))
+    pass
 
 
 

@@ -53,14 +53,14 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
 
     def bel_psi_minus(self):
         v = np.zeros((4, 1))
-        v[1, 0] = 1/(2 ** 0.5)
+        v[1, 0] = 1 / (2 ** 0.5)
         v[2, 0] = -1 / (2 ** 0.5)
 
         return v
 
     def initial_state(self, state_list):
         state_list = list(reversed(state_list))
-        v = self.col_basis_vectors(2)[state_list[0]] #self.bel_psi_minus(
+        v = self.col_basis_vectors(2)[state_list[0]]  # self.bel_psi_minus(
 
         for i in state_list[1:]:
             u = self.col_basis_vectors(2)[i]
@@ -68,9 +68,9 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
 
         return v
 
-
     def time_evolve(self, density_matrix=False, rydberg_fidelity=False, bell_fidelity=False, bell_fidelity_types=None,
-                    states_list=False, reduced_density_matrix_pair=False, hms=False, expec_energy=False, eigen_list=False, eigenstate_fidelities=False):
+                    states_list=False, reduced_density_matrix_pair=False, hms=False, expec_energy=False,
+                    eigen_list=False, eigenstate_fidelities=False):
 
         ψ = self.initial_psi
         j = self.row_basis_vectors(2 ** (self.n - 1))
@@ -86,7 +86,8 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
                               'phi plus': [[] for _ in range(self.n - 1)], 'phi minus': [[] for _ in range(self.n - 1)]}
         states = []
         rdms_pairs_list = [[] for _ in range(self.n - 1)]
-        first_atom_move = np.linspace(0, 0, self.steps) #np.hstack((np.linspace(0,0, int(self.steps/2)), np.linspace(0,10, int(self.steps/2))))
+        first_atom_move = np.linspace(0, 0,
+                                      self.steps)  # np.hstack((np.linspace(0,0, int(self.steps/2)), np.linspace(0,10, int(self.steps/2))))
 
         for k in range(0, self.steps):
 
@@ -111,7 +112,7 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
                 eigenvectors += [eigenvector]
                 if eigenstate_fidelities:
                     for i in range(0, self.dimension):
-                        v = eigenvector[:,i]
+                        v = eigenvector[:, i]
                         v = v[:, np.newaxis]
                         eigenstate_prob = data_analysis.state_prob(v, ψ)
                         eigenstate_probs[i] += [eigenstate_prob]
@@ -148,10 +149,7 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
                 return rydberg_fidelity_list, hamiltonian_matrices
             elif eigen_list:
                 if expec_energy and eigenstate_fidelities:
-                    if states_list:
-                        return rydberg_fidelity_list, eigenvalues, eigenvectors, expectation_energies, eigenstate_probs, states
-                    else:
-                        return rydberg_fidelity_list, eigenvalues, eigenvectors, expectation_energies, eigenstate_probs
+                    return rydberg_fidelity_list, eigenvalues, eigenvectors, expectation_energies, eigenstate_probs
                 elif expec_energy:
                     return rydberg_fidelity_list, eigenvalues, eigenvectors, expectation_energies
                 elif eigenstate_fidelities:
@@ -641,7 +639,6 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
             rdm = self.reduced_density_matrix_pair(ψ, i, i + 1)
             bf = da.expectation_value(rdm, bell_state)
             bell_fidelity_list[i - 1] += [bf]
-
 
 
 if __name__ == "__main__":
