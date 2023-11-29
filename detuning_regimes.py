@@ -5,23 +5,7 @@ import matplotlib.pyplot as plt
 import math
 
 
-# class DetuningRegime:
-#     def __init__(self, n, t, dt, δ_start, δ_end):
-#         self.n = n
-#         self.t = t
-#         self.dt = dt
-#         self.steps = int(t/dt)
-#         self.δ_start = δ_start
-#         self.δ_end = δ_end
-#         self.detunning = np.linspace(self.δ_start, self.δ_end, self.steps)
-#
-#     def detuning(self, type, steps):
-#
-#         if type == 'rabi osc':
-#             self.detunning = np.zeros(self.steps)
-
-
-def global_detuning(t, dt, δ_start, δ_end, type=None, position=0.05):
+def global_detuning(t, dt, δ_start, δ_end, type=None, position=0.1):
     steps = int(t / dt)
 
     if type is None:
@@ -41,6 +25,11 @@ def global_detuning(t, dt, δ_start, δ_end, type=None, position=0.05):
 
     elif type == 'linear flat':
         detuning = linear_detuning_flat(δ_start, δ_end, steps, position=position)
+        detuning = np.array([detuning])
+        return detuning
+
+    elif type == 'linear flat 2':
+        detuning = linear_detuning_flat(δ_start, δ_end-50, steps, position=position)
         detuning = np.array([detuning])
         return detuning
 
@@ -66,6 +55,11 @@ def global_detuning(t, dt, δ_start, δ_end, type=None, position=0.05):
 
     elif type == 'short quench':
         detuning = quench_return(δ_start, δ_end, steps, position=position)
+        detuning = np.array([detuning])
+        return detuning
+
+    elif type == 'driving quench':
+        detuning = driving_quench(t, dt, δ_start, δ_end, steps, position=position)
         detuning = np.array([detuning])
         return detuning
 
@@ -166,6 +160,41 @@ def single_addressing(t, dt, δ_start, δ_end, single_addressing_list):
 
     return detunning
 
+def driving_quench(t, dt, δ_start, δ_end, steps, position=0.1, show=False, ax=None):
+    linear_steps = math.floor(steps * position)
+
+    sweep = np.linspace(δ_start, δ_end, linear_steps)
+
+    t_quench = linear_steps*dt
+
+    q_times = np.linspace(t_quench, t, steps-linear_steps)
+
+    omega = 4*2 * np.pi
+    mod_omega = 1.24*omega
+
+    quench_detuning = 0.5*omega + 0.5*omega*np.cos(mod_omega*(q_times-t_quench)-np.pi)
+
+    detuning = np.hstack((sweep, quench_detuning))
+
+    if show:
+        x = np.linspace(0, t, steps)
+        plt.plot(x, detuning)
+        plt.show()
+
+    if ax is not None:
+        x = np.linspace(0, t, steps)
+        ax.plot(x, detuning)
+
+
+    return detuning
+
 
 if __name__ == "__main__":
-    pass
+    t=5
+    dt=0.01
+    steps= int(t/dt)
+    start =200
+    end= 200
+
+
+    driving_quench(t,dt,start,end,steps, show=True, position=0.1)

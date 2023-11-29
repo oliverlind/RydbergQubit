@@ -6,11 +6,14 @@ from scipy.linalg import expm
 from scipy.linalg import logm
 from matplotlib import pyplot as plt
 
-import data_analysis
+
 from rydberg_hamiltonian_1d import RydbergHamiltonian1D
 
 import detuning_regimes
+import data_analysis
 import data_analysis as da
+import rabi_regimes
+
 
 
 class AdiabaticEvolution(RydbergHamiltonian1D):
@@ -70,7 +73,7 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
 
     def time_evolve(self, density_matrix=False, rydberg_fidelity=False, bell_fidelity=False, bell_fidelity_types=None,
                     states_list=False, reduced_density_matrix_pair=False, hms=False, expec_energy=False,
-                    eigen_list=False, eigenstate_fidelities=False):
+                    eigen_list=False, eigenstate_fidelities=False, rabi_regime_type='constant'):
 
         ψ = self.initial_psi
         j = self.row_basis_vectors(2 ** (self.n - 1))
@@ -86,12 +89,17 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
                               'phi plus': [[] for _ in range(self.n - 1)], 'phi minus': [[] for _ in range(self.n - 1)]}
         states = []
         rdms_pairs_list = [[] for _ in range(self.n - 1)]
+
+        # Moving the first atom
         first_atom_move = np.linspace(0, 0,
                                       self.steps)  # np.hstack((np.linspace(0,0, int(self.steps/2)), np.linspace(0,10, int(self.steps/2))))
 
+        # Rabi regime
+        rabi_regime = rabi_regimes.global_rabi(self.t, self.dt, self.steps, type='pulse start')
+
         for k in range(0, self.steps):
 
-            h_m = self.hamiltonian_matrix(self.detunning[:, k], first_atom_move=first_atom_move[k], step=k)
+            h_m = self.hamiltonian_matrix(self.detunning[:, k], first_atom_move=first_atom_move[k], rabi_regime=rabi_regime[k])
             ψ = np.dot(expm(-1j * h_m * self.dt), ψ)
 
             if density_matrix:
@@ -154,6 +162,8 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
                     return rydberg_fidelity_list, eigenvalues, eigenvectors, expectation_energies
                 elif eigenstate_fidelities:
                     return rydberg_fidelity_list, eigenvalues, eigenvectors, eigenstate_probs
+            elif density_matrix:
+                return rydberg_fidelity_list, density_matrices
             else:
                 return rydberg_fidelity_list
 
@@ -195,268 +205,6 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
 
         else:
             return ψ
-
-        # if rydberg_fidelity and states_list:
-        #     return rydberg_fidelity_list, states
-        #
-        # elif bell_fidelity_types and rydberg_fidelity:
-        #     return rydberg_fidelity_list, bell_fidelity_dict
-        #
-        # elif rydberg_fidelity and bell_fidelity:
-        #     return rydberg_fidelity_list, bell_fidelity_list
-        #
-        # elif rydberg_fidelity:
-        #     return rydberg_fidelity_list
-        #
-        # elif density_matrix:
-        #     return density_matrices
-        #
-        # elif states_list:
-        #     return states
-        #
-        # elif bell_fidelity:
-        #     return bell_fidelity_list
-        #
-        # elif bell_fidelity_types:
-        #     return bell_fidelity_dict
-        #
-        # elif reduced_density_matrix_pair:
-        #     return rdms_pairs_list
-        #
-        # else:
-        #     return ψ
-
-    def expectation_vals(self, eval, evec):
-        expec_vals = []
-        for i in range(0, self.dimension):
-            v = self.row_basis_vectors(self.dimension)[i]
-            expec_val = 0
-            for j in range(0, self.dimension):
-                expec_val = expec_val + (eval[j] * np.dot(v, evec[:, j]))[0]
-
-            expec_vals += [expec_val]
-
-        return expec_vals
-
-    def eigenvalue_evolve(self, show=False):
-        eigenvalues = []
-        expectation_vals = []
-        # self.linear_step_detunning()
-
-        for k in range(0, self.steps):
-            h_m = self.hamiltonian_matrix(self.detunning[k])
-            eval, evec = np.linalg.eigh(h_m)
-            expectation_val = self.expectation_vals(eval, evec)
-            # eigenvalue = np.sort(eigenvalue)
-            # eigenvalues += [eval]
-            expectation_vals += [expectation_val]
-
-        # g = np.array([1,0])
-        # expec_val = eval[0]*np.dot(g,evec[:,0]) + eval[1]*np.dot(g,evec[:,1])
-        # print(expec_val)
-        #
-        # print(self.expectation_vals(eval,evec))
-
-        expectation_vals = np.array(expectation_vals)
-
-        if show:
-
-            if self.n == 1:
-
-                for i in range(0, self.dimension):
-                    if i == 0:
-                        plt.plot(self.times, expectation_vals[:, i], label=f'|g⟩')
-
-                    else:
-                        plt.plot(self.times, expectation_vals[:, i], label=f'|r⟩')
-
-                plt.xlabel('Δ (2πxMHz)')
-                plt.ylabel('Energy Eigenvalue')
-
-                plt.legend()
-
-                plt.show()
-
-            if n == 2:
-                states = ['|g⟩']
-                for i in range(0, self.dimension):
-                    plt.plot(self.detunning, eigenvalues[:, i], label=f'{i}')
-
-                plt.title(f'Rabi Oscillations ( {"$R_{b}$"}={round(self.r_b, 2)}μm, a={self.a}μm)')
-                plt.xlabel('Time')  # 'Δ (2πxMHz)')
-                plt.ylabel('Energy Eigenvalue')
-
-                # plt.legend()
-
-                plt.show()
-
-    def linear_detunning(self):
-        start_steps = int(0.1 * self.steps)
-
-        start_detuning = [self.δ_start] * start_steps
-
-        sweep = np.linspace(self.δ_start, self.δ_end, self.steps - 2 * start_steps)
-
-        end_detuning = [self.δ_end] * start_steps
-
-        detunning = np.hstack((start_detuning, sweep, end_detuning))
-
-        self.detunning = detunning
-
-        # x = np.arange(0,self.steps)
-        #
-        # plt.plot(x, detunning)
-        #
-        # plt.show()
-
-    def linear_step_detunning(self, show=False):
-
-        steps = int(self.steps / 3)
-        remainder = self.steps - (3 * steps)
-
-        sweep_1 = np.linspace(self.δ_start, 0, steps)
-
-        flat = [0] * steps
-
-        sweep_2 = np.linspace(0, self.δ_end, steps + remainder)
-
-        detunning = np.hstack((sweep_1, flat, sweep_2))
-
-        self.detunning = detunning
-
-        if show:
-            x = np.arange(0, self.steps)
-
-            plt.plot(x, detunning)
-
-            plt.show()
-
-    def linear_detunning_quench(self, show=False):
-
-        linear_steps = self.steps // 2
-
-        sweep = np.linspace(self.δ_start, self.δ_end, linear_steps)
-
-        quench = np.linspace(0, 0, self.steps - linear_steps)
-
-        detunning = np.hstack((sweep, quench))
-
-        if show:
-            x = np.arange(0, self.steps)
-
-            plt.plot(x, detunning)
-
-            plt.show()
-
-        return detunning
-
-    def linear_detunning_flat(self, show=False):
-
-        linear_steps = self.steps // 2
-
-        sweep = np.linspace(self.δ_start, self.δ_end, linear_steps)
-
-        quench = np.linspace(self.δ_end, self.δ_end, self.steps - linear_steps)
-
-        detunning = np.hstack((sweep, quench))
-
-        if show:
-            x = np.arange(0, self.steps)
-
-            plt.plot(x, detunning)
-
-            plt.show()
-
-        return detunning
-
-    def cubic_detunning(self):
-        start_steps = int(0.1 * self.steps)
-
-        start_detuning = [self.δ_start] * start_steps
-
-        sweep = np.linspace(self.δ_start, self.δ_end, self.steps - 2 * start_steps)
-
-        end_detuning = [self.δ_end] * start_steps
-
-        detunning = np.hstack((start_detuning, sweep, end_detuning))
-
-        x = np.arange(0, self.steps - 2)
-
-        plt.plot(x, detunning)
-
-        plt.show()
-
-    def two_atom_evolve(self, density_matrix, j, rydberg_fidelity={}, n_1list=[], n_2list=[]):
-
-        # Initialise reduced density matrices to 0
-        density_matrix_one = self.reduced_den_initial
-        density_matrix_two = self.reduced_den_initial
-
-        # Calculate reduced density matrices for each atom
-        for i in range(0, 2 ** (self.n - 1)):
-            j_bra = j[i]
-            j_ket = j[i].conj().T
-
-            # Atom 1
-            m_left = np.kron(self.id, j_bra)
-            m_right = np.kron(self.id, j_ket)
-            density_matrix_one = density_matrix_one + np.dot(m_left, np.dot(density_matrix, m_right))
-
-            # Atom 2
-            m_left = np.kron(j_bra, self.id)
-            m_right = np.kron(j_ket, self.id)
-            density_matrix_two = density_matrix_two + np.dot(m_left, np.dot(density_matrix, m_right))
-
-        # Rydberg Fidelity Atom 1
-        n_1 = abs(np.trace(np.dot(density_matrix_one, self.ni_op)))
-        n_1list += [n_1]
-
-        # Rydberg Fidelity Atom 2
-        n_2 = abs(np.trace(np.dot(density_matrix_two, self.ni_op)))
-        n_2list += [n_2]
-
-        rydberg_fidelity['Atom 1'] = n_1list
-        rydberg_fidelity['Atom 2'] = n_2list
-
-        return rydberg_fidelity
-
-    def three_atom_evolve(self, density_matrix, j, rydberg_fidelity={}, n_1list=[], n_2list=[], n_3list=[]):
-
-        # Initialise reduced density matrices to 0
-        density_matrix_one = self.reduced_den_initial
-        density_matrix_two = self.reduced_den_initial
-        density_matrix_three = self.reduced_den_initial
-
-        # Calculate reduced density matrices for each atom
-        for i in range(0, 2 ** (self.n - 1)):
-            j_bra = j[i]
-            j_ket = j[i].conj().T
-
-            # Atom one
-            m_left = np.kron(self.id, j_bra)
-            m_right = np.kron(self.id, j_ket)
-            density_matrix_one = density_matrix_one + np.dot(m_left, np.dot(density_matrix, m_right))
-
-            # Atom two
-            self.comp_basis_vector_to_qubit_states(j_bra)
-
-            # Atom three
-            m_left = np.kron(j_bra, self.id)
-            m_right = np.kron(j_ket, self.id)
-            density_matrix_two = density_matrix_two + np.dot(m_left, np.dot(density_matrix, m_right))
-
-        # Rydberg Fidelity Atom 1
-        n_1 = abs(np.trace(np.dot(density_matrix_one, self.ni_op)))
-        n_1list += [n_1]
-
-        # Rydberg Fidelity Atom 2
-        n_2 = abs(np.trace(np.dot(density_matrix_two, self.ni_op)))
-        n_2list += [n_2]
-
-        rydberg_fidelity['Atom 1'] = n_1list
-        rydberg_fidelity['Atom 2'] = n_2list
-
-        return rydberg_fidelity
 
     @staticmethod
     def comp_basis_vector_to_qubit_states(basis_vector):
@@ -603,7 +351,7 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
 
         for i in range(1, self.n + 1):
             rdm = self.reduced_density_matrix(ψ, i)
-            rf = da.expectation_value(rdm, self.ni_op)
+            rf = data_analysis.expectation_value(rdm, self.ni_op)
             rydberg_fidelity_list[i - 1] += [rf]
 
     def bell_state_fidelity(self, bell_fidelity_list, ψ, bell_type='psi minus'):
@@ -637,7 +385,7 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
 
         for i in range(1, self.n):
             rdm = self.reduced_density_matrix_pair(ψ, i, i + 1)
-            bf = da.expectation_value(rdm, bell_state)
+            bf = data_analysis.expectation_value(rdm, bell_state)
             bell_fidelity_list[i - 1] += [bf]
 
 

@@ -14,6 +14,11 @@ def set_up_color_bar(n, data, times, ax, type='rydberg', color='viridis', colorb
         norm = mcolors.Normalize(vmin=0, vmax=1)
         bar_label = "Rydberg Probability"
 
+    elif type == 'vne':
+        labels = [f'Atom {i + 1}' for i in range(n)]
+        norm = mcolors.Normalize(vmin=0, vmax=np.log(n))
+        bar_label = "Von Neumann Entropy"
+
     elif type == 'psi plus':
         n = n-1
         labels = [f'Atom {i + 1}, {i+2}' for i in range(n)]

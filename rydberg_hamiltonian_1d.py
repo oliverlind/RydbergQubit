@@ -9,7 +9,7 @@ import data_analysis
 
 
 class RydbergHamiltonian1D:
-    def __init__(self, n, a=5.48, C_6=862690*2 * np.pi, Rabi=8*2 * np.pi):
+    def __init__(self, n, a=5.48, C_6= 862690*2 * np.pi, Rabi=4*2 * np.pi):
         '''
 
         :param n: Number of atoms
@@ -20,7 +20,7 @@ class RydbergHamiltonian1D:
         self.n = n
         self.a = a
         self.C_6 = C_6
-        self.Rabi = Rabi #np.hstack((np.linspace(Rabi, Rabi,250), np.linspace(Rabi,0,100), np.linspace(0,0,150)))
+        self.Rabi = Rabi
         self.r_b = (C_6 / Rabi) ** (1 / 6)
         self.id = np.identity(2)
         self.σx = np.array([[0, 1], [1, 0]])
@@ -76,7 +76,7 @@ class RydbergHamiltonian1D:
 
         return m
 
-    def vdw(self, first_atom_move=0, NN=False ):
+    def vdw(self, first_atom_move=0, NN=False):
 
         m_vdw = self.zeros
 
@@ -99,26 +99,26 @@ class RydbergHamiltonian1D:
                     else:
                         v = self.C_6 / r ** 6
 
+
                     m_ik = v * np.dot(self.n_i(i), self.n_i(k))
                     m_vdw = m_vdw + m_ik
 
         return m_vdw
 
-    def hamiltonian_matrix(self, δ, first_atom_move=None, step=None):
+    def hamiltonian_matrix(self, δ, first_atom_move=None, rabi_regime=1):
 
         if len(δ) > 1:
             if first_atom_move is None:
-                h_m = (((self.Rabi / 2) * self.sum_sigma_xi()) - self.sum_n_i(δ=δ) + self.vdw())
+                h_m = (((rabi_regime * self.Rabi / 2) * self.sum_sigma_xi()) - self.sum_n_i(δ=δ) + self.vdw())
             else:
-                h_m = (((self.Rabi / 2) * self.sum_sigma_xi()) - self.sum_n_i(δ=δ) + self.vdw(first_atom_move=first_atom_move))
-
+                h_m = (((rabi_regime * self.Rabi / 2) * self.sum_sigma_xi()) - self.sum_n_i(δ=δ) + self.vdw(first_atom_move=first_atom_move))
 
 
         else:
             if first_atom_move is None:
-                h_m = (((self.Rabi / 2) * self.sum_sigma_xi()) - δ*self.sum_n_i() + self.vdw())
+                h_m = (((rabi_regime * self.Rabi / 2) * self.sum_sigma_xi()) - δ*self.sum_n_i() + self.vdw())
             else:
-                h_m = (((self.Rabi / 2) * self.sum_sigma_xi()) - δ*self.sum_n_i() + self.vdw(first_atom_move=first_atom_move))
+                h_m = (((rabi_regime * self.Rabi / 2) * self.sum_sigma_xi()) - δ*self.sum_n_i() + self.vdw(first_atom_move=first_atom_move))
 
         return h_m
 
