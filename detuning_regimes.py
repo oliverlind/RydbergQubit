@@ -5,10 +5,10 @@ import matplotlib.pyplot as plt
 import math
 
 
-def global_detuning(t, dt, δ_start, δ_end, type=None, position=0.1):
+def global_detuning(t, dt, δ_start, δ_end, type='linear', position=0.1):
     steps = int(t / dt)
 
-    if type is None:
+    if type == 'linear':
         detuning = np.linspace(δ_start, δ_end, steps)
         detuning = np.array([detuning])
         return detuning
@@ -29,7 +29,7 @@ def global_detuning(t, dt, δ_start, δ_end, type=None, position=0.1):
         return detuning
 
     elif type == 'linear flat 2':
-        detuning = linear_detuning_flat(δ_start, δ_end-50, steps, position=position)
+        detuning = linear_detuning_flat(δ_start, δ_end-20, steps, position=position)
         detuning = np.array([detuning])
         return detuning
 

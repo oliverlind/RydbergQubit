@@ -19,7 +19,7 @@ def has_sublists(my_list):
 
 
 def von_nuemann_entropy(density_matrix):
-    vne = -np.trace(np.dot(density_matrix, logm(density_matrix) / np.log(2)))
+    vne = -np.trace(np.dot(density_matrix, logm(density_matrix))) #/ np.log(2)
     if vne.imag > 0.01:
         raise ValueError("Imaginary Entanglement")
         sys.exit()

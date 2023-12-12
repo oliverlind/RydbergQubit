@@ -76,7 +76,7 @@ def set_up_color_bar(n, data, times, ax, type='rydberg', color='viridis', colorb
         # Add a colorbar to show the mapping of values to colors
         sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
         sm.set_array([])  # fake up the array
-        cbar = plt.colorbar(sm, ax=ax, orientation='vertical', shrink=0.7)
+        cbar = plt.colorbar(sm, ax=ax, orientation='vertical', shrink=0.9)
         cbar.set_label(bar_label)
 
 def colormap_density_matrices(density_matrices, dt, times, num_of_plots=25, showtime=False):
@@ -155,6 +155,10 @@ def ascending_binary_strings(n):
         result = [s + '0' for s in result] + [s + '1' for s in result]
 
     return [s.zfill(n) for s in result]
+
+def energy_labels(n):
+    labels = [f'E{i}' for i in range(n)]
+    return labels
 
 
 if __name__ == "__main__":

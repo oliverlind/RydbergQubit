@@ -124,5 +124,17 @@ class RydbergHamiltonian1D:
 
 
 if __name__ == "__main__":
-    two_atoms = RydbergHamiltonian1D(1)
+
+    a_list = np.linspace(0, 10, 50)
+
+    for a in a_list:
+
+        h_m = RydbergHamiltonian1D(2, a=a).hamiltonian_matrix([0])
+
+
+
+
+
+
+
 

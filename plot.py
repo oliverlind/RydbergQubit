@@ -1,5 +1,9 @@
 import sys
 import pandas as pd
+from scipy.fft import fft, fftfreq, rfft, rfftfreq
+import numpy as np
+import time
+from scipy.linalg import expm
 
 import matplotlib as mpl
 from matplotlib import pyplot as plt
@@ -15,9 +19,7 @@ import data_analysis
 import detuning_regimes
 import rabi_regimes
 from adiabatic_evolution import AdiabaticEvolution
-import numpy as np
-import time
-from scipy.linalg import expm
+from rydberg_hamiltonian_1d import RydbergHamiltonian1D
 import data_analysis as da
 import config.config as cf
 from config.config import plotcolors
@@ -41,9 +43,10 @@ mpl.rcParams['axes.linewidth'] = 1.0
 
 class Plot(AdiabaticEvolution):
     def __init__(self, n, t, dt, δ_start, δ_end, no_int=False, detuning_type=None, single_addressing_list=None,
-                 initial_state_list=None):
+                 initial_state_list=None, rabi_regime='constant'):
         super().__init__(n, t, dt, δ_start=δ_start, δ_end=δ_end, detuning_type=detuning_type,
-                         single_addressing_list=single_addressing_list, initial_state_list=initial_state_list)
+                         single_addressing_list=single_addressing_list, initial_state_list=initial_state_list,
+                         rabi_regime=rabi_regime)
         if no_int:
             self.C_6 = 0
 
@@ -471,7 +474,7 @@ class Plot(AdiabaticEvolution):
 
         plt.show()
 
-    def entanglement_entropy(self, atom=None, show=False, ax=None, states=None):
+    def entanglement_entropy(self, atom=None, show=False, ax=None, states=None, FT=False):
 
         if show:
             states = self.time_evolve(states_list=True)
@@ -486,6 +489,7 @@ class Plot(AdiabaticEvolution):
         ax.xaxis.set_minor_locator(MultipleLocator(0.2))
         ax.tick_params(which='minor', size=4)
         ax.spines['left'].set_position('zero')
+        ax.set_ylabel('Von Neumann Entropy')
 
         if atom is None:
             for j in range(1, self.n + 1):
@@ -497,6 +501,36 @@ class Plot(AdiabaticEvolution):
 
                 ax.plot(self.times, vne_list, label=f'Atom {j}')
 
+        elif atom == 'sum':
+            vne_lists = [[] for _ in range(self.n)]
+            for j in range(1, self.n + 1):
+                for i in range(0, self.steps):
+                    rdm = self.reduced_density_matrix(states[i], j)
+                    vne = da.von_nuemann_entropy(rdm)
+                    vne_lists[j - 1] += [vne]
+
+            vne_lists_array = np.array(vne_lists)
+
+            vne_sum = np.sum(vne_lists_array, axis=0)
+
+            if FT:
+                fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12.5, 8))
+
+                ax1.set_ylabel('Von Neumann Entropy Sum')
+                ax1.plot(self.times, vne_sum)
+
+                yf = fft(vne_sum)
+                xf = fftfreq(self.steps, self.dt)[0:self.steps // 2]  # Range 0 to 1/2dt
+
+                ax2.set_xlabel('Frequency (MHz)')
+                ax2.plot(xf, 2.0 / self.steps * np.abs(yf[0:self.steps // 2]))
+
+            else:
+
+                ax.set_ylabel('Von Neumann Entropy Sum')
+                ax.plot(self.times, vne_sum)
+
+
         else:
             vne_list = []
             for i in range(0, self.steps):
@@ -506,7 +540,6 @@ class Plot(AdiabaticEvolution):
 
             ax.plot(self.times, vne_list, label=f'Atom {atom}')
 
-        ax.set_ylabel('Von Neumann Entropy')
         plt.legend(loc='upper left')
 
         if show:
@@ -534,9 +567,11 @@ class Plot(AdiabaticEvolution):
                     vne = da.von_nuemann_entropy(rdm)
                     vne_list[j - 1] += [vne]
 
-        ploting_tools.set_up_color_bar(self.n, vne_list, self.times, ax=ax, type='vne', color='inferno', colorbar=False)
+        ploting_tools.set_up_color_bar(self.n, vne_list, self.times, ax=ax, type='vne', color='inferno', colorbar=True)
 
-        # plt.show()
+        if show:
+
+            plt.show()
 
     def relative_entanglement_entropy(self, j, k, show=False, ax=None, states=None):
 
@@ -575,41 +610,20 @@ class Plot(AdiabaticEvolution):
 
     def lineplot_and_rf_colorbar(self, states_to_test=None):
 
-        rydberg_fidelity_data, eigenvalues, eigenvectors, expectation_energies, eigenstate_probs = self.time_evolve(
-            rydberg_fidelity=True, expec_energy=True, eigen_list=True, eigenstate_fidelities=True)
-        # rydberg_fidelity_data, states = self.time_evolve(rydberg_fidelity=True, states_list=True)
-
-        j = 0
-
-        print(eigenvectors[0][:, j])
-        print(eigenvectors[200][:, j])
-        print(eigenvectors[400][:, j])
+        # rydberg_fidelity_data, eigenvalues, eigenvectors, expectation_energies, eigenstate_probs = self.time_evolve(
+        #     rydberg_fidelity=True, expec_energy=True, eigen_list=True, eigenstate_fidelities=True)
+        rydberg_fidelity_data, states = self.time_evolve(rydberg_fidelity=True, states_list=True)
 
         # Create subplots with shared x-axis
         fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, figsize=(12.5, 8))
 
-        fig.suptitle(f'Instant quench Atom 1 ({"$Δ_{initial}$"} = {self.δ_start} )', fontsize=18)
-
+        fig.suptitle(f'({"$Δ_{initial}$"} = {self.δ_start} )', fontsize=18)
         # fig.suptitle(f'Moving first Atom away 1 a per μs (Δ = {self.δ_end})', fontsize=18)
-
         # fig.suptitle(f'Adiabatic detunning sweep (Δ = {self.δ_start} to {self.δ_end}) followed by first atom quench', fontsize=18)
 
         ploting_tools.set_up_color_bar(self.n, rydberg_fidelity_data, self.times, ax1, colorbar=False)
 
-        # self.state_fidelity(states_to_test[:2], q_states=states, ax=ax2)
-
-        # ax2.legend(loc='upper right')
-
-        # self.state_fidelity(states_to_test[2:], q_states=states, ax=ax3)
-
-        # self.eigenvalue_lineplot(eigenvalues=eigenvalues, eigenvectors=eigenvectors, ax=ax2, expectation_energies=expectation_energies)
-
-        ploting_tools.set_up_color_bar(15, eigenstate_probs, self.times, ax=ax2, type='eigen energies', colorbar=False,
-                                       color='viridis')
-
-        # self.state_fidelity([states_to_test[2]], q_states=states, ax=ax3)
-        # self.entanglement_entropy(ax=ax2, states=states, atom=7)
-        # self.relative_entanglement_entropy(5, 1, states=states, ax=ax3)
+        self.entanglement_entropy(ax=ax2, states=states, atom='sum')
 
         # Adjust spacing between subplots and remove vertical space
         plt.subplots_adjust(hspace=0)
@@ -630,7 +644,7 @@ class Plot(AdiabaticEvolution):
         # fig.suptitle(f'Adiabatic quench Atom 1 ({"$Δ_{initial}$"} = {self.δ_start} {"$t_{quench}$ = 7.5 μs"})',
         # fontsize=18)
 
-        #fig.suptitle(f'Generating GHZ State ({"$Δ_{1,4 final}$"} = {self.δ_end-50} , {"$Δ_{2,3 final}$"} = {self.δ_end})', fontsize=18)
+        # fig.suptitle(f'Generating GHZ State ({"$Δ_{1,4 final}$"} = {self.δ_end-50} , {"$Δ_{2,3 final}$"} = {self.δ_end})', fontsize=18)
 
         ploting_tools.set_up_color_bar(self.n, rydberg_fidelity_data, self.times, ax1, colorbar=False)
 
@@ -937,7 +951,8 @@ class Plot(AdiabaticEvolution):
         probs_df = pd.DataFrame(eigenstate_probs[index])
 
         eigenvectors = eigenvectors[index]
-        comp_basis_probs = np.multiply(eigenvectors, eigenvectors)
+
+        # comp_basis_probs = np.multiply(eigenvectors, eigenvectors)
 
         eigenstate_df = pd.DataFrame(eigenvectors)
 
@@ -949,6 +964,20 @@ class Plot(AdiabaticEvolution):
         path = 'Eigenstate Tables/data.csv'
 
         df.to_csv(path, index=True)
+
+    def eigenstate_basis(self, state_to_convert=[]):
+
+        eigenvalues, eigenvectors, states = self.time_evolve(eigen_list=True,
+                                                             states_list=True)
+
+        index = int(time / self.dt)
+
+        v = self.initial_state(state_to_convert)
+        eigenvectors_matrix = eigenvectors[index]
+
+        inv_eigenvectors_matrix = np.linalg.inv(eigenvectors_matrix)
+
+        v = 2
 
     def rf_and_quench(self, single_addressing_list=None):
 
@@ -990,7 +1019,6 @@ class Plot(AdiabaticEvolution):
         ax1.plot(self.times, detuning_2, color='g', label='Atom 2, 3, 4, 5')
         ax1.tick_params(axis='y')
 
-
         ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
 
         color = 'tab:blue'
@@ -999,7 +1027,6 @@ class Plot(AdiabaticEvolution):
         ax2.fill_between(self.times, rabi, 0, color='blue', alpha=.1)
         ax2.tick_params(axis='y', labelcolor=color)
         ax2.set_ylim(-1, 1.1)
-
 
         ax1.legend(loc="upper right")
 
@@ -1062,7 +1089,96 @@ class Plot(AdiabaticEvolution):
         plt.subplots_adjust(hspace=0)
 
         # Set x axis label
-        plt.xlabel('Time (μs)')
+        plt.xlabel('Frequency')
+
+        plt.show()
+
+    def fourier_transform_state_fidelity(self, states_to_test, interval=None, colors_num=0):
+
+        if interval is None:
+            interval = [0, self.steps]
+
+        q_states = self.time_evolve(states_list=True)
+
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12.5, 8))
+
+        ax1.set_xlabel('Time (μs)')
+        ax1.set_xlabel('Frequency (MHz)')
+
+        num_of_test_states = len(states_to_test)
+
+        state_fidelities = [[] for _ in range(num_of_test_states)]
+
+        for i in range(0, num_of_test_states):
+
+            state_to_test = states_to_test[i]
+            label = ploting_tools.state_label(state_to_test)
+
+            v_state_to_test = self.initial_state(state_to_test)
+
+            for j in range(0, self.steps):
+                state_fidelity = data_analysis.state_prob(v_state_to_test, q_states[j])
+                state_fidelities[i] += [state_fidelity]
+
+            cn = colors_num + i
+
+            ax1.plot(self.times, state_fidelities[i], label=f'{label}', color=plotcolors[cn])
+
+            ax1.legend()
+
+            yf = fft(state_fidelities[i])
+
+            xf = fftfreq(self.steps, self.dt)[0:self.steps // 2]  # Range 0 to 1/2dt
+
+            ax2.plot(xf, 2.0 / self.steps * np.abs(yf[0:self.steps // 2]))
+            plt.show()
+
+            print(state_fidelities[i])
+
+    def fourier_transorm_ee(self):
+
+        vne_sum = self.entanglement_entropy(atom='sum')
+
+        yf = fft(state_fidelities[i])
+
+        xf = fftfreq(self.steps, self.dt)[0:self.steps // 2]  # Range 0 to 1/2dt
+
+        ax2.plot(xf, 2.0 / self.steps * np.abs(yf[0:self.steps // 2]))
+        plt.show()
+
+    def eigenstate_projection(self, time=0):
+
+        eigenvalues, eigenvectors, expectation_energies, eigenstate_probs = self.time_evolve(eigen_list=True,
+                                                                                             expec_energy=True,
+                                                                                             eigenstate_fidelities=True)
+        index1 = 449
+        index2 = int(time / self.dt)
+
+        x = ploting_tools.energy_labels(self.dimension)
+
+        eigenstate_probs = np.array(eigenstate_probs)
+        eigenstate_probs = eigenstate_probs.T
+
+        probs_intial = eigenstate_probs[index1]
+        probs_after = eigenstate_probs[index2]
+
+        initial_array = np.zeros(self.dimension)
+        initial_array[0] = 1
+
+        fig = plt.figure(figsize=(12.5, 8))
+
+        plt.bar(x, probs_intial, color='grey', alpha=0.3, label='Before Quench')
+        plt.bar(x, probs_after, color='blue', label='After Quench')
+
+        # Removing ticks on the top and right sides
+        plt.tick_params(axis='x', which='both', bottom=False, top=False, labelsize=8)  # Remove ticks on x-axis (bottom and top)
+        plt.tick_params(axis='y', which='both', right=False)  # Remove ticks on y-axis (right side)
+
+        # Adding labels and title
+        plt.legend(loc='upper right')
+        plt.xlabel('Energy Eigenstates')
+        plt.ylabel('Probability')
+        plt.title(f'Quench 1st Atom Δ = {self.δ_start}')
 
         plt.show()
 
@@ -1073,13 +1189,16 @@ class Plot(AdiabaticEvolution):
 if __name__ == "__main__":
     start_time = time.time()
 
-    t = 5
-    dt = 0.01
-    n = 5
+    t = 2
+    dt = 0.005
+    n = 7
     δ_start = 200
     δ_end = 200
 
-    two = ['quench', 'linear flat']
+    two = ['quench', 'quench']
+    two2 = ['quench', 'linear flat']
+    two3 = ['linear flat', 'linear flat']
+
     three = ['quench'] + ['linear flat'] * 2
     three2 = ['flat positive'] * 3
     three3 = ['linear flat'] * 3
@@ -1094,7 +1213,7 @@ if __name__ == "__main__":
     five3 = ['quench'] + ['linear flat'] * 4
     five4 = ['quench'] * 5
     five5 = ['linear flat'] + ['flat start'] * 4
-    five6 = ['quench'] + ['linear flat']*3 + ['quench']
+    five6 = ['quench'] + ['linear flat'] * 3 + ['quench']
     five7 = ['driving quench'] * 5
     five8 = ['rabi osc'] * 2 + ['quench'] + ['rabi osc'] * 2
     five9 = ['quench'] + ['linear flat 2'] + ['linear flat'] * 2 + ['linear flat 2']
@@ -1107,62 +1226,52 @@ if __name__ == "__main__":
     seven2 = ['quench'] + 5 * ['linear flat'] + ['quench']
     seven3 = ['flat zero'] + ['flat positive'] * 6
     seven4 = ['linear flat'] + ['flat start'] * 6
+    seven5 = 2 * ['linear flat'] + ['quench'] + 4 * ['linear flat']
+
     nine = ['quench'] + 8 * ['linear flat']
 
     evol = Plot(n, t, dt, δ_start, δ_end, detuning_type=None,
-                single_addressing_list=five6,
-                initial_state_list=[1, 0, 1, 0, 1]
+                single_addressing_list=seven,
+                initial_state_list=[1, 0, 1, 0, 1, 0, 1]
                 )
-
-    #evol.colorbars_ghz()
-
-    # evol.rabi_and_detuning_shape()
-
-    #evol.rydberg_bell_fidelity_colorbars()
-
-    # evol.eigenstate_table(time=2.7)
-
-    # evol.GHZ_fidelity(show=True)
     #
-    # evol.rabi_and_detuning_shape()
-    # evol.rf_and_quench()
-    # evol.cmap_energyeigenvalues(show=True)
-
-    # evol.eigenvalue_lineplot(show=True)
-
-    # evol.cmap_energyeigenvalues(show=True)
-    # evol.eigenvalue_lineplot(show=True)
-
-    # evol.lineplot_and_rf_colorbar(states_to_test=None)
-
     # evol.entanglement_entropy_colorbar(show=True)
-
-    evol.state_fidelity_rf_colorbar(
-        [[1, 0, 1, 0, 1], [0, 1, 0, 1, 0], [1, 0, 1, 1, 0], [1, 1, 0, 1, 0], [1, 0, 0, 1, 0], [1, 0, 1, 0, 0]])
-
+    #
+    # evol.bell_fidelity_colorbars()
+    #
+    # evol.lineplot_and_rf_colorbar()
+    #
+    # evol.state_fidelity_rf_colorbar([[1, 0, 1, 0, 1, 0, 1], [0, 1, 0, 1, 0, 1, 0]])
+    #
     # evol.state_fidelity_rf_colorbar(
-    #   [[1, 0, 0, 1], [0, 1, 0, 1], [1, 0, 1, 0], [0, 1, 1, 0]])
+    #     [[1, 0, 1, 0, 1], [0, 1, 0, 1, 0], [1, 0, 1, 1, 0], [1, 1, 0, 1, 0], [1, 0, 0, 1, 0], [1, 0, 1, 0, 0]])
 
-    # evol.rydberg_bell_fidelity_colorbars()
 
-    # evol.state_fidelity([[1, 0, 1, 0, 1]], show=True)
 
-    # evol.entanglement_entropy_and_colorbar(show=True)
-    #
 
-    #
-    # evol.plot_line_bell_pos_sup_prob()
+    '''Plots From Hamiltonian'''
 
-    # evol.energy_eigenstates(showtime=True)
+    a_list = np.linspace(0, 10, 50)
 
-    #
-    # evol.plot_line_rydberg_prob()
+    for a in a_list:
+        h_m = RydbergHamiltonian1D(2, a=a).hamiltonian_matrix([0])
 
-    # evol.relative_entanglement_entropy(2, 1, show=True)
-    #
-    # evol.plot_colour_bar(show=True)
+
+
+
+
+
+
+
+
+
+
+
+
 
     end_time = time.time()
     execution_time = end_time - start_time
 
     print(f"Execution time: {execution_time} seconds")
+
+

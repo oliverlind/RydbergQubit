@@ -1,7 +1,7 @@
-from plot import Plot
+from plot_single import PlotSingle
 
 
-class CombinedPlots(Plot):
+class CombinedPlots(PlotSingle):
 
     def __init__(self, n, t, dt, δ_start, δ_end, detuning_type=None, single_addressing_list=None,
                  initial_state_list=None):

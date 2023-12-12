@@ -17,9 +17,9 @@ import rabi_regimes
 
 
 class AdiabaticEvolution(RydbergHamiltonian1D):
-    def __init__(self, n, t, dt, δ_start, δ_end, rabi_osc=False, no_int=False, detuning_type=None,
-                 single_addressing_list=None, initial_state_list=None):
-        super().__init__(n)
+    def __init__(self, n, t, dt, δ_start, δ_end, a=5.48, rabi_osc=False, no_int=False, detuning_type=None,
+                 single_addressing_list=None, initial_state_list=None, rabi_regime="constant"):
+        super().__init__(n, a=a)
         self.t = t
         self.dt = dt
         self.steps = int(t / dt)
@@ -34,11 +34,18 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
         if no_int:
             self.C_6 = 0
 
-        self.detunning = detuning_regimes.global_detuning(t, dt, δ_start, δ_end, detuning_type)
+        # Detuning Regime
+        # self.detunning = detuning_regimes.global_detuning(t, dt, δ_start, δ_end, detuning_type)
 
         if single_addressing_list is not None:
+
             self.detunning = detuning_regimes.single_addressing(self.t, self.dt, self.δ_start, self.δ_end,
                                                                 single_addressing_list)
+
+        # Rabi regime
+        self.rabi_regime = rabi_regimes.global_rabi(self.t, self.dt, self.steps, type=rabi_regime)
+
+        # Initial regime
         if initial_state_list is not None:
             # if len(initial_state_list) == self.n:
             self.initial_psi = self.initial_state(initial_state_list)
@@ -94,12 +101,9 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
         first_atom_move = np.linspace(0, 0,
                                       self.steps)  # np.hstack((np.linspace(0,0, int(self.steps/2)), np.linspace(0,10, int(self.steps/2))))
 
-        # Rabi regime
-        rabi_regime = rabi_regimes.global_rabi(self.t, self.dt, self.steps, type='pulse start')
-
         for k in range(0, self.steps):
 
-            h_m = self.hamiltonian_matrix(self.detunning[:, k], first_atom_move=first_atom_move[k], rabi_regime=rabi_regime[k])
+            h_m = self.hamiltonian_matrix(self.detunning[:, k], first_atom_move=first_atom_move[k], rabi_regime=self.rabi_regime[k])
             ψ = np.dot(expm(-1j * h_m * self.dt), ψ)
 
             if density_matrix:
@@ -357,10 +361,11 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
     def bell_state_fidelity(self, bell_fidelity_list, ψ, bell_type='psi minus'):
 
         if bell_type == 'psi plus':
-            bell_state = 0.5 * np.array([[0, 0, 0, 0],
-                                         [0, 1, 1, 0],
-                                         [0, 1, 1, 0],
+            bell_state = 0.5 * np.array([[1, 0, 0, 0],
+                                         [0, 0, 0, 0],
+                                         [0, 0, 0, 0],
                                          [0, 0, 0, 0]])
+
 
         elif bell_type == 'psi minus':
             bell_state = 0.5 * np.array([[0, 0, 0, 0],
