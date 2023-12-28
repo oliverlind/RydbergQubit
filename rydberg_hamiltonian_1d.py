@@ -125,14 +125,12 @@ class RydbergHamiltonian1D:
 
 if __name__ == "__main__":
 
-    a_list = np.linspace(0, 10, 50)
+    h_m = RydbergHamiltonian1D(2).hamiltonian_matrix([0])
 
-    for a in a_list:
-
-        h_m = RydbergHamiltonian1D(2, a=a).hamiltonian_matrix([0])
+    print(np.linalg.eigh(h_m))
 
 
-
+    print(h_m)
 
 
 

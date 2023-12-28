@@ -455,7 +455,7 @@ class Plot(AdiabaticEvolution):
 
         # Plot eigenvalues
         if eigen:
-            for i in range(0, 2):
+            for i in range(0, self.dimension):
                 ax.plot(self.times, eigenvalues[:, i], label=labels[i])
 
         plt.legend(loc='upper right')
@@ -1049,7 +1049,7 @@ class Plot(AdiabaticEvolution):
 
         ghz_fidelities = []
 
-        v1 = (1 / np.sqrt(2)) * (self.initial_state([1, 0, 1, 0, 1, 0]) + self.initial_state([0, 1, 0, 1, 0, 1]))
+        v1 = (1 / np.sqrt(2)) * (self.initial_state([1, 0, 1, 0]) + self.initial_state([0, 1, 0, 1]))
 
         ghz_density_matrix = np.dot(v1, v1.conj().T)
 
@@ -1189,10 +1189,10 @@ class Plot(AdiabaticEvolution):
 if __name__ == "__main__":
     start_time = time.time()
 
-    t = 2
-    dt = 0.005
-    n = 7
-    δ_start = 200
+    t = 5
+    dt = 0.01
+    n = 5
+    δ_start = -200
     δ_end = 200
 
     two = ['quench', 'quench']
@@ -1231,42 +1231,25 @@ if __name__ == "__main__":
     nine = ['quench'] + 8 * ['linear flat']
 
     evol = Plot(n, t, dt, δ_start, δ_end, detuning_type=None,
-                single_addressing_list=seven,
-                initial_state_list=[1, 0, 1, 0, 1, 0, 1]
+                single_addressing_list=five3,
+                initial_state_list=[0, 0, 0, 0, 0]
                 )
+
+
+    #evol.eigenvalue_lineplot(show=True)
+
+    #evol.eigenstate_fidelity_colorbar()
+
     #
     # evol.entanglement_entropy_colorbar(show=True)
     #
     # evol.bell_fidelity_colorbars()
     #
-    # evol.lineplot_and_rf_colorbar()
+    #evol.colorbars_ghz()
     #
     # evol.state_fidelity_rf_colorbar([[1, 0, 1, 0, 1, 0, 1], [0, 1, 0, 1, 0, 1, 0]])
     #
-    # evol.state_fidelity_rf_colorbar(
-    #     [[1, 0, 1, 0, 1], [0, 1, 0, 1, 0], [1, 0, 1, 1, 0], [1, 1, 0, 1, 0], [1, 0, 0, 1, 0], [1, 0, 1, 0, 0]])
-
-
-
-
-    '''Plots From Hamiltonian'''
-
-    a_list = np.linspace(0, 10, 50)
-
-    for a in a_list:
-        h_m = RydbergHamiltonian1D(2, a=a).hamiltonian_matrix([0])
-
-
-
-
-
-
-
-
-
-
-
-
+    evol.state_fidelity_rf_colorbar([[1, 0, 1, 0, 0]])
 
 
     end_time = time.time()

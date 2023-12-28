@@ -1,0 +1,1995 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="504pt" height="288pt" viewBox="0 0 504 288" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2023-12-23T12:38:25.810181</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.8.0, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 288 
+L 504 288 
+L 504 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 63 256.32 
+L 403.2 256.32 
+L 403.2 34.56 
+L 63 34.56 
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g id="line2d_1">
+    <path d="M 63 56.836304 
+L 403.2 56.841467 
+L 403.2 56.841467 
+" clip-path="url(#pc303805eb7)" style="fill: none; stroke: #1f77b4; stroke-width: 3; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_2">
+    <path d="M 63 137.6951 
+L 64.363527 140.504568 
+L 65.727054 142.796993 
+L 67.090581 144.595562 
+L 68.454108 145.967009 
+L 69.817635 146.999849 
+L 71.181162 147.779465 
+L 73.226453 148.620354 
+L 75.271743 149.203369 
+L 77.998798 149.738496 
+L 81.407615 150.180562 
+L 86.17996 150.57173 
+L 93.679359 150.926261 
+L 105.269339 151.2091 
+L 124.358717 151.420995 
+L 160.492184 151.566947 
+L 247.757916 151.644868 
+L 403.2 151.661301 
+L 403.2 151.661301 
+" clip-path="url(#pc303805eb7)" style="fill: none; stroke: #ff7f0e; stroke-width: 3; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_3">
+    <path d="M 63 151.663681 
+L 403.2 151.663681 
+L 403.2 151.663681 
+" clip-path="url(#pc303805eb7)" style="fill: none; stroke: #2ca02c; stroke-width: 3; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_4">
+    <path d="M 63 158.294343 
+L 64.363527 159.627183 
+L 65.727054 161.282458 
+L 67.090581 163.247354 
+L 69.135872 166.643741 
+L 73.226453 174.126782 
+L 77.317034 181.469218 
+L 80.725852 187.126896 
+L 84.134669 192.300137 
+L 87.543487 196.998112 
+L 90.952305 201.252227 
+L 94.361122 205.100543 
+L 97.76994 208.581598 
+L 101.178758 211.73192 
+L 104.587575 214.585112 
+L 107.996393 217.171611 
+L 112.086974 219.961683 
+L 116.177555 222.448781 
+L 120.268136 224.669388 
+L 124.358717 226.655286 
+L 129.131062 228.712255 
+L 133.903407 230.525221 
+L 139.357515 232.339685 
+L 144.811623 233.918422 
+L 150.947495 235.455157 
+L 157.76513 236.912508 
+L 165.264529 238.263506 
+L 173.445691 239.491122 
+L 182.308617 240.587092 
+L 192.53507 241.61183 
+L 204.12505 242.531868 
+L 217.078557 243.330133 
+L 232.077355 244.030546 
+L 250.48497 244.656577 
+L 272.983166 245.185378 
+L 301.617234 245.621032 
+L 339.795992 245.963467 
+L 395.018838 246.216283 
+L 403.2 246.24 
+L 403.2 246.24 
+" clip-path="url(#pc303805eb7)" style="fill: none; stroke: #d62728; stroke-width: 3; stroke-linecap: square"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 63 256.32 
+L 63 34.56 
+L 143.359109 34.56 
+L 143.359109 256.32 
+z
+" clip-path="url(#pc303805eb7)" style="fill: #b2ccff; opacity: 0.2; stroke: #b2ccff; stroke-linejoin: miter"/>
+   </g>
+   <g id="matplotlib.axis_1">
+    <g id="xtick_1">
+     <g id="line2d_5">
+      <defs>
+       <path id="m5eefd421d1" d="M 0 0 
+L 0 -6 
+" style="stroke: #000000"/>
+      </defs>
+      <g>
+       <use xlink:href="#m5eefd421d1" x="80.905263" y="256.32" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="line2d_6">
+      <defs>
+       <path id="m5e0d0341da" d="M 0 0 
+L 0 6 
+" style="stroke: #000000"/>
+      </defs>
+      <g>
+       <use xlink:href="#m5e0d0341da" x="80.905263" y="34.56" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="text_1">
+      <!-- $\mathdefault{6}$ -->
+      <g transform="translate(77.714652 268.427781) scale(0.12 -0.12)">
+       <defs>
+        <path id="CharterBT-Roman-36" d="M 2835 4544 
+C 1267 4544 320 3473 320 1811 
+C 320 644 947 -64 1811 -64 
+C 2688 -64 3360 606 3360 1476 
+C 3360 2293 2790 2880 2029 2880 
+C 1651 2880 1274 2745 941 2490 
+C 1139 3625 1792 4224 2816 4224 
+C 2822 4224 2829 4224 2835 4224 
+L 2835 4544 
+z
+M 928 2206 
+C 1190 2399 1504 2496 1856 2496 
+C 2400 2496 2778 2083 2778 1419 
+C 2778 733 2394 243 1862 243 
+C 1261 243 915 786 915 1812 
+C 915 1935 915 2070 928 2206 
+z
+" transform="scale(0.015625)"/>
+       </defs>
+       <use xlink:href="#CharterBT-Roman-36" transform="scale(0.95642)"/>
+      </g>
+     </g>
+    </g>
+    <g id="xtick_2">
+     <g id="line2d_7">
+      <g>
+       <use xlink:href="#m5eefd421d1" x="152.526316" y="256.32" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="line2d_8">
+      <g>
+       <use xlink:href="#m5e0d0341da" x="152.526316" y="34.56" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="text_2">
+      <!-- $\mathdefault{8}$ -->
+      <g transform="translate(149.335705 268.427781) scale(0.12 -0.12)">
+       <defs>
+        <path id="CharterBT-Roman-38" d="M 2054 2333 
+C 1357 2582 1018 2870 1018 3291 
+C 1018 3713 1350 4045 1792 4045 
+C 2259 4045 2566 3726 2566 3215 
+C 2566 2876 2387 2550 2054 2333 
+z
+M 2323 2217 
+C 2797 2466 3059 2856 3059 3278 
+C 3059 3898 2579 4352 1811 4352 
+C 1018 4352 486 3873 486 3194 
+C 486 2735 717 2396 1158 2211 
+C 576 1987 282 1610 282 1106 
+C 282 383 838 -128 1760 -128 
+C 2650 -128 3238 440 3238 1118 
+C 3238 1617 2925 2006 2323 2217 
+z
+M 1402 2076 
+C 2259 1756 2688 1558 2688 1054 
+C 2688 549 2330 204 1779 204 
+C 1165 204 774 581 774 1143 
+C 774 1571 966 1846 1402 2076 
+z
+" transform="scale(0.015625)"/>
+       </defs>
+       <use xlink:href="#CharterBT-Roman-38" transform="scale(0.95642)"/>
+      </g>
+     </g>
+    </g>
+    <g id="xtick_3">
+     <g id="line2d_9">
+      <g>
+       <use xlink:href="#m5eefd421d1" x="224.147368" y="256.32" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="line2d_10">
+      <g>
+       <use xlink:href="#m5e0d0341da" x="224.147368" y="34.56" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="text_3">
+      <!-- $\mathdefault{10}$ -->
+      <g transform="translate(217.766147 268.427781) scale(0.12 -0.12)">
+       <defs>
+        <path id="CharterBT-Roman-31" d="M 1990 4352 
+L 602 3938 
+L 602 3670 
+L 1606 3849 
+L 1606 421 
+L 1530 294 
+L 794 294 
+L 794 0 
+L 2938 0 
+L 2938 294 
+L 2246 294 
+L 2170 396 
+L 2170 4352 
+L 1990 4352 
+z
+" transform="scale(0.015625)"/>
+        <path id="CharterBT-Roman-30" d="M 1779 4396 
+C 864 4396 262 3587 262 2169 
+C 262 752 864 -64 1779 -64 
+C 2694 -64 3296 752 3296 2169 
+C 3296 3587 2694 4396 1779 4396 
+z
+M 1779 4096 
+C 2368 4096 2688 3441 2688 2169 
+C 2688 898 2368 243 1779 243 
+C 1190 243 864 891 864 2163 
+C 864 3441 1190 4096 1779 4096 
+z
+" transform="scale(0.015625)"/>
+       </defs>
+       <use xlink:href="#CharterBT-Roman-31" transform="scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-30" transform="translate(53.176929 0) scale(0.95642)"/>
+      </g>
+     </g>
+    </g>
+    <g id="xtick_4">
+     <g id="line2d_11">
+      <g>
+       <use xlink:href="#m5eefd421d1" x="295.768421" y="256.32" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="line2d_12">
+      <g>
+       <use xlink:href="#m5e0d0341da" x="295.768421" y="34.56" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="text_4">
+      <!-- $\mathdefault{12}$ -->
+      <g transform="translate(289.387199 268.427781) scale(0.12 -0.12)">
+       <defs>
+        <path id="CharterBT-Roman-32" d="M 902 505 
+C 2317 1628 3091 2349 3091 3153 
+C 3091 3873 2586 4358 1760 4358 
+C 966 4358 403 3904 403 3458 
+C 403 3241 538 3100 762 3100 
+C 864 3100 960 3132 1050 3196 
+L 1050 3879 
+C 1242 3987 1427 4032 1619 4032 
+C 2150 4032 2470 3675 2470 3070 
+C 2470 2234 1670 1538 269 403 
+L 269 0 
+L 3232 0 
+L 3232 1047 
+L 2944 1047 
+L 2829 505 
+L 902 505 
+z
+" transform="scale(0.015625)"/>
+       </defs>
+       <use xlink:href="#CharterBT-Roman-31" transform="scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-32" transform="translate(53.176929 0) scale(0.95642)"/>
+      </g>
+     </g>
+    </g>
+    <g id="xtick_5">
+     <g id="line2d_13">
+      <g>
+       <use xlink:href="#m5eefd421d1" x="367.389474" y="256.32" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="line2d_14">
+      <g>
+       <use xlink:href="#m5e0d0341da" x="367.389474" y="34.56" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="text_5">
+      <!-- $\mathdefault{14}$ -->
+      <g transform="translate(361.008252 268.427781) scale(0.12 -0.12)">
+       <defs>
+        <path id="CharterBT-Roman-34" d="M 2355 4288 
+L 173 1631 
+L 173 1216 
+L 2234 1216 
+L 2234 -256 
+L 2726 -256 
+L 2726 1216 
+L 3450 1216 
+L 3450 1631 
+L 2726 1631 
+L 2726 4288 
+L 2355 4288 
+z
+M 2234 3595 
+L 2234 1631 
+L 653 1631 
+L 2234 3595 
+z
+" transform="scale(0.015625)"/>
+       </defs>
+       <use xlink:href="#CharterBT-Roman-31" transform="scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-34" transform="translate(53.176929 0) scale(0.95642)"/>
+      </g>
+     </g>
+    </g>
+    <g id="text_6">
+     <!-- Distance between Atoms ($\mu$m) -->
+     <g transform="translate(156.760556 283.629367) scale(0.12 -0.12)">
+      <defs>
+       <path id="CharterBT-Roman-44" d="M 1792 4288 
+L 211 4288 
+L 211 4032 
+L 576 3993 
+L 685 3905 
+L 685 383 
+L 576 294 
+L 211 262 
+L 211 0 
+L 1792 0 
+C 2432 0 2918 70 3354 396 
+C 3878 792 4154 1387 4154 2147 
+C 4154 3490 3309 4288 1792 4288 
+z
+M 1261 3994 
+L 1766 3994 
+C 2938 3994 3507 3394 3507 2147 
+C 3507 907 2938 294 1766 294 
+L 1261 294 
+L 1261 3994 
+z
+" transform="scale(0.015625)"/>
+       <path id="CharterBT-Roman-69" d="M 986 4511 
+C 781 4511 614 4351 614 4140 
+C 614 3936 781 3776 986 3776 
+C 1190 3776 1357 3936 1357 4140 
+C 1357 4344 1190 4511 986 4511 
+z
+M 960 3094 
+L 224 2865 
+L 224 2668 
+L 672 2668 
+L 672 363 
+L 563 261 
+L 224 229 
+L 224 0 
+L 1664 0 
+L 1664 229 
+L 1318 261 
+L 1203 363 
+L 1203 3094 
+L 960 3094 
+z
+" transform="scale(0.015625)"/>
+       <path id="CharterBT-Roman-73" d="M 2202 2996 
+C 1984 3092 1734 3136 1453 3136 
+C 723 3136 320 2803 320 2240 
+C 320 1811 602 1606 1146 1363 
+C 1568 1170 1798 1055 1798 722 
+C 1798 422 1568 204 1197 204 
+C 1011 204 832 255 653 357 
+L 576 902 
+L 269 902 
+L 269 70 
+C 493 -13 774 -64 1101 -64 
+C 1856 -64 2298 301 2298 896 
+C 2298 1133 2208 1325 2054 1447 
+C 1843 1619 1600 1709 1376 1818 
+C 1018 1991 832 2125 832 2401 
+C 832 2689 1024 2862 1363 2862 
+C 1517 2862 1670 2817 1837 2728 
+L 1888 2272 
+L 2202 2272 
+L 2202 2996 
+z
+" transform="scale(0.015625)"/>
+       <path id="CharterBT-Roman-74" d="M 563 2708 
+L 563 645 
+C 563 191 698 0 1229 0 
+C 1478 0 1766 45 2067 141 
+L 2067 377 
+C 1920 345 1773 326 1626 326 
+C 1178 326 1094 536 1094 1022 
+L 1094 2708 
+L 2067 2708 
+L 2067 3008 
+L 1094 3008 
+L 1094 3680 
+L 858 3680 
+L 582 3091 
+L 160 2906 
+L 160 2708 
+L 563 2708 
+z
+" transform="scale(0.015625)"/>
+       <path id="CharterBT-Roman-61" d="M 2138 351 
+L 2221 -19 
+L 3123 -19 
+L 3123 211 
+L 2784 243 
+L 2669 345 
+L 2669 2211 
+C 2669 2860 2387 3136 1715 3136 
+C 909 3136 422 2802 422 2411 
+C 422 2256 474 2212 621 2212 
+L 1062 2212 
+L 1062 2752 
+C 1235 2823 1389 2855 1549 2855 
+C 2010 2855 2138 2644 2138 2135 
+L 2138 1929 
+C 858 1621 269 1428 269 759 
+C 269 277 582 -64 1088 -64 
+C 1395 -64 1734 77 2138 351 
+z
+M 2138 571 
+C 1818 384 1555 281 1344 281 
+C 1024 281 832 494 832 809 
+C 832 1279 1235 1453 2138 1704 
+L 2138 571 
+z
+" transform="scale(0.015625)"/>
+       <path id="CharterBT-Roman-6e" d="M 192 -32 
+L 1594 -32 
+L 1594 198 
+L 1286 230 
+L 1178 333 
+L 1178 2476 
+C 1453 2618 1690 2688 1894 2688 
+C 2368 2688 2541 2496 2541 2029 
+L 2541 333 
+L 2432 230 
+L 2125 198 
+L 2125 -32 
+L 3526 -32 
+L 3526 198 
+L 3181 230 
+L 3072 333 
+L 3072 2137 
+C 3072 2777 2765 3109 2208 3109 
+C 1933 3109 1606 2962 1178 2726 
+L 1178 3077 
+L 934 3077 
+L 192 2847 
+L 192 2649 
+L 646 2649 
+L 646 333 
+L 538 230 
+L 192 198 
+L 192 -32 
+z
+" transform="scale(0.015625)"/>
+       <path id="CharterBT-Roman-63" d="M 2720 249 
+L 2720 583 
+C 2451 404 2189 313 1907 313 
+C 1242 313 819 782 819 1574 
+C 819 2385 1210 2880 1760 2880 
+C 1869 2880 1971 2848 2067 2790 
+L 2067 2262 
+C 2163 2198 2259 2166 2355 2166 
+C 2573 2166 2714 2301 2714 2506 
+C 2714 2879 2368 3135 1754 3135 
+C 858 3135 237 2486 237 1529 
+C 237 579 806 -64 1677 -64 
+C 2022 -64 2368 45 2720 249 
+z
+" transform="scale(0.015625)"/>
+       <path id="CharterBT-Roman-65" d="M 2867 668 
+C 2502 426 2182 300 1862 300 
+C 1216 300 787 782 787 1594 
+C 787 1613 787 1638 787 1664 
+L 2861 1664 
+C 2867 1735 2867 1799 2867 1864 
+C 2867 2659 2413 3136 1715 3136 
+C 858 3136 237 2477 237 1510 
+C 237 569 819 -64 1664 -64 
+C 2067 -64 2483 63 2867 319 
+L 2867 668 
+z
+M 2298 1945 
+L 819 1945 
+C 858 2490 1222 2849 1632 2849 
+C 2061 2849 2298 2557 2298 2018 
+C 2298 1986 2298 1945 2298 1945 
+z
+" transform="scale(0.015625)"/>
+       <path id="CharterBT-Roman-62" d="M 838 4704 
+L 51 4480 
+L 51 4288 
+L 550 4288 
+L 550 0 
+L 1370 0 
+C 2592 0 3226 581 3226 1680 
+C 3226 2549 2714 3136 1958 3136 
+C 1677 3136 1389 3060 1082 2913 
+L 1082 4704 
+L 838 4704 
+z
+M 1082 287 
+L 1082 2696 
+C 1293 2760 1485 2798 1645 2798 
+C 2285 2798 2650 2357 2650 1559 
+C 2650 677 2266 287 1434 287 
+C 1402 287 1280 287 1082 287 
+z
+" transform="scale(0.015625)"/>
+       <path id="CharterBT-Roman-77" d="M -13 3072 
+L -13 2836 
+L 378 2798 
+L 1229 0 
+L 1626 0 
+L 2490 2421 
+L 3264 0 
+L 3661 0 
+L 4576 2785 
+L 4934 2836 
+L 4934 3072 
+L 3802 3072 
+L 3802 2836 
+L 4147 2811 
+L 4198 2708 
+L 3546 632 
+L 2790 3072 
+L 2400 3072 
+L 1542 632 
+L 960 2708 
+L 1037 2811 
+L 1376 2836 
+L 1376 3072 
+L -13 3072 
+z
+" transform="scale(0.015625)"/>
+       <path id="CharterBT-Roman-41" d="M 1818 4320 
+L 320 338 
+L -51 261 
+L -51 0 
+L 1203 0 
+L 1203 261 
+L 787 293 
+L 723 382 
+L 1178 1600 
+L 2688 1600 
+L 3149 382 
+L 3104 293 
+L 2707 261 
+L 2707 0 
+L 4160 0 
+L 4160 261 
+L 3776 338 
+L 2240 4320 
+L 1818 4320 
+z
+M 1920 3664 
+L 2579 1894 
+L 1286 1894 
+L 1920 3664 
+z
+" transform="scale(0.015625)"/>
+       <path id="CharterBT-Roman-6f" d="M 1722 3136 
+C 858 3136 237 2490 237 1536 
+C 237 588 864 -64 1722 -64 
+C 2579 -64 3213 588 3213 1536 
+C 3213 2484 2586 3136 1722 3136 
+z
+M 1722 2862 
+C 2240 2862 2611 2362 2611 1535 
+C 2611 703 2240 210 1722 210 
+C 1210 210 838 709 838 1535 
+C 838 2369 1203 2862 1722 2862 
+z
+" transform="scale(0.015625)"/>
+       <path id="CharterBT-Roman-6d" d="M 2906 2681 
+C 2758 2962 2515 3109 2202 3109 
+C 1933 3109 1600 2975 1178 2726 
+L 1178 3077 
+L 934 3077 
+L 192 2847 
+L 192 2649 
+L 646 2649 
+L 646 333 
+L 538 230 
+L 192 198 
+L 192 -32 
+L 1594 -32 
+L 1594 198 
+L 1286 230 
+L 1178 333 
+L 1178 2476 
+C 1459 2618 1696 2688 1907 2688 
+C 2291 2688 2470 2477 2470 2029 
+L 2470 333 
+L 2362 230 
+L 2054 198 
+L 2054 -32 
+L 3418 -32 
+L 3418 198 
+L 3117 230 
+L 3002 333 
+L 3002 2476 
+C 3277 2611 3520 2688 3725 2688 
+C 4122 2688 4301 2477 4301 2029 
+L 4301 333 
+L 4186 230 
+L 3885 198 
+L 3885 -32 
+L 5280 -32 
+L 5280 198 
+L 4941 230 
+L 4832 333 
+L 4832 2137 
+C 4832 2771 4512 3109 4006 3109 
+C 3750 3109 3386 2962 2906 2681 
+z
+" transform="scale(0.015625)"/>
+       <path id="CharterBT-Roman-28" d="M 2470 4586 
+C 1331 4446 678 3481 678 1821 
+C 678 185 1357 -779 2470 -907 
+L 2470 -639 
+C 1613 -492 1222 313 1222 1814 
+C 1222 3347 1594 4165 2470 4318 
+L 2470 4586 
+z
+" transform="scale(0.015625)"/>
+       <path id="MathDesign-CH-Regular-Italic-MathItalic-10-16" d="M 3552 3136 
+L 3270 1662 
+C 3200 1287 3110 834 3110 531 
+C 3110 324 3155 188 3264 188 
+C 3546 188 3622 615 3706 1048 
+L 3936 1048 
+C 3827 459 3712 -64 3219 -64 
+C 2950 -64 2790 155 2790 479 
+C 2790 549 2797 627 2810 705 
+C 2509 161 2048 -64 1466 -64 
+C 992 -64 685 304 646 776 
+C 640 737 634 685 634 633 
+C 634 147 902 -819 704 -1169 
+C 627 -1311 499 -1376 390 -1376 
+C 256 -1376 147 -1292 147 -1149 
+C 147 -1130 147 -1110 154 -1091 
+L 960 3136 
+L 1517 3136 
+L 1235 1662 
+C 1178 1384 1152 1139 1152 925 
+C 1152 466 1280 188 1517 188 
+C 2074 188 2547 770 2720 1662 
+L 3002 3136 
+L 3552 3136 
+z
+" transform="scale(0.015625)"/>
+       <path id="CharterBT-Roman-29" d="M 198 4586 
+L 198 4318 
+C 1075 4165 1446 3347 1446 1814 
+C 1446 313 1056 -492 198 -639 
+L 198 -907 
+C 1312 -779 1990 185 1990 1821 
+C 1990 3481 1338 4446 198 4586 
+z
+" transform="scale(0.015625)"/>
+      </defs>
+      <use xlink:href="#CharterBT-Roman-44" transform="scale(0.95642)"/>
+      <use xlink:href="#CharterBT-Roman-69" transform="translate(66.279893 0) scale(0.95642)"/>
+      <use xlink:href="#CharterBT-Roman-73" transform="translate(93.059626 0) scale(0.95642)"/>
+      <use xlink:href="#CharterBT-Roman-74" transform="translate(131.316386 0) scale(0.95642)"/>
+      <use xlink:href="#CharterBT-Roman-61" transform="translate(163.260773 0) scale(0.95642)"/>
+      <use xlink:href="#CharterBT-Roman-6e" transform="translate(211.751267 0) scale(0.95642)"/>
+      <use xlink:href="#CharterBT-Roman-63" transform="translate(266.0759 0) scale(0.95642)"/>
+      <use xlink:href="#CharterBT-Roman-65" transform="translate(308.732238 0) scale(0.95642)"/>
+      <use xlink:href="#CharterBT-Roman-62" transform="translate(382.376619 0) scale(0.95642)"/>
+      <use xlink:href="#CharterBT-Roman-65" transform="translate(433.927612 0) scale(0.95642)"/>
+      <use xlink:href="#CharterBT-Roman-74" transform="translate(480.887848 0) scale(0.95642)"/>
+      <use xlink:href="#CharterBT-Roman-77" transform="translate(512.832235 0) scale(0.95642)"/>
+      <use xlink:href="#CharterBT-Roman-65" transform="translate(586.572205 0) scale(0.95642)"/>
+      <use xlink:href="#CharterBT-Roman-65" transform="translate(633.532441 0) scale(0.95642)"/>
+      <use xlink:href="#CharterBT-Roman-6e" transform="translate(680.492678 0) scale(0.95642)"/>
+      <use xlink:href="#CharterBT-Roman-41" transform="translate(761.501456 0) scale(0.95642)"/>
+      <use xlink:href="#CharterBT-Roman-74" transform="translate(820.799489 0) scale(0.95642)"/>
+      <use xlink:href="#CharterBT-Roman-6f" transform="translate(852.743876 0) scale(0.95642)"/>
+      <use xlink:href="#CharterBT-Roman-6d" transform="translate(904.294868 0) scale(0.95642)"/>
+      <use xlink:href="#CharterBT-Roman-73" transform="translate(984.921124 0) scale(0.95642)"/>
+      <use xlink:href="#CharterBT-Roman-28" transform="translate(1049.862029 0) scale(0.95642)"/>
+      <use xlink:href="#MathDesign-CH-Regular-Italic-MathItalic-10-16" transform="translate(1089.744726 0) scale(0.95642)"/>
+      <use xlink:href="#CharterBT-Roman-6d" transform="translate(1151.8164 0) scale(0.95642)"/>
+      <use xlink:href="#CharterBT-Roman-29" transform="translate(1232.442656 0) scale(0.95642)"/>
+     </g>
+    </g>
+   </g>
+   <g id="matplotlib.axis_2">
+    <g id="ytick_1">
+     <g id="line2d_15">
+      <defs>
+       <path id="m3d7fbaf76f" d="M 0 0 
+L 6 0 
+" style="stroke: #000000"/>
+      </defs>
+      <g>
+       <use xlink:href="#m3d7fbaf76f" x="63" y="240.357595" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="line2d_16">
+      <defs>
+       <path id="mdba6194798" d="M 0 0 
+L -6 0 
+" style="stroke: #000000"/>
+      </defs>
+      <g>
+       <use xlink:href="#mdba6194798" x="403.2" y="240.357595" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="text_7">
+      <!-- $\mathdefault{−350}$ -->
+      <g transform="translate(31.966623 244.661485) scale(0.12 -0.12)">
+       <defs>
+        <path id="MathDesign-CH-Regular-Symbol-10-0" d="M 153 1661 
+L 4505 1661 
+L 4505 2045 
+L 153 2045 
+L 153 1661 
+z
+" transform="scale(0.015625)"/>
+        <path id="CharterBT-Roman-33" d="M 2029 2255 
+C 2656 2434 2982 2797 2982 3288 
+C 2982 3931 2490 4358 1722 4358 
+C 922 4358 371 3934 371 3517 
+C 371 3315 512 3175 717 3175 
+C 819 3175 902 3201 979 3257 
+L 979 3849 
+C 1165 3976 1363 4032 1587 4032 
+C 2080 4032 2400 3710 2400 3213 
+C 2400 2702 2054 2400 1408 2400 
+C 1363 2400 1318 2406 1274 2406 
+L 1274 2029 
+C 1395 2048 1510 2048 1613 2048 
+C 2227 2048 2560 1753 2560 1247 
+C 2560 678 2138 236 1555 236 
+C 1363 236 1184 287 1011 390 
+L 813 936 
+C 742 962 678 968 621 968 
+C 416 968 262 827 262 641 
+C 262 314 768 -64 1530 -64 
+C 2515 -64 3149 516 3149 1229 
+C 3149 1809 2739 2204 2029 2255 
+z
+" transform="scale(0.015625)"/>
+        <path id="CharterBT-Roman-35" d="M 646 4274 
+L 646 2189 
+C 787 2221 973 2221 1210 2221 
+C 2099 2221 2541 1918 2541 1257 
+C 2541 659 2131 229 1530 229 
+C 1389 229 1242 255 1101 307 
+L 845 861 
+C 781 874 730 881 691 881 
+C 474 881 320 739 320 540 
+C 320 231 762 -64 1421 -64 
+C 2470 -64 3130 559 3130 1389 
+C 3130 2122 2586 2624 1728 2624 
+C 1523 2624 1293 2592 1043 2522 
+L 1043 3776 
+L 2938 3776 
+L 2938 4274 
+L 646 4274 
+z
+" transform="scale(0.015625)"/>
+       </defs>
+       <use xlink:href="#MathDesign-CH-Regular-Symbol-10-0" transform="scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-33" transform="translate(69.914305 0) scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-35" transform="translate(123.091234 0) scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-30" transform="translate(176.268163 0) scale(0.95642)"/>
+      </g>
+     </g>
+    </g>
+    <g id="ytick_2">
+     <g id="line2d_17">
+      <g>
+       <use xlink:href="#m3d7fbaf76f" x="63" y="214.271149" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="line2d_18">
+      <g>
+       <use xlink:href="#mdba6194798" x="403.2" y="214.271149" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="text_8">
+      <!-- $\mathdefault{−300}$ -->
+      <g transform="translate(31.966623 218.57504) scale(0.12 -0.12)">
+       <use xlink:href="#MathDesign-CH-Regular-Symbol-10-0" transform="scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-33" transform="translate(69.914305 0) scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-30" transform="translate(123.091234 0) scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-30" transform="translate(176.268163 0) scale(0.95642)"/>
+      </g>
+     </g>
+    </g>
+    <g id="ytick_3">
+     <g id="line2d_19">
+      <g>
+       <use xlink:href="#m3d7fbaf76f" x="63" y="188.184704" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="line2d_20">
+      <g>
+       <use xlink:href="#mdba6194798" x="403.2" y="188.184704" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="text_9">
+      <!-- $\mathdefault{−250}$ -->
+      <g transform="translate(31.966623 192.488595) scale(0.12 -0.12)">
+       <use xlink:href="#MathDesign-CH-Regular-Symbol-10-0" transform="scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-32" transform="translate(69.914305 0) scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-35" transform="translate(123.091234 0) scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-30" transform="translate(176.268163 0) scale(0.95642)"/>
+      </g>
+     </g>
+    </g>
+    <g id="ytick_4">
+     <g id="line2d_21">
+      <g>
+       <use xlink:href="#m3d7fbaf76f" x="63" y="162.098259" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="line2d_22">
+      <g>
+       <use xlink:href="#mdba6194798" x="403.2" y="162.098259" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="text_10">
+      <!-- $\mathdefault{−200}$ -->
+      <g transform="translate(31.966623 166.402149) scale(0.12 -0.12)">
+       <use xlink:href="#MathDesign-CH-Regular-Symbol-10-0" transform="scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-32" transform="translate(69.914305 0) scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-30" transform="translate(123.091234 0) scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-30" transform="translate(176.268163 0) scale(0.95642)"/>
+      </g>
+     </g>
+    </g>
+    <g id="ytick_5">
+     <g id="line2d_23">
+      <g>
+       <use xlink:href="#m3d7fbaf76f" x="63" y="136.011813" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="line2d_24">
+      <g>
+       <use xlink:href="#mdba6194798" x="403.2" y="136.011813" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="text_11">
+      <!-- $\mathdefault{−150}$ -->
+      <g transform="translate(31.966623 140.315704) scale(0.12 -0.12)">
+       <use xlink:href="#MathDesign-CH-Regular-Symbol-10-0" transform="scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-31" transform="translate(69.914305 0) scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-35" transform="translate(123.091234 0) scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-30" transform="translate(176.268163 0) scale(0.95642)"/>
+      </g>
+     </g>
+    </g>
+    <g id="ytick_6">
+     <g id="line2d_25">
+      <g>
+       <use xlink:href="#m3d7fbaf76f" x="63" y="109.925368" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="line2d_26">
+      <g>
+       <use xlink:href="#mdba6194798" x="403.2" y="109.925368" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="text_12">
+      <!-- $\mathdefault{−100}$ -->
+      <g transform="translate(31.966623 114.229259) scale(0.12 -0.12)">
+       <use xlink:href="#MathDesign-CH-Regular-Symbol-10-0" transform="scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-31" transform="translate(69.914305 0) scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-30" transform="translate(123.091234 0) scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-30" transform="translate(176.268163 0) scale(0.95642)"/>
+      </g>
+     </g>
+    </g>
+    <g id="ytick_7">
+     <g id="line2d_27">
+      <g>
+       <use xlink:href="#m3d7fbaf76f" x="63" y="83.838923" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="line2d_28">
+      <g>
+       <use xlink:href="#mdba6194798" x="403.2" y="83.838923" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="text_13">
+      <!-- $\mathdefault{−50}$ -->
+      <g transform="translate(38.347845 88.142814) scale(0.12 -0.12)">
+       <use xlink:href="#MathDesign-CH-Regular-Symbol-10-0" transform="scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-35" transform="translate(69.914305 0) scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-30" transform="translate(123.091234 0) scale(0.95642)"/>
+      </g>
+     </g>
+    </g>
+    <g id="ytick_8">
+     <g id="line2d_29">
+      <g>
+       <use xlink:href="#m3d7fbaf76f" x="63" y="57.752478" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="line2d_30">
+      <g>
+       <use xlink:href="#mdba6194798" x="403.2" y="57.752478" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="text_14">
+      <!-- $\mathdefault{0}$ -->
+      <g transform="translate(53.118778 62.056368) scale(0.12 -0.12)">
+       <use xlink:href="#CharterBT-Roman-30" transform="scale(0.95642)"/>
+      </g>
+     </g>
+    </g>
+    <g id="text_15">
+     <!-- Energy Eigenvalue $\hbar^{-1}$ -->
+     <g transform="translate(25.372819 201.579871) rotate(-90) scale(0.12 -0.12)">
+      <defs>
+       <path id="CharterBT-Roman-45" d="M 211 0 
+L 3507 0 
+L 3507 1046 
+L 3174 1046 
+L 3066 397 
+L 2976 294 
+L 1261 294 
+L 1261 2074 
+L 2310 2074 
+L 2400 1982 
+L 2464 1536 
+L 2765 1536 
+L 2765 2941 
+L 2464 2941 
+L 2400 2461 
+L 2310 2368 
+L 1261 2368 
+L 1261 3994 
+L 2739 3994 
+L 2829 3900 
+L 2918 3360 
+L 3277 3360 
+L 3277 4288 
+L 211 4288 
+L 211 4032 
+L 576 3993 
+L 685 3905 
+L 685 384 
+L 576 294 
+L 211 262 
+L 211 0 
+z
+" transform="scale(0.015625)"/>
+       <path id="CharterBT-Roman-72" d="M 192 32 
+L 1734 32 
+L 1734 262 
+L 1286 294 
+L 1178 396 
+L 1178 2222 
+C 1440 2529 1664 2688 1875 2688 
+C 2010 2688 2118 2637 2202 2535 
+L 2406 2535 
+L 2406 3084 
+C 2272 3142 2150 3167 2022 3167 
+C 1971 3167 1914 3167 1862 3155 
+C 1632 2969 1402 2765 1178 2535 
+L 1178 3135 
+L 934 3135 
+L 192 2905 
+L 192 2707 
+L 646 2707 
+L 646 396 
+L 531 294 
+L 192 262 
+L 192 32 
+z
+" transform="scale(0.015625)"/>
+       <path id="CharterBT-Roman-67" d="M 2362 2944 
+C 2118 3070 1882 3129 1638 3129 
+C 883 3129 397 2689 397 2060 
+C 397 1574 698 1192 1190 1082 
+C 986 841 883 645 883 480 
+C 883 379 909 284 947 196 
+C 512 120 256 -185 256 -591 
+C 256 -1098 678 -1408 1414 -1408 
+C 1901 -1408 2342 -1262 2682 -990 
+C 2931 -787 3066 -515 3066 -281 
+C 3066 188 2733 385 1978 499 
+L 1363 594 
+C 1357 663 1350 714 1350 745 
+C 1350 848 1376 942 1421 1031 
+C 1459 1031 1498 1031 1530 1031 
+C 2272 1031 2752 1465 2752 2041 
+C 2752 2268 2694 2455 2573 2643 
+L 3277 2643 
+L 3277 2944 
+L 2362 2944 
+z
+M 1574 2880 
+C 1946 2880 2202 2574 2202 2081 
+C 2202 1592 1946 1280 1574 1280 
+C 1203 1280 947 1592 947 2081 
+C 947 2581 1203 2880 1574 2880 
+z
+M 1318 177 
+L 1939 62 
+C 2387 -21 2592 -92 2592 -437 
+C 2592 -794 2208 -1114 1638 -1114 
+C 1114 -1114 768 -820 768 -449 
+C 768 -168 966 68 1318 177 
+z
+" transform="scale(0.015625)"/>
+       <path id="CharterBT-Roman-79" d="M -6 3072 
+L -6 2835 
+L 384 2797 
+L 1459 15 
+C 1299 -440 1114 -760 941 -947 
+L 326 -703 
+C 218 -805 160 -921 160 -1049 
+C 160 -1261 333 -1408 602 -1408 
+C 1018 -1408 1325 -1055 1626 -330 
+L 2906 2784 
+L 3277 2835 
+L 3277 3072 
+L 2138 3072 
+L 2138 2835 
+L 2483 2810 
+L 2534 2707 
+L 1734 713 
+L 966 2707 
+L 1043 2810 
+L 1382 2835 
+L 1382 3072 
+L -6 3072 
+z
+" transform="scale(0.015625)"/>
+       <path id="CharterBT-Roman-76" d="M -32 3072 
+L -32 2836 
+L 358 2798 
+L 1389 0 
+L 1747 0 
+L 2867 2785 
+L 3245 2836 
+L 3245 3072 
+L 2112 3072 
+L 2112 2836 
+L 2458 2811 
+L 2509 2708 
+L 1690 620 
+L 941 2708 
+L 1018 2811 
+L 1357 2836 
+L 1357 3072 
+L -32 3072 
+z
+" transform="scale(0.015625)"/>
+       <path id="CharterBT-Roman-6c" d="M 179 0 
+L 1677 0 
+L 1677 231 
+L 1312 263 
+L 1197 365 
+L 1197 4704 
+L 954 4704 
+L 173 4480 
+L 173 4288 
+L 666 4288 
+L 666 365 
+L 557 263 
+L 179 231 
+L 179 0 
+z
+" transform="scale(0.015625)"/>
+       <path id="CharterBT-Roman-75" d="M 909 3136 
+L 166 2892 
+L 166 2688 
+L 621 2688 
+L 621 908 
+C 621 273 928 -64 1478 -64 
+C 1792 -64 2131 83 2515 358 
+L 2515 0 
+L 3462 0 
+L 3462 230 
+L 3162 262 
+L 3046 364 
+L 3046 3136 
+L 2803 3136 
+L 2061 2892 
+L 2061 2688 
+L 2515 2688 
+L 2515 535 
+C 2253 408 2010 345 1773 345 
+C 1344 345 1152 562 1152 1022 
+L 1152 3136 
+L 909 3136 
+z
+" transform="scale(0.015625)"/>
+       <path id="MathDesign-CH-Regular-MathDesignSymbolA-10-7e" d="M 461 3392 
+L 3501 3392 
+L 3552 3699 
+L 518 3699 
+L 461 3392 
+z
+" transform="scale(0.015625)"/>
+       <path id="CharterBT-Italic-68" d="M 1427 4784 
+L 422 4569 
+L 422 4406 
+L 1024 4354 
+L 147 23 
+L 691 23 
+L 1088 2208 
+C 1485 2568 1824 2736 2035 2736 
+C 2278 2736 2381 2600 2381 2324 
+C 2381 2240 2362 2098 2317 1911 
+L 2042 719 
+C 2010 577 1997 461 1997 377 
+C 1997 107 2144 -16 2464 -16 
+C 2630 -16 2893 49 3232 185 
+L 3232 359 
+C 3085 320 2963 301 2874 301 
+C 2662 301 2547 417 2547 623 
+C 2547 732 2573 867 2611 1042 
+L 2835 2041 
+C 2886 2272 2925 2459 2925 2621 
+C 2925 2936 2720 3136 2387 3136 
+C 2054 3136 1658 2930 1158 2523 
+L 1370 3634 
+C 1459 4088 1542 4472 1626 4784 
+L 1427 4784 
+z
+" transform="scale(0.015625)"/>
+      </defs>
+      <use xlink:href="#CharterBT-Roman-45" transform="scale(0.95642)"/>
+      <use xlink:href="#CharterBT-Roman-6e" transform="translate(55.089815 0) scale(0.95642)"/>
+      <use xlink:href="#CharterBT-Roman-65" transform="translate(109.414449 0) scale(0.95642)"/>
+      <use xlink:href="#CharterBT-Roman-72" transform="translate(156.374685 0) scale(0.95642)"/>
+      <use xlink:href="#CharterBT-Roman-67" transform="translate(192.909919 0) scale(0.95642)"/>
+      <use xlink:href="#CharterBT-Roman-79" transform="translate(242.93067 0) scale(0.95642)"/>
+      <use xlink:href="#CharterBT-Roman-45" transform="translate(316.957588 0) scale(0.95642)"/>
+      <use xlink:href="#CharterBT-Roman-69" transform="translate(372.047403 0) scale(0.95642)"/>
+      <use xlink:href="#CharterBT-Roman-67" transform="translate(398.827137 0) scale(0.95642)"/>
+      <use xlink:href="#CharterBT-Roman-65" transform="translate(448.847887 0) scale(0.95642)"/>
+      <use xlink:href="#CharterBT-Roman-6e" transform="translate(495.808124 0) scale(0.95642)"/>
+      <use xlink:href="#CharterBT-Roman-76" transform="translate(550.132757 0) scale(0.95642)"/>
+      <use xlink:href="#CharterBT-Roman-61" transform="translate(597.379942 0) scale(0.95642)"/>
+      <use xlink:href="#CharterBT-Roman-6c" transform="translate(645.870436 0) scale(0.95642)"/>
+      <use xlink:href="#CharterBT-Roman-75" transform="translate(672.841438 0) scale(0.95642)"/>
+      <use xlink:href="#CharterBT-Roman-65" transform="translate(727.261767 0) scale(0.95642)"/>
+      <use xlink:href="#MathDesign-CH-Regular-MathDesignSymbolA-10-7e" transform="translate(798.51512 0) scale(0.95642)"/>
+      <use xlink:href="#CharterBT-Italic-68" transform="translate(800.906148 0) scale(0.95642)"/>
+      <use xlink:href="#MathDesign-CH-Regular-Symbol-10-0" transform="translate(853.604859 42.283499) scale(0.669491)"/>
+      <use xlink:href="#CharterBT-Roman-31" transform="translate(902.544642 42.283499) scale(0.669491)"/>
+     </g>
+    </g>
+   </g>
+   <g id="line2d_31">
+    <path d="M 63 44.64 
+L 403.2 44.64 
+" clip-path="url(#pc303805eb7)" style="fill: none; stroke-dasharray: 3.7,1.6; stroke-dashoffset: 0; stroke: #000000; stroke-opacity: 0.5"/>
+   </g>
+   <g id="line2d_32">
+    <path d="M 63 70.864955 
+L 403.2 70.864955 
+" clip-path="url(#pc303805eb7)" style="fill: none; stroke-dasharray: 3.7,1.6; stroke-dashoffset: 0; stroke: #000000; stroke-opacity: 0.5"/>
+   </g>
+   <g id="line2d_33">
+    <path d="M 143.359109 256.32 
+L 143.359109 34.56 
+" clip-path="url(#pc303805eb7)" style="fill: none; stroke-dasharray: 7.4,3.2; stroke-dashoffset: 0; stroke: #b2ccff; stroke-opacity: 0.8; stroke-width: 2"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 63 256.32 
+L 63 34.56 
+" style="fill: none; stroke: #000000; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 403.2 256.32 
+L 403.2 34.56 
+" style="fill: none; stroke: #000000; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 63 256.32 
+L 403.2 256.32 
+" style="fill: none; stroke: #000000; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 63 34.56 
+L 403.2 34.56 
+" style="fill: none; stroke: #000000; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="text_16">
+    <!-- Blockade Radius $R_{B}$ -->
+    <g transform="translate(145.7237 -56.307928) rotate(-270) scale(0.12 -0.12)">
+     <defs>
+      <path id="CharterBT-Roman-42" d="M 211 4288 
+L 211 4033 
+L 576 3994 
+L 685 3904 
+L 685 383 
+L 576 294 
+L 211 262 
+L 211 0 
+L 1901 0 
+C 2989 0 3571 445 3571 1247 
+C 3571 1871 3142 2259 2381 2259 
+C 2995 2426 3309 2755 3309 3244 
+C 3309 3953 2822 4288 1843 4288 
+L 211 4288 
+z
+M 1261 2335 
+L 1261 3988 
+C 1421 3988 1542 4007 1626 4007 
+C 2330 4007 2675 3743 2675 3223 
+C 2675 2599 2304 2329 1504 2329 
+C 1427 2329 1344 2329 1261 2335 
+z
+M 1261 319 
+L 1261 2016 
+C 1510 2048 1722 2048 1888 2048 
+C 2598 2048 2944 1776 2944 1199 
+C 2944 560 2547 300 1690 300 
+C 1555 300 1414 300 1261 319 
+z
+" transform="scale(0.015625)"/>
+      <path id="CharterBT-Roman-6b" d="M 160 32 
+L 1562 32 
+L 1562 260 
+L 1261 292 
+L 1146 394 
+L 1146 1472 
+L 1517 1472 
+L 2381 241 
+L 2381 32 
+L 3379 32 
+L 3379 273 
+L 2970 305 
+L 1843 1882 
+L 2720 2815 
+L 3130 2866 
+L 3130 3104 
+L 1914 3104 
+L 1914 2866 
+L 2202 2841 
+L 2246 2750 
+L 1267 1651 
+L 1146 1651 
+L 1146 4736 
+L 902 4736 
+L 122 4495 
+L 122 4288 
+L 614 4288 
+L 614 394 
+L 506 292 
+L 160 260 
+L 160 32 
+z
+" transform="scale(0.015625)"/>
+      <path id="CharterBT-Roman-64" d="M 2451 4256 
+L 2451 3066 
+C 2253 3110 2061 3136 1882 3136 
+C 909 3136 230 2452 230 1430 
+C 230 536 768 -64 1466 -64 
+C 1818 -64 2125 63 2451 325 
+L 2451 -7 
+L 3398 -7 
+L 3398 223 
+L 3091 255 
+L 2982 357 
+L 2982 4704 
+L 2739 4704 
+L 1958 4463 
+L 1958 4256 
+L 2451 4256 
+z
+M 2451 562 
+C 2214 415 1984 338 1754 338 
+C 1178 338 794 791 794 1539 
+C 794 2337 1242 2855 1888 2855 
+C 2042 2855 2234 2816 2451 2753 
+L 2451 562 
+z
+" transform="scale(0.015625)"/>
+      <path id="CharterBT-Roman-52" d="M 211 4262 
+L 211 4006 
+L 576 3967 
+L 685 3878 
+L 685 369 
+L 576 281 
+L 211 249 
+L 211 -13 
+L 1734 -13 
+L 1734 249 
+L 1370 281 
+L 1261 369 
+L 1261 1882 
+C 1376 1882 1485 1882 1581 1882 
+C 2163 1882 2413 1718 2586 1199 
+C 2720 796 2746 384 3053 119 
+C 3200 -8 3411 -64 3699 -64 
+C 3846 -64 4006 -45 4198 -7 
+L 4198 236 
+C 4179 236 4160 236 4141 236 
+C 3654 236 3450 312 3309 686 
+C 3194 984 3187 1332 3008 1624 
+C 2880 1833 2662 1966 2349 2048 
+C 3040 2201 3386 2560 3386 3110 
+C 3386 3897 2880 4262 1843 4262 
+L 211 4262 
+z
+M 1261 3968 
+L 1568 3968 
+C 2362 3968 2746 3725 2746 3059 
+C 2746 2426 2381 2176 1613 2176 
+C 1574 2176 1459 2176 1261 2176 
+L 1261 3968 
+z
+" transform="scale(0.015625)"/>
+      <path id="CharterBT-Italic-52" d="M 486 4352 
+L 486 4107 
+L 941 4068 
+L 1011 3978 
+L 326 400 
+L 224 310 
+L -186 277 
+L -186 32 
+L 1376 32 
+L 1376 277 
+L 960 310 
+L 883 399 
+L 1184 1943 
+C 1318 1943 1434 1943 1536 1943 
+C 1709 1943 1830 1930 1907 1891 
+C 2234 1745 2272 1488 2355 1118 
+C 2451 683 2509 352 2739 159 
+C 2861 57 3059 0 3328 0 
+C 3430 0 3578 13 3776 38 
+L 3776 277 
+C 3757 277 3738 277 3718 277 
+C 3226 277 3104 438 2970 925 
+C 2797 1528 2746 1944 2182 2066 
+C 3002 2246 3456 2751 3456 3409 
+C 3456 4075 3014 4352 2106 4352 
+L 486 4352 
+z
+M 1242 2246 
+L 1587 4049 
+C 1683 4049 1773 4062 1856 4062 
+C 2528 4062 2848 3830 2848 3312 
+C 2848 2647 2368 2240 1478 2240 
+C 1402 2240 1325 2240 1242 2246 
+z
+" transform="scale(0.015625)"/>
+      <path id="CharterBT-Italic-42" d="M 538 4352 
+L 538 4107 
+L 947 4075 
+L 1011 3976 
+L 333 376 
+L 224 285 
+L -179 246 
+L -179 0 
+L 1421 0 
+C 2714 0 3354 474 3354 1449 
+C 3354 1981 3008 2280 2342 2280 
+C 3085 2472 3475 2906 3475 3531 
+C 3475 4102 3046 4352 2182 4352 
+L 538 4352 
+z
+M 1274 2377 
+L 1581 4081 
+C 1734 4094 1850 4094 1933 4094 
+C 2547 4094 2842 3899 2842 3469 
+C 2842 2806 2381 2364 1600 2364 
+C 1517 2364 1414 2364 1274 2377 
+z
+M 877 278 
+L 1222 2080 
+C 1434 2099 1600 2112 1715 2112 
+C 2400 2112 2726 1899 2726 1395 
+C 2726 645 2246 265 1299 265 
+C 1165 265 1024 265 877 278 
+z
+" transform="scale(0.015625)"/>
+     </defs>
+     <use xlink:href="#CharterBT-Roman-42" transform="scale(0.95642)"/>
+     <use xlink:href="#CharterBT-Roman-6c" transform="translate(57.767776 0) scale(0.95642)"/>
+     <use xlink:href="#CharterBT-Roman-6f" transform="translate(84.738779 0) scale(0.95642)"/>
+     <use xlink:href="#CharterBT-Roman-63" transform="translate(136.289771 0) scale(0.95642)"/>
+     <use xlink:href="#CharterBT-Roman-6b" transform="translate(178.946109 0) scale(0.95642)"/>
+     <use xlink:href="#CharterBT-Roman-61" transform="translate(228.393038 0) scale(0.95642)"/>
+     <use xlink:href="#CharterBT-Roman-64" transform="translate(276.883531 0) scale(0.95642)"/>
+     <use xlink:href="#CharterBT-Roman-65" transform="translate(330.921216 0) scale(0.95642)"/>
+     <use xlink:href="#CharterBT-Roman-52" transform="translate(404.565597 0) scale(0.95642)"/>
+     <use xlink:href="#CharterBT-Roman-61" transform="translate(466.350323 0) scale(0.95642)"/>
+     <use xlink:href="#CharterBT-Roman-64" transform="translate(514.840816 0) scale(0.95642)"/>
+     <use xlink:href="#CharterBT-Roman-69" transform="translate(568.878501 0) scale(0.95642)"/>
+     <use xlink:href="#CharterBT-Roman-75" transform="translate(595.658234 0) scale(0.95642)"/>
+     <use xlink:href="#CharterBT-Roman-73" transform="translate(650.078563 0) scale(0.95642)"/>
+     <use xlink:href="#CharterBT-Italic-52" transform="translate(715.019467 0) scale(0.95642)"/>
+     <use xlink:href="#CharterBT-Italic-42" transform="translate(776.660688 -21.615065) scale(0.669491)"/>
+    </g>
+   </g>
+   <g id="legend_1">
+    <g id="patch_8">
+     <path d="M 412.804 124.42518 
+L 487.120617 124.42518 
+Q 489.920617 124.42518 489.920617 121.62518 
+L 489.920617 37.36 
+Q 489.920617 34.56 487.120617 34.56 
+L 412.804 34.56 
+Q 410.004 34.56 410.004 37.36 
+L 410.004 121.62518 
+Q 410.004 124.42518 412.804 124.42518 
+z
+" style="fill: #ffffff; opacity: 0.8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="line2d_34">
+     <path d="M 415.604 46.0069 
+L 429.604 46.0069 
+L 443.604 46.0069 
+" style="fill: none; stroke: #1f77b4; stroke-width: 3; stroke-linecap: square"/>
+    </g>
+    <g id="text_17">
+     <!-- |rr⟩ -->
+     <g transform="translate(454.804 50.9069) scale(0.14 -0.14)">
+      <defs>
+       <path id="CharterBT-Roman-7c" d="M 1402 4864 
+L 1402 -1536 
+L 1798 -1536 
+L 1798 4864 
+L 1402 4864 
+z
+" transform="scale(0.015625)"/>
+       <path id="SFRM3583-3e" d="M 397 4787 
+C 352 4774 320 4730 320 4685 
+C 333 4602 371 4512 403 4435 
+C 717 3558 1011 2662 1325 1779 
+C 1344 1728 1382 1664 1382 1606 
+C 1382 1549 1338 1472 1318 1408 
+L 1171 986 
+C 909 224 627 -550 371 -1318 
+C 358 -1363 326 -1427 326 -1485 
+C 326 -1530 352 -1581 435 -1581 
+C 563 -1562 774 -774 909 -390 
+C 1114 218 1338 813 1542 1421 
+C 1562 1478 1600 1542 1600 1606 
+C 1600 1664 1562 1728 1542 1786 
+C 1389 2304 1178 2822 998 3347 
+C 858 3776 710 4211 550 4634 
+C 531 4698 506 4794 422 4794 
+C 416 4794 403 4787 397 4787 
+z
+" transform="scale(0.015625)"/>
+      </defs>
+      <use xlink:href="#CharterBT-Roman-7c" transform="scale(0.95642)"/>
+      <use xlink:href="#CharterBT-Roman-72" transform="translate(47.821007 0) scale(0.95642)"/>
+      <use xlink:href="#CharterBT-Roman-72" transform="translate(84.356241 0) scale(0.95642)"/>
+      <use xlink:href="#SFRM3583-3e" transform="translate(120.891475 0) scale(0.356961)"/>
+     </g>
+    </g>
+    <g id="line2d_35">
+     <path d="M 415.604 67.533085 
+L 429.604 67.533085 
+L 443.604 67.533085 
+" style="fill: none; stroke: #ff7f0e; stroke-width: 3; stroke-linecap: square"/>
+    </g>
+    <g id="text_18">
+     <!-- |$\Psi^{+}$⟩ -->
+     <g transform="translate(454.804 72.433085) scale(0.14 -0.14)">
+      <defs>
+       <path id="MathDesign-CH-Regular-MathItalic-10-9" d="M 2042 1198 
+C 1485 1306 1107 1733 1107 2301 
+C 1107 2862 954 3468 467 3468 
+L 179 3468 
+L 179 3200 
+C 538 3200 538 2715 538 2301 
+C 538 1562 1152 1014 2042 918 
+L 2042 402 
+L 1946 306 
+L 1453 261 
+L 1453 0 
+L 3206 0 
+L 3206 261 
+L 2714 306 
+L 2611 402 
+L 2611 918 
+C 3507 1014 4122 1562 4122 2301 
+C 4122 2715 4122 3200 4480 3200 
+L 4480 3468 
+L 4192 3468 
+C 3706 3468 3552 2862 3552 2301 
+C 3552 1733 3174 1306 2611 1198 
+L 2611 3880 
+L 2714 3977 
+L 3206 4022 
+L 3206 4286 
+L 1453 4286 
+L 1453 4022 
+L 1946 3977 
+L 2042 3880 
+L 2042 1198 
+z
+" transform="scale(0.015625)"/>
+       <path id="MathDesign-CH-Regular-OT1-10-2b" d="M 2138 1664 
+L 2138 -128 
+L 2522 -128 
+L 2522 1664 
+L 4301 1664 
+L 4301 2048 
+L 2522 2048 
+L 2522 3814 
+L 2138 3814 
+L 2138 2048 
+L 358 2048 
+L 358 1664 
+L 550 1664 
+L 2138 1664 
+z
+" transform="scale(0.015625)"/>
+      </defs>
+      <use xlink:href="#CharterBT-Roman-7c" transform="scale(0.95642)"/>
+      <use xlink:href="#MathDesign-CH-Regular-MathItalic-10-9" transform="translate(47.821007 0) scale(0.95642)"/>
+      <use xlink:href="#MathDesign-CH-Regular-OT1-10-2b" transform="translate(120.413273 38.161171) scale(0.669491)"/>
+      <use xlink:href="#SFRM3583-3e" transform="translate(169.851187 0) scale(0.356961)"/>
+     </g>
+    </g>
+    <g id="line2d_36">
+     <path d="M 415.604 89.025415 
+L 429.604 89.025415 
+L 443.604 89.025415 
+" style="fill: none; stroke: #2ca02c; stroke-width: 3; stroke-linecap: square"/>
+    </g>
+    <g id="text_19">
+     <!-- |$\Psi^{-}$⟩ -->
+     <g transform="translate(454.804 93.925415) scale(0.14 -0.14)">
+      <use xlink:href="#CharterBT-Roman-7c" transform="scale(0.95642)"/>
+      <use xlink:href="#MathDesign-CH-Regular-MathItalic-10-9" transform="translate(47.821007 0) scale(0.95642)"/>
+      <use xlink:href="#MathDesign-CH-Regular-Symbol-10-0" transform="translate(120.413273 38.161171) scale(0.669491)"/>
+      <use xlink:href="#SFRM3583-3e" transform="translate(169.851187 0) scale(0.356961)"/>
+     </g>
+    </g>
+    <g id="line2d_37">
+     <path d="M 415.604 110.348747 
+L 429.604 110.348747 
+L 443.604 110.348747 
+" style="fill: none; stroke: #d62728; stroke-width: 3; stroke-linecap: square"/>
+    </g>
+    <g id="text_20">
+     <!-- |00⟩ -->
+     <g transform="translate(454.804 115.248747) scale(0.14 -0.14)">
+      <use xlink:href="#CharterBT-Roman-7c" transform="scale(0.95642)"/>
+      <use xlink:href="#CharterBT-Roman-30" transform="translate(47.821007 0) scale(0.95642)"/>
+      <use xlink:href="#CharterBT-Roman-30" transform="translate(100.997936 0) scale(0.95642)"/>
+      <use xlink:href="#SFRM3583-3e" transform="translate(154.174865 0) scale(0.356961)"/>
+     </g>
+    </g>
+   </g>
+  </g>
+  <g id="axes_2">
+   <g id="patch_9">
+    <path d="M 244.11 129.264 
+L 397.2 129.264 
+L 397.2 40.56 
+L 244.11 40.56 
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g id="matplotlib.axis_3">
+    <g id="xtick_6">
+     <g id="line2d_38">
+      <g>
+       <use xlink:href="#m5eefd421d1" x="256.196053" y="129.264" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="line2d_39">
+      <g>
+       <use xlink:href="#m5e0d0341da" x="256.196053" y="40.56" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="text_21">
+      <!-- $\mathdefault{11.5}$ -->
+      <g transform="translate(250.612484 137.067883) scale(0.06 -0.06)">
+       <defs>
+        <path id="CharterBT-Roman-2e" d="M 890 747 
+C 666 747 480 568 480 338 
+C 480 108 666 -64 890 -64 
+C 1114 -64 1293 114 1293 338 
+C 1293 568 1114 747 890 747 
+z
+" transform="scale(0.015625)"/>
+       </defs>
+       <use xlink:href="#CharterBT-Roman-31" transform="scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-31" transform="translate(53.176929 0) scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-2e" transform="translate(106.353859 0) scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-35" transform="translate(132.942323 0) scale(0.95642)"/>
+      </g>
+     </g>
+    </g>
+    <g id="xtick_7">
+     <g id="line2d_40">
+      <g>
+       <use xlink:href="#m5eefd421d1" x="276.339474" y="129.264" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="line2d_41">
+      <g>
+       <use xlink:href="#m5e0d0341da" x="276.339474" y="40.56" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="text_22">
+      <!-- $\mathdefault{12.0}$ -->
+      <g transform="translate(270.755905 137.067883) scale(0.06 -0.06)">
+       <use xlink:href="#CharterBT-Roman-31" transform="scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-32" transform="translate(53.176929 0) scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-2e" transform="translate(106.353859 0) scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-30" transform="translate(132.942323 0) scale(0.95642)"/>
+      </g>
+     </g>
+    </g>
+    <g id="xtick_8">
+     <g id="line2d_42">
+      <g>
+       <use xlink:href="#m5eefd421d1" x="296.482895" y="129.264" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="line2d_43">
+      <g>
+       <use xlink:href="#m5e0d0341da" x="296.482895" y="40.56" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="text_23">
+      <!-- $\mathdefault{12.5}$ -->
+      <g transform="translate(290.899326 137.067883) scale(0.06 -0.06)">
+       <use xlink:href="#CharterBT-Roman-31" transform="scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-32" transform="translate(53.176929 0) scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-2e" transform="translate(106.353859 0) scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-35" transform="translate(132.942323 0) scale(0.95642)"/>
+      </g>
+     </g>
+    </g>
+    <g id="xtick_9">
+     <g id="line2d_44">
+      <g>
+       <use xlink:href="#m5eefd421d1" x="316.626316" y="129.264" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="line2d_45">
+      <g>
+       <use xlink:href="#m5e0d0341da" x="316.626316" y="40.56" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="text_24">
+      <!-- $\mathdefault{13.0}$ -->
+      <g transform="translate(311.042747 137.067883) scale(0.06 -0.06)">
+       <use xlink:href="#CharterBT-Roman-31" transform="scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-33" transform="translate(53.176929 0) scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-2e" transform="translate(106.353859 0) scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-30" transform="translate(132.942323 0) scale(0.95642)"/>
+      </g>
+     </g>
+    </g>
+    <g id="xtick_10">
+     <g id="line2d_46">
+      <g>
+       <use xlink:href="#m5eefd421d1" x="336.769737" y="129.264" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="line2d_47">
+      <g>
+       <use xlink:href="#m5e0d0341da" x="336.769737" y="40.56" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="text_25">
+      <!-- $\mathdefault{13.5}$ -->
+      <g transform="translate(331.186168 137.067883) scale(0.06 -0.06)">
+       <use xlink:href="#CharterBT-Roman-31" transform="scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-33" transform="translate(53.176929 0) scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-2e" transform="translate(106.353859 0) scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-35" transform="translate(132.942323 0) scale(0.95642)"/>
+      </g>
+     </g>
+    </g>
+    <g id="xtick_11">
+     <g id="line2d_48">
+      <g>
+       <use xlink:href="#m5eefd421d1" x="356.913158" y="129.264" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="line2d_49">
+      <g>
+       <use xlink:href="#m5e0d0341da" x="356.913158" y="40.56" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="text_26">
+      <!-- $\mathdefault{14.0}$ -->
+      <g transform="translate(351.329589 137.067883) scale(0.06 -0.06)">
+       <use xlink:href="#CharterBT-Roman-31" transform="scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-34" transform="translate(53.176929 0) scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-2e" transform="translate(106.353859 0) scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-30" transform="translate(132.942323 0) scale(0.95642)"/>
+      </g>
+     </g>
+    </g>
+    <g id="xtick_12">
+     <g id="line2d_50">
+      <g>
+       <use xlink:href="#m5eefd421d1" x="377.056579" y="129.264" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="line2d_51">
+      <g>
+       <use xlink:href="#m5e0d0341da" x="377.056579" y="40.56" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="text_27">
+      <!-- $\mathdefault{14.5}$ -->
+      <g transform="translate(371.47301 137.067883) scale(0.06 -0.06)">
+       <use xlink:href="#CharterBT-Roman-31" transform="scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-34" transform="translate(53.176929 0) scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-2e" transform="translate(106.353859 0) scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-35" transform="translate(132.942323 0) scale(0.95642)"/>
+      </g>
+     </g>
+    </g>
+    <g id="xtick_13">
+     <g id="line2d_52">
+      <g>
+       <use xlink:href="#m5eefd421d1" x="397.2" y="129.264" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="line2d_53">
+      <g>
+       <use xlink:href="#m5e0d0341da" x="397.2" y="40.56" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="text_28">
+      <!-- $\mathdefault{15.0}$ -->
+      <g transform="translate(391.616431 137.067883) scale(0.06 -0.06)">
+       <use xlink:href="#CharterBT-Roman-31" transform="scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-35" transform="translate(53.176929 0) scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-2e" transform="translate(106.353859 0) scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-30" transform="translate(132.942323 0) scale(0.95642)"/>
+      </g>
+     </g>
+    </g>
+   </g>
+   <g id="matplotlib.axis_4">
+    <g id="ytick_9">
+     <g id="line2d_54">
+      <g>
+       <use xlink:href="#m3d7fbaf76f" x="244.11" y="111.5232" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="line2d_55">
+      <g>
+       <use xlink:href="#mdba6194798" x="397.2" y="111.5232" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="text_29">
+      <!-- $\mathdefault{−20}$ -->
+      <g transform="translate(230.033922 113.675142) scale(0.06 -0.06)">
+       <use xlink:href="#MathDesign-CH-Regular-Symbol-10-0" transform="scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-32" transform="translate(69.914305 0) scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-30" transform="translate(123.091234 0) scale(0.95642)"/>
+      </g>
+     </g>
+    </g>
+    <g id="ytick_10">
+     <g id="line2d_56">
+      <g>
+       <use xlink:href="#m3d7fbaf76f" x="244.11" y="87.8688" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="line2d_57">
+      <g>
+       <use xlink:href="#mdba6194798" x="397.2" y="87.8688" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="text_30">
+      <!-- $\mathdefault{0}$ -->
+      <g transform="translate(237.419389 90.020742) scale(0.06 -0.06)">
+       <use xlink:href="#CharterBT-Roman-30" transform="scale(0.95642)"/>
+      </g>
+     </g>
+    </g>
+    <g id="ytick_11">
+     <g id="line2d_58">
+      <g>
+       <use xlink:href="#m3d7fbaf76f" x="244.11" y="64.2144" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="line2d_59">
+      <g>
+       <use xlink:href="#mdba6194798" x="397.2" y="64.2144" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="text_31">
+      <!-- $\mathdefault{20}$ -->
+      <g transform="translate(234.228778 66.366342) scale(0.06 -0.06)">
+       <use xlink:href="#CharterBT-Roman-32" transform="scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-30" transform="translate(53.176929 0) scale(0.95642)"/>
+      </g>
+     </g>
+    </g>
+    <g id="ytick_12">
+     <g id="line2d_60">
+      <g>
+       <use xlink:href="#m3d7fbaf76f" x="244.11" y="40.56" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="line2d_61">
+      <g>
+       <use xlink:href="#mdba6194798" x="397.2" y="40.56" style="stroke: #000000"/>
+      </g>
+     </g>
+     <g id="text_32">
+      <!-- $\mathdefault{40}$ -->
+      <g transform="translate(234.228778 42.711942) scale(0.06 -0.06)">
+       <use xlink:href="#CharterBT-Roman-34" transform="scale(0.95642)"/>
+       <use xlink:href="#CharterBT-Roman-30" transform="translate(53.176929 0) scale(0.95642)"/>
+      </g>
+     </g>
+    </g>
+   </g>
+   <g id="line2d_62">
+    <path d="M 14.475 85.791904 
+L 197.017184 85.803473 
+L 397.2 85.803608 
+L 397.2 85.803608 
+" clip-path="url(#p9a43adc08c)" style="fill: none; stroke: #1f77b4; stroke-width: 1.5; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_63">
+    <path d="M 14.475 269.092683 
+L 16.008968 275.461534 
+L 17.542936 280.658288 
+L 19.076904 284.73551 
+L 20.610872 287.844475 
+L 21.317701 289 
+L 21.317701 289 
+" clip-path="url(#p9a43adc08c)" style="fill: none; stroke: #ff7f0e; stroke-width: 1.5; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_64">
+    <path d="M 0 0 
+" clip-path="url(#p9a43adc08c)" style="fill: none; stroke: #2ca02c; stroke-width: 1.5; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_65">
+    <path d="M 0 0 
+" clip-path="url(#p9a43adc08c)" style="fill: none; stroke: #d62728; stroke-width: 1.5; stroke-linecap: square"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 326.698026 87.040896 
+L 328.712368 89.406336 
+L 326.71817 89.406336 
+L 326.71817 117.4368 
+L 326.677883 117.4368 
+L 326.677883 89.406336 
+L 324.683684 89.406336 
+z
+" clip-path="url(#p9a43adc08c)" style="stroke: #000000; stroke-width: 2; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_11">
+    <path d="M 326.698026 117.081984 
+L 324.683684 114.716544 
+L 326.677883 114.716544 
+L 326.677883 87.27744 
+L 326.71817 87.27744 
+L 326.71817 114.716544 
+L 328.712368 114.716544 
+z
+" clip-path="url(#p9a43adc08c)" style="stroke: #000000; stroke-width: 2; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_12">
+    <path d="M 336.769737 57.472896 
+L 338.784079 59.838336 
+L 336.78988 59.838336 
+L 336.78988 87.8688 
+L 336.749593 87.8688 
+L 336.749593 59.838336 
+L 334.755395 59.838336 
+z
+" clip-path="url(#p9a43adc08c)" style="stroke: #000000; stroke-width: 2; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_13">
+    <path d="M 336.769737 89.05152 
+L 334.755395 86.68608 
+L 336.749593 86.68608 
+L 336.749593 59.838336 
+L 336.78988 59.838336 
+L 336.78988 86.68608 
+L 338.784079 86.68608 
+z
+" clip-path="url(#p9a43adc08c)" style="stroke: #000000; stroke-width: 2; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_14">
+    <path d="M 244.11 129.264 
+L 244.11 40.56 
+" style="fill: none; stroke: #000000; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="patch_15">
+    <path d="M 397.2 129.264 
+L 397.2 40.56 
+" style="fill: none; stroke: #000000; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="patch_16">
+    <path d="M 244.11 129.264 
+L 397.2 129.264 
+" style="fill: none; stroke: #000000; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="patch_17">
+    <path d="M 244.11 40.56 
+L 397.2 40.56 
+" style="fill: none; stroke: #000000; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="text_33">
+    <!-- $\Omega$ -->
+    <g transform="translate(327.149989 107.253478) scale(0.16 -0.16)">
+     <defs>
+      <path id="MathDesign-CH-Regular-MathItalic-10-a" d="M 1626 0 
+L 1760 0 
+C 1760 1000 1018 1854 1018 2847 
+C 1018 3567 1536 4032 2330 4032 
+C 3123 4032 3642 3567 3642 2847 
+C 3642 1854 2899 1000 2899 0 
+L 4371 0 
+L 4371 1039 
+L 4038 1039 
+L 3949 492 
+L 3917 460 
+L 3238 460 
+C 3482 1288 4301 1951 4301 2848 
+C 4301 3741 3482 4377 2330 4377 
+C 1178 4377 358 3741 358 2848 
+C 358 1951 1178 1288 1421 460 
+L 742 460 
+L 710 492 
+L 621 1039 
+L 288 1039 
+L 288 0 
+L 1626 0 
+z
+" transform="scale(0.015625)"/>
+     </defs>
+     <use xlink:href="#MathDesign-CH-Regular-MathItalic-10-a" transform="scale(0.95642)"/>
+    </g>
+   </g>
+   <g id="text_34">
+    <!-- $\Omega$ -->
+    <g transform="translate(337.2217 76.502758) scale(0.16 -0.16)">
+     <use xlink:href="#MathDesign-CH-Regular-MathItalic-10-a" transform="scale(0.95642)"/>
+    </g>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="pc303805eb7">
+   <rect x="63" y="34.56" width="340.2" height="221.76"/>
+  </clipPath>
+  <clipPath id="p9a43adc08c">
+   <rect x="244.11" y="40.56" width="153.09" height="88.704"/>
+  </clipPath>
+ </defs>
+</svg>

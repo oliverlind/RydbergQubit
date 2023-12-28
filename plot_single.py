@@ -26,10 +26,10 @@ from config.config import plotcolors
 import ploting_tools
 from matplotlib.colors import Normalize
 
-mpl.rcParams['font.size'] = 10
+mpl.rcParams['font.size'] = 12
 mpl.rcParams['font.family'] = 'serif'
-# mpl.rcParams["text.latex.preamble"]  = r" \usepackage[T1]{fontenc} \usepackage[charter,cal=cmcal]{mathdesign}"
-# mpl.rcParams["text.usetex"] = True
+mpl.rcParams["text.latex.preamble"]  = r" \usepackage[T1]{fontenc} \usepackage[charter,cal=cmcal]{mathdesign}"
+mpl.rcParams["text.usetex"] = True
 mpl.rcParams['xtick.direction'] = 'in'
 mpl.rcParams['ytick.direction'] = 'in'
 mpl.rcParams['xtick.top'] = True
@@ -48,18 +48,66 @@ class PlotSingle(AdiabaticEvolution):
                          single_addressing_list=single_addressing_list, initial_state_list=initial_state_list,
                          rabi_regime=rabi_regime, a=a)
 
-    def colour_bar(self, type='RF', title=None, ax=None, show=False):
+    def colour_bar(self, type='rydberg', data=None, title=None, show=False, ax=None, cb=True, cb_ax=None):
 
         if ax is None:
             fig, ax = plt.subplots(figsize=(10, 5))
 
-        if type == 'RF':
-            data = self.time_evolve(rydberg_fidelity=True)
+        if data is None:
+            if type == 'rydberg':
+                data = self.time_evolve(rydberg_fidelity=True)
 
-        ploting_tools.set_up_color_bar(self.n, data, self.times, ax=ax, type=type)
+        ploting_tools.set_up_color_bar(self.n, data, self.times, ax=ax, type=type, colorbar=cb, cb_ax=cb_ax)
 
         if show:
             plt.show()
+
+    def rabi_and_detuning_shape(self, ax=None, show=False):
+
+        if ax is None:
+            fig, ax1 = plt.subplots(figsize=(11, 6))
+        else:
+            ax1 = ax
+
+        detuning_1 = detuning_regimes.linear_detuning_flat(self.δ_start, self.δ_end, self.steps)
+        rabi = rabi_regimes.pulse_start(self.steps)
+
+        ax1.set_xlabel('Time ($\mu$s)')
+        ax1.set_ylabel(r'$\Delta$ (2$\pi$ x Mhz)', color='r')
+        ax1.plot(self.times, detuning_1, color='r', label='Atom 1, 4')
+        ax1.tick_params(axis='y', labelcolor='r')
+        ax1.set_ylim(min(self.δ_start, self.δ_end) - 20 ,max(self.δ_start, self.δ_end) + 60)
+
+
+        ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
+
+        color = 'tab:blue'
+        ax2.set_ylabel(r'$\Omega$ \ $\Omega_{0}$', color=color)  # we already handled the x-label with ax1
+        ax2.plot(self.times, rabi, color=color)
+        ax2.fill_between(self.times, rabi, 0, color='blue', alpha=.1)
+        ax2.tick_params(axis='y', labelcolor=color)
+        ax2.set_ylim(0, 1.1)
+
+
+        if show:
+            # fig.tight_layout()  # otherwise the right y-label is slightly clipped
+            plt.show()
+
+    def state_fidelity(self, states_to_test, q_states=None, ax=None, sum_probs=False, colors_num=0):
+
+        if ax is None:
+            q_states = self.time_evolve(states_list=True)
+            fig = plt.figure(figsize=(10, 5))
+            plt.xlim(0, self.t)
+            ax = plt.gca()
+            ax.set_xlabel(r'Time ($\mu$s)')
+        elif ax is not None:
+            ax = ax
+        else:
+            sys.exit()
+
+        ploting_tools.plot_state_fidelities(q_states, states_to_test, self.times, self.steps, ax=ax, sum_probs=sum_probs
+                                            , colors_num=colors_num)
 
     def state_fidelity_ft(self, states_to_test, interval=None, colors_num=0, title=None, ax=None, q_states=None):
 
@@ -103,47 +151,58 @@ class PlotSingle(AdiabaticEvolution):
             fourier_transform = np.abs(fft(state_fidelities[i][200:]))  # Taken absolute value to get the magnitude of
             # each phase component
 
-    def eigenvalue_lineplot(self, eigenvalues=None, ax=None, title=None, show=False):
+    def eigenenergies_lineplot(self, eigenvalues=None, detuning=False, ax=None):
 
         if eigenvalues is None:
 
             eigenvalues, eigenvectors = self.time_evolve(eigen_list=True)
-
             fig, ax = plt.subplots(figsize=(12, 6.5))
+            ax.set_xlabel(r'Time ($\mu$s)')
 
-            ax.set_xlabel('Time (μs)')
+        if detuning:
+            ploting_tools.plot_eigenenergies(self.n, self.detunning[0], eigenvalues, ax, range(0, self.dimension))
 
-        eigenvalues = np.array(eigenvalues)
-        labels = cf.energy_eigenvalue_labels(self.n)
-        ax.set_ylabel('Energy')
+        else:
+            ploting_tools.plot_eigenenergies(self.n, self.times, eigenvalues, ax, range(0, self.dimension))
 
-        # Plot eigenvalues
-        for i in range(0, self.dimension):
-            ax.plot(self.times, eigenvalues[:, i], label=labels[i])
+    def eigenenergies_lineplot_with_eigenstate_fidelities(self, eigenvalues=None, eigenstate_fidelities=None, ax=None):
 
-        ax.legend(loc='upper right')
+        if ax is None:
 
-        if show:
-            plt.show()
+            eigenvalues, eigenvectors, expectation_energies, eigenstate_probs = self.time_evolve(eigen_list=True, eigenstate_fidelities=True, expec_energy=True)
+            fig, ax = plt.subplots(figsize=(12, 6.5))
+            ax.set_xlabel(r'Time ($\mu$s)')
 
-    def eigenvalues_distance(self):
-        fig, ax = plt.subplots(figsize=(12, 6.5))
+        ploting_tools.plot_eigenenergies_fidelities_line(self.n, self.times, eigenvalues, eigenstate_probs, expectation_energies, ax, range(0, self.dimension))
 
-        ax.set_xlabel('Distance between Atoms (μm)', fontsize=12)
-        ax.set_ylabel(f'Energy Eigenvalue {"($ħ^{-1}$)"}', fontsize=12)
+    def eigenenergies_lineplot_with_state_fidelities(self, state_to_test, eigenvalues=None, ax=None):
 
-        a_list = np.linspace(5.5, 15, 100)
+        if ax is None:
+
+            eigenvalues, eigenvectors = self.time_evolve(eigen_list=True)
+            fig, ax = plt.subplots(figsize=(12, 6.5))
+            ax.set_xlabel(r'Time ($\mu$s)')
+
+        ploting_tools.plot_eigenenergies_state_fidelities_line(self.n, self.times, eigenvalues, eigenvectors, state_to_test, ax, range(0, self.dimension))
+
+    def eigenvalues_distance(self, save_pdf=False):
+        fig, ax = plt.subplots(figsize=(7, 4))
+
+        ax.set_xlabel(r'Distance between Atoms ($\mu$m)', fontsize=12)
+        ax.set_ylabel(r'Energy  $\hbar^{-1}$', fontsize=12)
+
+        a_list = np.linspace(5.5, 15, 500)
 
         eigenvalues_list = []
 
         for a in a_list:
-            h_m = RydbergHamiltonian1D(2, a=a).hamiltonian_matrix([0])
+            h_m = RydbergHamiltonian1D(2, a=a).hamiltonian_matrix([180])
 
             eigenvalues, eigenvector = np.linalg.eigh(h_m)
 
             eigenvalues_list += [eigenvalues]
 
-        labels = ['|00⟩', '|$Ψ^{-}$⟩', '|$Ψ^{+}$⟩', '|rr⟩']
+        labels = ['|00⟩', r'|$\Psi^{-}$⟩', r'|$\Psi^{+}$⟩', '|rr⟩']
 
 
         eigenvalues_list = np.array(eigenvalues_list)
@@ -156,16 +215,23 @@ class PlotSingle(AdiabaticEvolution):
         ax.spines['right'].set_position(('data', max(a_list)))
 
         pale_blue = (0.7, 0.8, 1.0)
-        # plt.axvline(x=self.r_b, color=pale_blue, linestyle='-',linewidth=10, alpha=0.5)
+
+
+        plt.axhline(y=self.Rabi, color='black', linestyle='--',linewidth=1, alpha=0.5)
+        plt.axhline(y=-self.Rabi, color='black', linestyle='--', linewidth=1, alpha=0.5)
+
         plt.axvline(x=self.r_b, color=pale_blue, linestyle='--', linewidth=2, alpha=0.8)
 
         print(self.Rabi)
 
         plt.text(self.r_b+0.15, 125, 'Blockade Radius $R_{B}$', ha='center', va='center', rotation=-90, fontsize=12)
 
-        plt.text(5.25, 315, r'$|rr⟩$', ha='center', va='center', fontsize=18)  # Displaying 1/2
+        #plt.text(5.25, 315, r'$|rr⟩$', ha='center', va='center', fontsize=18)  # Displaying 1/2
 
         plt.axvspan(xmin=5.5, xmax=self.r_b, color=pale_blue, alpha=0.2)
+
+        plt.subplots_adjust(right=0.8)
+        plt.legend(loc='upper left', bbox_to_anchor=(1.02, 1), borderaxespad=0, fontsize=14)
 
 
         # plt.arrow(13, -25+23.7, 0, -22.7, head_width=0.1, head_length=2, ec='black', fc='black', linewidth=2, zorder=2)
@@ -185,10 +251,12 @@ class PlotSingle(AdiabaticEvolution):
             axins.plot(a_list, eigenvalues_list[:, i])
 
         axins.arrow(13.25, -25, 0, 23.7, head_width=0.1, head_length=2, ec='black', fc='black', linewidth=2, zorder=2)
-        axins.text(13.4, -13, r'$Ω$', ha='center', va='center', fontsize=16)
+        axins.arrow(13.25, 0.5, 0, -23.2, head_width=0.1, head_length=2, ec='black', fc='black', linewidth=2, zorder=2)
+        axins.text(13.4, -13, r'$\Omega$', ha='center', va='center', fontsize=16)
 
         axins.arrow(13.5, 0, 0, 23.7, head_width=0.1, head_length=2, ec='black', fc='black', linewidth=2, zorder=2)
-        axins.text(13.65, 13, r'$Ω$', ha='center', va='center', fontsize=16)
+        axins.arrow(13.5, 23.7, 0, -22.7, head_width=0.1, head_length=2, ec='black', fc='black', linewidth=2, zorder=2)
+        axins.text(13.65, 13, r'$\Omega$', ha='center', va='center', fontsize=16)
 
 
         # Customize the appearance of tick labels in the inset axes
@@ -197,32 +265,41 @@ class PlotSingle(AdiabaticEvolution):
         #mark_inset(ax, axins, loc1=2, loc2=4, fc="none", ec="0.5", alpha=0.7)
         #plt.draw()
 
-        ax.legend(fontsize=16)
-
-        plt.savefig('output_plot.svg', format='svg')
+        if save_pdf:
+            plt.savefig('Quick Save Plots/output_plot.svg', format='svg')
 
         plt.show()
 
 
 if __name__ == "__main__":
-    t = 2
+    t = 5
     dt = 0.01
-    n = 2
-    δ_start = -200
-    δ_end = 300
+    n = 5
+    δ_start = -190
+    δ_end = 190
 
     two = ['quench', 'quench']
     two2 = ['quench', 'linear flat']
     two3 = ['linear', 'linear']
 
+    three = ['quench'] * 3
+
+    five = ['linear'] * 5
+    five1 = ['linear flat'] * 5
+    five2 = ['quench'] * 5
+
     plotter = PlotSingle(n, t, dt, δ_start, δ_end, detuning_type=None,
-                         single_addressing_list=two3,
-                         initial_state_list=[0, 0],
+                         single_addressing_list=five,
+                         initial_state_list=[0, 0, 0, 0, 0],
                          )
 
-    #plotter.eigenvalue_lineplot(show=True)
 
-    plotter.eigenvalues_distance()
+    plotter.eigenenergies_lineplot_with_state_fidelities([1, 0, 1, 0, 1])
+
+
+    plotter.state_fidelity([[0, 0]])
+
+    plotter.eigenenergies_lineplot(detuning=True)
 
 
 

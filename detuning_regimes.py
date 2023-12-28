@@ -4,8 +4,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 
+pos=0.6
 
-def global_detuning(t, dt, δ_start, δ_end, type='linear', position=0.1):
+def global_detuning(t, dt, δ_start, δ_end, type='linear', position=pos):
     steps = int(t / dt)
 
     if type == 'linear':
@@ -68,7 +69,7 @@ def global_detuning(t, dt, δ_start, δ_end, type='linear', position=0.1):
         sys.exit()
 
 
-def linear_detuning_quench(δ_start, δ_end, steps, position=0, show=False):
+def linear_detuning_quench(δ_start, δ_end, steps, position=pos, show=False):
     linear_steps = math.floor(steps * position)
 
     sweep = np.linspace(δ_start, δ_end, linear_steps)
@@ -83,7 +84,7 @@ def linear_detuning_quench(δ_start, δ_end, steps, position=0, show=False):
     return detuning
 
 
-def linear_detuning_flat(δ_start, δ_end, steps, position=0.5, show=False):
+def linear_detuning_flat(δ_start, δ_end, steps, position=pos, show=False):
     linear_steps = math.floor(steps * position)
 
     sweep = np.linspace(δ_start, δ_end, linear_steps)

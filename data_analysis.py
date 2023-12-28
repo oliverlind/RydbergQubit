@@ -2,6 +2,8 @@ import numpy as np
 from scipy.linalg import expm
 from scipy.linalg import logm
 
+import vector_manipluation_tools as vm
+
 
 def expectation_value(density_matrix, operator):
     expectation_val = np.trace(np.dot(density_matrix, operator))
@@ -49,6 +51,19 @@ def state_prob(v,ψ):
     p = (abs(np.dot(v.conj().T, ψ)) ** 2)[0][0]
 
     return p
+
+def get_state_fidelities(q_states, state_to_test):
+
+    v_state_to_test = vm.initial_state(state_to_test)
+    state_fidelities = []
+
+    for j in range(0, len(q_states)):
+        state_fidelity = state_prob(v_state_to_test, q_states[j])
+        state_fidelities += [state_fidelity]
+
+    return state_fidelities
+
+
 
 
 

@@ -129,6 +129,7 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
                         eigenstate_prob = data_analysis.state_prob(v, ψ)
                         eigenstate_probs[i] += [eigenstate_prob]
 
+
             if hms:
                 hamiltonian_matrices += [h_m]
 
@@ -189,6 +190,8 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
                 return eigenvalues, eigenvectors, expectation_energies
             elif eigenstate_fidelities:
                 return eigenvalues, eigenvectors, eigenstate_probs
+            elif states_list:
+                return eigenvalues, eigenvectors, states
             else:
                 return eigenvalues, eigenvectors
 
