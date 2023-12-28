@@ -15,6 +15,7 @@ import data_analysis as da
 import config.config as cf
 from config.config import plotcolors
 
+mpl.rcParams['font.size'] = 12
 mpl.rcParams["text.latex.preamble"] = r" \usepackage[T1]{fontenc} \usepackage[charter,cal=cmcal]{mathdesign}"
 mpl.rcParams["text.usetex"] = True
 
@@ -264,15 +265,16 @@ def plot_eigenenergies_fidelities_line(n, times, eigenvalues, eigen_probs, expec
 
     plt.show()
 
-def plot_eigenenergies_state_fidelities_line(n, times, eigenvalues, eigenvectors, state_to_test, ax, energy_range):
+def plot_eigenenergies_state_fidelities_line(n, times, eigenvalues, eigenvectors, state_to_test, ax, energy_range, cb_label='h'):
 
-    eigenvalues = np.array(eigenvalues)
+    eigenvalues = np.array(eigenvalues)/(2*np.pi) #convert to frequency
     eigenstate_state_probs = [[] for _ in range(0, energy_range[-1] + 1)]
 
     if state_to_test == 'psi plus':
         v_state_to_test = (1/np.sqrt(2)) * (vm.initial_state([1, 0]) + vm.initial_state([0, 1]))
+    elif state_to_test == 'psi minus':
+        v_state_to_test = (1/np.sqrt(2)) * (vm.initial_state([1, 0]) - vm.initial_state([0, 1]))
 
-        print(v_state_to_test)
 
     else:
         v_state_to_test = vm.initial_state(state_to_test)
@@ -287,15 +289,11 @@ def plot_eigenenergies_state_fidelities_line(n, times, eigenvalues, eigenvectors
             eigenstate_state_prob = da.state_prob(v_state_to_test, v)
             eigenstate_state_probs[i] += [eigenstate_state_prob]
 
-    print(eigenstate_state_probs)
-    print(np.shape(eigenstate_state_probs))
 
     for i in reversed(energy_range):
 
         points = np.array([times, eigenvalues[:, i]]).T.reshape(-1, 1, 2)
         segments = np.concatenate([points[:-1], points[1:]], axis=1)
-
-        print(segments)
 
         # Create a continuous norm to map from data points to colors
         norm = plt.Normalize(0, 1)
@@ -306,12 +304,13 @@ def plot_eigenenergies_state_fidelities_line(n, times, eigenvalues, eigenvectors
         lc.set_linewidth(2)
         line = ax.add_collection(lc)
 
-    plt.colorbar(line, ax=ax)
+    plt.colorbar(line, ax=ax, label=cb_label, shrink=0.9)
 
-    ax.set_xlim(0, times[-1])
-    ax.set_ylim(min(eigenvalues[:, 0]) - 10, 700) #max(eigenvalues[:, energy_range[-1]] + 10))
+    ax.set_xlim(times[0], times[-1])
+    ax.set_ylim(min(eigenvalues[:, 0]) - 10, max(eigenvalues[:, energy_range[-1]] + 10))
 
-    plt.show()
+    ax.set_ylabel(r'$E_{\lambda}$ (MHz)')
+
 
 
 
