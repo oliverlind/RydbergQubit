@@ -48,7 +48,7 @@ class PlotSingle(AdiabaticEvolution):
                          single_addressing_list=single_addressing_list, initial_state_list=initial_state_list,
                          rabi_regime=rabi_regime, a=a)
 
-    def colour_bar(self, type='rydberg', data=None, title=None, show=False, ax=None, cb=True, cb_ax=None):
+    def colour_bar(self, type='rydberg', data=None, title=None, show=False, ax=None, cb=True, cb_ax=None, end_ax=None):
 
         if ax is None:
             fig, ax = plt.subplots(figsize=(10, 5))
@@ -56,8 +56,15 @@ class PlotSingle(AdiabaticEvolution):
         if data is None:
             if type == 'rydberg':
                 data = self.time_evolve(rydberg_fidelity=True)
+                print(np.shape(data))
 
         ploting_tools.set_up_color_bar(self.n, data, self.times, ax=ax, type=type, colorbar=cb, cb_ax=cb_ax)
+
+
+        if end_ax is not None:
+            ploting_tools.end_colorbar_barchart(self.n, data, ax=end_ax)
+
+
 
         if show:
             plt.show()
@@ -162,7 +169,7 @@ class PlotSingle(AdiabaticEvolution):
         else:
             ploting_tools.plot_eigenenergies(self.n, self.times, eigenvalues, ax, range(0, self.dimension))
 
-    def eigenenergies_lineplot_with_eigenstate_fidelities(self, eigenvalues=None, eigenstate_fidelities=None, ax=None):
+    def eigenenergies_lineplot_with_eigenstate_fidelities(self, eigenvalues=None, eigenstate_probs=None, expectation_energies=None, eigenstate_fidelities=None, ax=None):
 
         if ax is None:
             eigenvalues, eigenvectors, expectation_energies, eigenstate_probs = self.time_evolve(eigen_list=True,
@@ -174,8 +181,8 @@ class PlotSingle(AdiabaticEvolution):
         ploting_tools.plot_eigenenergies_fidelities_line(self.n, self.times, eigenvalues, eigenstate_probs,
                                                          expectation_energies, ax, range(0, self.dimension))
 
-    def eigenenergies_lineplot_with_state_fidelities(self, state_to_test, eigenvalues=None, detuning=False, ax=None,
-                                                     cb_label=r'|rr⟩ Fidelity', save_pdf=False, show=False):
+    def eigenenergies_lineplot_with_state_fidelities(self, state_to_test, eigenvalues=None, eigenvectors=None, detuning=False, ax=None,
+                                                     cb_label=r'|$\Psi^{+}$⟩ Fidelity', save_pdf=False, show=False):
 
         if ax is None:
 
@@ -294,8 +301,8 @@ if __name__ == "__main__":
     t = 5
     dt = 0.01
     n = 2
-    δ_start = 0
-    δ_end = 0
+    δ_start = -190
+    δ_end = 300
 
     two = ['quench', 'quench']
     two2 = ['quench', 'linear flat']
@@ -312,9 +319,11 @@ if __name__ == "__main__":
                          initial_state_list=[0, 0],
                          )
 
-    plotter.eigenvalues_distance(show=True, save_pdf=True)
+    plotter.colour_bar(show=True)
 
-    plotter.eigenenergies_lineplot_with_state_fidelities([1, 1], detuning=True, save_pdf=True, show=True)
+    #plotter.eigenvalues_distance(show=True, save_pdf=True)
+
+    plotter.eigenenergies_lineplot_with_state_fidelities('psi plus', detuning=True, save_pdf=True, show=True)
 
     plotter.state_fidelity([[0, 0]])
 

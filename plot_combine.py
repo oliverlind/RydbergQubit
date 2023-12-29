@@ -70,14 +70,50 @@ class CombinedPlots(PlotSingle):
 
         plt.show()
 
+    def ordered_state_colourbars(self, a_list, initial_state_list, single_addressing_list, save_pdf=False):
+
+        fig, axs = plt.subplots(len(a_list), 3,  figsize=(8, 4),  sharex='col', gridspec_kw={'width_ratios': [6, 3, 1], 'height_ratios': [1, 1]})
+
+
+        for i in range(0, len(a_list)):
+
+            singleplot = PlotSingle(self.n, self.t, self.dt, self.δ_start, self.δ_end, a=a_list[i], detuning_type=None, single_addressing_list=single_addressing_list,
+                     initial_state_list=initial_state_list, rabi_regime='pulse start')
+
+            if i == 0:
+                cb_ax = axs[:, 2]
+                cb = True
+            else:
+                cb_ax = None
+                cb = False
+
+            singleplot.colour_bar(ax=axs[i, 0], cb=cb, end_ax=axs[i, 1], cb_ax=cb_ax)
+
+
+        axs[-1, 0].set_xlabel('Time ($\mu$s)')
+        axs[-1, 1].set_xlabel(r'⟨$n_{i}$⟩')
+
+
+        for ax in axs[:, 2]:
+            ax.axis('off')
+
+        if save_pdf:
+            plt.savefig(f'Quick Save Plots/output.pdf', format='pdf', bbox_inches='tight', dpi=700)
+
+
+        plt.show()
+
+
+
+
 
 
 if __name__ == "__main__":
-    t = 2
+    t = 4
     dt = 0.01
-    n = 3
-    δ_start = -190
-    δ_end = 190
+    n = 7
+    δ_start = -30 * 2 * np.pi
+    δ_end = 30 * 2 * np.pi
 
     two = ['quench', 'quench']
     two2 = ['quench', 'linear flat']
@@ -90,10 +126,10 @@ if __name__ == "__main__":
     seven = ['linear flat'] * 7
 
     plotter = CombinedPlots(n, t, dt, δ_start, δ_end, detuning_type=None,
-                         single_addressing_list=three,
-                         initial_state_list=[0, 0, 0], rabi_regime='pulse start'
+                         single_addressing_list=seven,
+                         initial_state_list=[0, 0, 0, 0, 0, 0, 0], rabi_regime='pulse start'
                          )
 
     #plotter.eigenvalue_lineplot(show=True)
 
-    plotter.sweep_colourbar()
+    plotter.ordered_state_colourbars([5.48, 3.16], [0, 0, 0, 0, 0, 0, 0], seven, save_pdf=True)

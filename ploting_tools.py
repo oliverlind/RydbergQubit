@@ -23,9 +23,10 @@ mpl.rcParams["text.usetex"] = True
 def set_up_color_bar(n, data, times, ax, type='rydberg', color='viridis', colorbar=True, cb_ax=None):
     # Labels for the bars
     if type == 'rydberg':
-        labels = [f'Atom {i + 1}' for i in range(n)]
+        labels = [f'{i + 1}' for i in range(n)]
         norm = mcolors.Normalize(vmin=0, vmax=1)
         bar_label = "Rydberg Probability"
+        ax.set_ylabel('Atom')
 
     elif type == 'vne':
         labels = [f'Atom {i + 1}' for i in range(n)]
@@ -99,6 +100,28 @@ def set_up_color_bar(n, data, times, ax, type='rydberg', color='viridis', colorb
         sm.set_array([])  # fake up the array
         cbar = plt.colorbar(sm, ax=cb_ax, orientation='vertical', shrink=0.9, fraction=frac)
         cbar.set_label(bar_label)
+
+
+def end_colorbar_barchart(n, data, ax):
+
+    atoms = np.arange(1, n+1, 1)
+
+    data = np.array(data)
+
+    data = data[:, -1]
+
+    # Remove y-axis ticks
+    ax.tick_params(axis='y', which='both', left=False, right=False)
+    ax.set_yticklabels([''])
+    ax.set_xlim(0, 1)
+
+
+    ax.barh(atoms, data)
+
+
+
+
+
 
 
 def colormap_density_matrices(density_matrices, dt, times, num_of_plots=25, showtime=False):
@@ -290,7 +313,7 @@ def plot_eigenenergies_state_fidelities_line(n, times, eigenvalues, eigenvectors
             eigenstate_state_probs[i] += [eigenstate_state_prob]
 
 
-    for i in reversed(energy_range):
+    for i in energy_range:
 
         points = np.array([times, eigenvalues[:, i]]).T.reshape(-1, 1, 2)
         segments = np.concatenate([points[:-1], points[1:]], axis=1)
