@@ -21,7 +21,7 @@ def has_sublists(my_list):
 
 
 def von_nuemann_entropy(density_matrix):
-    vne = -np.trace(np.dot(density_matrix, logm(density_matrix))) #/ np.log(2)
+    vne = -np.trace(np.dot(density_matrix, logm(density_matrix))  / np.log(2))
     if vne.imag > 0.01:
         raise ValueError("Imaginary Entanglement")
         sys.exit()
@@ -46,6 +46,17 @@ def quantum_relative_entropy(density_matrix_1, density_matrix_2):
 
     else:
         return qre.real
+
+def q_mutual_info(rdm_i, rdm_j, rdm_ij):
+
+    qmi = -np.trace(np.dot(rdm_i, logm(rdm_i)/np.log(2))) - np.trace(np.dot(rdm_j, logm(rdm_j)/np.log(2))) + np.trace(np.dot(rdm_ij, logm(rdm_ij) / np.log(2)))
+
+    if qmi.imag > 0.01:
+        raise ValueError("Imaginary Entanglement")
+        sys.exit()
+
+    else:
+        return qmi.real
 
 def state_prob(v,ψ):
     p = (abs(np.dot(v.conj().T, ψ)) ** 2)[0][0]

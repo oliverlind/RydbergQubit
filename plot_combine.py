@@ -103,15 +103,74 @@ class CombinedPlots(PlotSingle):
 
         plt.show()
 
+    def colorbar_state_fidelity(self,  states_to_test, type='rydberg', save_pdf=False):
+
+        if type == 'rydberg':
+            rydberg_fidelity_data, states = self.time_evolve(rydberg_fidelity=True, states_list=True)
+
+        else:
+            sys.exit()
+
+        fig, axs = plt.subplots(2, 2, sharex=True, figsize=(8, 3.5),
+                                gridspec_kw={'width_ratios': [9, 1], 'height_ratios': [1.7, 1]})
+
+        self.colour_bar(data=rydberg_fidelity_data,type=type, ax=axs[0, 0], cb_ax=axs[:, 1])
+        self.state_fidelity(states_to_test, q_states=states, ax=axs[1, 0])
+
+        axs[1,0].set_ylabel(r'⟨$Z_{2}$|$\Psi$⟩')
+
+        plt.subplots_adjust(hspace=0)
+
+        for ax in axs[:, 1]:
+            ax.axis('off')
+
+        # Set x axis label
+        plt.xlabel('Time ($\mu$s)')
+
+        if save_pdf:
+            plt.savefig(f'Quick Save Plots/output.pdf', format='pdf', bbox_inches='tight', dpi=700)
+
+        plt.show()
+
+    def quantum_mutual_informations(self):
+
+        fig, axs = plt.subplots(self.n-1,1, sharex='col', figsize=(8, 4))
+
+        states = self.time_evolve(states_list=True)
+
+        for j in range(2, self.n+1):
+
+            self.quantum_mutual_information(1, j, states=states, ax=axs[j-2])
+            axs[j-2].set_ylim(0,1)
+
+        plt.show()
+
+    def eigenstate_fidelities(self):
+
+        eigenvalues, eigenvectors, eigenstate_probs = self.time_evolve(eigen_list=True,
+                                                                       eigenstate_fidelities=True)
+
+        fig, axs = plt.subplots(1, 3, sharex=True, figsize=(8, 3.5),
+                                gridspec_kw={'width_ratios': [5, 3, 0.7]})
+
+        self.eigenenergies_lineplot_with_eigenstate_fidelities(eigenvalues=eigenvalues, eigenstate_probs=eigenstate_probs, ax=axs[0], cb=False)
+        self.colour_bar(data=eigenstate_probs, ax=axs[1], type='eigen energies', cb_ax=axs[2])
+
+        axs[1].set_xlim(2, self.t)
 
 
+        axs[2].axis('off')
 
+        # Set x axis label
+        plt.xlabel('Time ($\mu$s)')
+
+        plt.show()
 
 
 if __name__ == "__main__":
-    t = 4
+    t = 5
     dt = 0.01
-    n = 7
+    n = 3
     δ_start = -30 * 2 * np.pi
     δ_end = 30 * 2 * np.pi
 
@@ -120,16 +179,26 @@ if __name__ == "__main__":
     two3 = ['linear', 'linear']
 
     three = ['linear flat'] * 3
+    three2 = ['quench']
 
     five = ['linear flat'] * 5
+    five2 = ['quench'] * 5
+    five3 = ['quench'] + ['linear flat'] * 4
 
     seven = ['linear flat'] * 7
+    seven2 = ['quench'] * 7
 
     plotter = CombinedPlots(n, t, dt, δ_start, δ_end, detuning_type=None,
-                         single_addressing_list=seven,
-                         initial_state_list=[0, 0, 0, 0, 0, 0, 0], rabi_regime='pulse start'
+                         single_addressing_list=three2,
+                         initial_state_list=[0, 0, 0], rabi_regime='constant'
                          )
+
+    plotter.eigenstate_fidelities()
+
+    plotter.quantum_mutual_informations()
+
+    plotter.colorbar_state_fidelity([[1, 0, 1, 0, 1, 0, 1]], save_pdf=True)
 
     #plotter.eigenvalue_lineplot(show=True)
 
-    plotter.ordered_state_colourbars([5.48, 3.16], [0, 0, 0, 0, 0, 0, 0], seven, save_pdf=True)
+    #plotter.ordered_state_colourbars([5.48, 3.16], [0, 0, 0, 0, 0, 0, 0], seven, save_pdf=True)

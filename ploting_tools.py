@@ -62,9 +62,10 @@ def set_up_color_bar(n, data, times, ax, type='rydberg', color='viridis', colorb
 
     elif type == 'eigen energies':
         labels = [f'E{i}' for i in range(n)]
-
+        color ='cmo.amp'
         norm = mcolors.Normalize(vmin=0, vmax=1)
-        bar_label = f'Eigenstate Probability'
+        bar_label = r'⟨$\psi_{\lambda}$|$\Psi$⟩'
+
 
     else:
         sys.exit()
@@ -117,11 +118,6 @@ def end_colorbar_barchart(n, data, ax):
 
 
     ax.barh(atoms, data)
-
-
-
-
-
 
 
 def colormap_density_matrices(density_matrices, dt, times, num_of_plots=25, showtime=False):
@@ -238,10 +234,8 @@ def plot_state_fidelities(q_states, states_to_test, times, steps, ax, colors_num
     ax.tick_params(which='minor', size=4)
     ax.spines['left'].set_position('zero')
     ax.set_ylabel('Probability')
-    ax.legend(loc='upper right')
+    #ax.legend(loc='upper right')
 
-    plt.tight_layout()
-    plt.show()
 
 
 def plot_eigenenergies(n, times, eigenvalues, ax, energy_range):
@@ -259,7 +253,7 @@ def plot_eigenenergies(n, times, eigenvalues, ax, energy_range):
     plt.show()
 
 
-def plot_eigenenergies_fidelities_line(n, times, eigenvalues, eigen_probs, expectation_energies, ax, energy_range):
+def plot_eigenenergies_fidelities_line(n, times, eigenvalues, eigen_probs, expectation_energies, ax, energy_range, cb=True, cb_label='h'):
 
     eigenvalues = np.array(eigenvalues)
 
@@ -281,12 +275,12 @@ def plot_eigenenergies_fidelities_line(n, times, eigenvalues, eigen_probs, expec
         lc.set_linewidth(2)
         line = ax.add_collection(lc)
 
-    plt.colorbar(line, ax=ax)
+    if cb:
+        plt.colorbar(line, ax=ax, label=cb_label)
 
     ax.set_xlim(0, times[-1])
     ax.set_ylim(min(eigenvalues[:, 0]) - 10, max(eigenvalues[:, energy_range[-1]] + 10))
 
-    plt.show()
 
 def plot_eigenenergies_state_fidelities_line(n, times, eigenvalues, eigenvectors, state_to_test, ax, energy_range, cb_label='h'):
 

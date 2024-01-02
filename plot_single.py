@@ -56,9 +56,27 @@ class PlotSingle(AdiabaticEvolution):
         if data is None:
             if type == 'rydberg':
                 data = self.time_evolve(rydberg_fidelity=True)
-                print(np.shape(data))
+                n = self.n
 
-        ploting_tools.set_up_color_bar(self.n, data, self.times, ax=ax, type=type, colorbar=cb, cb_ax=cb_ax)
+            if type == 'eigen energies':
+                eigenvalues, eigenvectors, expectation_energies, eigenstate_probs = self.time_evolve(expec_energy=True,
+                                                                                                     eigen_list=True,
+                                                                                                     eigenstate_fidelities=True,
+                                                                                                     )
+
+                data = eigenstate_probs
+                n = self.dimension
+
+        else:
+            if type == 'rydberg':
+                n = self.n
+                
+            elif type == 'eigen energies':
+                n = 10#self.dimension
+            
+
+
+        ploting_tools.set_up_color_bar(n, data, self.times, ax=ax, type=type, colorbar=cb, cb_ax=cb_ax)
 
 
         if end_ax is not None:
@@ -98,7 +116,7 @@ class PlotSingle(AdiabaticEvolution):
             # fig.tight_layout()  # otherwise the right y-label is slightly clipped
             plt.show()
 
-    def state_fidelity(self, states_to_test, q_states=None, ax=None, sum_probs=False, colors_num=0):
+    def state_fidelity(self, states_to_test, q_states=None, ax=None, sum_probs=False, show=False, colors_num=0):
 
         if ax is None:
             q_states = self.time_evolve(states_list=True)
@@ -113,6 +131,9 @@ class PlotSingle(AdiabaticEvolution):
 
         ploting_tools.plot_state_fidelities(q_states, states_to_test, self.times, self.steps, ax=ax, sum_probs=sum_probs
                                             , colors_num=colors_num)
+
+        if show:
+            plt.show()
 
     def state_fidelity_ft(self, states_to_test, interval=None, colors_num=0, title=None, ax=None, q_states=None):
 
@@ -169,17 +190,53 @@ class PlotSingle(AdiabaticEvolution):
         else:
             ploting_tools.plot_eigenenergies(self.n, self.times, eigenvalues, ax, range(0, self.dimension))
 
-    def eigenenergies_lineplot_with_eigenstate_fidelities(self, eigenvalues=None, eigenstate_probs=None, expectation_energies=None, eigenstate_fidelities=None, ax=None):
+    def quantum_mutual_information(self, i, j, states=None, ax=None, show=False):
+
+        if ax is None:
+            states = self.time_evolve(states_list=True)
+            fig = plt.figure(figsize=(10, 5))
+            plt.xlim(0, self.t)
+            ax = plt.gca()
+        elif ax is not None:
+            ax = ax
+        else:
+            sys.exit()
+
+        qmi_list = []
+
+        for state in states:
+            rdm_i = self.reduced_density_matrix(state, i)
+            rdm_j = self.reduced_density_matrix(state, j)
+            rdm_ij = self.reduced_density_matrix_pair(state, i, j)
+
+            qmi = da.q_mutual_info(rdm_i, rdm_j, rdm_ij)
+
+            qmi_list += [qmi]
+
+        ax.plot(self.times, qmi_list)
+
+        if show:
+            plt.ylabel('Quantum Relative Entropy')
+            plt.xlabel('Time (s)')
+            plt.show()
+
+
+
+    def eigenenergies_lineplot_with_eigenstate_fidelities(self, eigenvalues=None, eigenstate_probs=None,
+                                                          expectation_energies=None, eigenstate_fidelities=None, ax=None, show=False, cb=True, cb_label=r'|$\Psi^{+}$⟩ Fidelity'):
 
         if ax is None:
             eigenvalues, eigenvectors, expectation_energies, eigenstate_probs = self.time_evolve(eigen_list=True,
                                                                                                  eigenstate_fidelities=True,
                                                                                                  expec_energy=True)
-            fig, ax = plt.subplots(figsize=(12, 6.5))
+            fig, ax = plt.subplots(figsize=(4, 4))
             ax.set_xlabel(r'Time ($\mu$s)')
 
         ploting_tools.plot_eigenenergies_fidelities_line(self.n, self.times, eigenvalues, eigenstate_probs,
-                                                         expectation_energies, ax, range(0, self.dimension))
+                                                         expectation_energies, ax, range(0, self.dimension), cb=cb, cb_label=r'$⟨\Psi_{\lambda}$|$\Psi$⟩')
+
+        if show:
+            plt.show()
 
     def eigenenergies_lineplot_with_state_fidelities(self, state_to_test, eigenvalues=None, eigenvectors=None, detuning=False, ax=None,
                                                      cb_label=r'|$\Psi^{+}$⟩ Fidelity', save_pdf=False, show=False):
@@ -300,9 +357,9 @@ class PlotSingle(AdiabaticEvolution):
 if __name__ == "__main__":
     t = 5
     dt = 0.01
-    n = 2
-    δ_start = -190
-    δ_end = 300
+    n = 7
+    δ_start = -30 * 2 * np.pi
+    δ_end = 30 * 2 * np.pi
 
     two = ['quench', 'quench']
     two2 = ['quench', 'linear flat']
@@ -313,17 +370,24 @@ if __name__ == "__main__":
     five = ['linear'] * 5
     five1 = ['linear flat'] * 5
     five2 = ['quench'] * 5
+    five3 = ['quench'] +['linear flat'] * 4
+
+    seven = ['quench'] + ['linear flat'] * 6
+    seven2 = ['quench']*7
 
     plotter = PlotSingle(n, t, dt, δ_start, δ_end, detuning_type=None,
-                         single_addressing_list=two3,
-                         initial_state_list=[0, 0],
+                         single_addressing_list=seven2,
+                         initial_state_list=[0, 0, 0, 0, 0, 0, 0],
                          )
+    #plotter.colour_bar(show=True)
 
-    plotter.colour_bar(show=True)
+    plotter.eigenenergies_lineplot_with_eigenstate_fidelities(show=True)
+
+    #plotter.colour_bar(show=True, type='eigen energies')
 
     #plotter.eigenvalues_distance(show=True, save_pdf=True)
 
-    plotter.eigenenergies_lineplot_with_state_fidelities('psi plus', detuning=True, save_pdf=True, show=True)
+    #plotter.eigenenergies_lineplot_with_state_fidelities('psi plus', detuning=True, save_pdf=True, show=True)
 
     plotter.state_fidelity([[0, 0]])
 
