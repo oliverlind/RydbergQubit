@@ -116,6 +116,44 @@ class PlotSingle(AdiabaticEvolution):
             # fig.tight_layout()  # otherwise the right y-label is slightly clipped
             plt.show()
 
+    def detuning_shape(self, types, ax=None, show=False, save_pdf=False):
+
+        if ax is None:
+            fig, ax = plt.subplots(figsize=(4, 2.2))
+            ax.axhline(y=0, color='black', linestyle='--', linewidth=1, alpha=0.5)
+            ax.set_xlabel('Time ($\mu$s)')
+        else:
+            ax = ax
+
+        for i, type in enumerate(types):
+            print(type)
+
+            if type == 'quench':
+                color = 'b'
+                d = detuning_regimes.linear_detuning_quench(self.δ_start, self.δ_end, self.steps)
+                ax.plot(self.times, d/self.two_pi, color=color)
+            elif type == 'linear flat':
+                if i == 1:
+                    color = 'r'
+                    d = detuning_regimes.linear_detuning_flat(self.δ_start, self.δ_end, self.steps)
+                    ax.plot(self.times, d/self.two_pi, color=color)
+                else:
+                    pass
+            else:
+                pass
+
+        ax.set_ylim(- 40, max(self.δ_start, self.δ_end)/self.two_pi + 10) #min(self.δ_start, self.δ_end)/self.two_pi
+        ax.set_ylabel(r'$\Delta$ (MHz)')
+
+        if save_pdf:
+            plt.savefig(f'Quick Save Plots/output.pdf', format='pdf', bbox_inches='tight', dpi=700)
+
+        if show:
+            plt.tight_layout()
+            plt.show()
+
+
+
     def state_fidelity(self, states_to_test, q_states=None, ax=None, sum_probs=False, show=False, colors_num=0):
 
         if ax is None:
@@ -214,6 +252,7 @@ class PlotSingle(AdiabaticEvolution):
             qmi_list += [qmi]
 
         ax.plot(self.times, qmi_list)
+        print(f'Atom {j}', np.average(qmi_list))
 
         if show:
             plt.ylabel('Quantum Relative Entropy')
@@ -223,7 +262,8 @@ class PlotSingle(AdiabaticEvolution):
 
 
     def eigenenergies_lineplot_with_eigenstate_fidelities(self, eigenvalues=None, eigenstate_probs=None,
-                                                          expectation_energies=None, eigenstate_fidelities=None, ax=None, show=False, cb=True, cb_label=r'|$\Psi^{+}$⟩ Fidelity'):
+                                                          expectation_energies=None, eigenstate_fidelities=None, ax=None,
+                                                          show=False, cb=True, cb_label=r'|$\Psi^{+}$⟩ Fidelity', cb_ax=None):
 
         if ax is None:
             eigenvalues, eigenvectors, expectation_energies, eigenstate_probs = self.time_evolve(eigen_list=True,
@@ -233,13 +273,16 @@ class PlotSingle(AdiabaticEvolution):
             ax.set_xlabel(r'Time ($\mu$s)')
 
         ploting_tools.plot_eigenenergies_fidelities_line(self.n, self.times, eigenvalues, eigenstate_probs,
-                                                         expectation_energies, ax, range(0, self.dimension), cb=cb, cb_label=r'$⟨\Psi_{\lambda}$|$\Psi$⟩')
+                                                         expectation_energies, ax, range(0, self.dimension), cb=cb, cb_label=r'⟨$\Psi_{\lambda}$|$\Psi$⟩', cb_ax=cb_ax)
+
+
+
 
         if show:
             plt.show()
 
     def eigenenergies_lineplot_with_state_fidelities(self, state_to_test, eigenvalues=None, eigenvectors=None, detuning=False, ax=None,
-                                                     cb_label=r'|$\Psi^{+}$⟩ Fidelity', save_pdf=False, show=False):
+                                                     cb_label=r'|$\Psi^{+}$⟩ Fidelity', save_pdf=False, reverse=True, show=False):
 
         if ax is None:
 
@@ -254,12 +297,12 @@ class PlotSingle(AdiabaticEvolution):
         if detuning:
             ploting_tools.plot_eigenenergies_state_fidelities_line(self.n, self.detunning[0] / (2 * np.pi), eigenvalues,
                                                                    eigenvectors,
-                                                                   state_to_test, ax, range(0, self.dimension),
+                                                                   state_to_test, ax, range(0, self.dimension), reverse=reverse,
                                                                    cb_label=cb_label)
 
         else:
             ploting_tools.plot_eigenenergies_state_fidelities_line(self.n, self.times, eigenvalues, eigenvectors,
-                                                                   state_to_test, ax, range(0, self.dimension),
+                                                                   state_to_test, ax, range(0, self.dimension),reverse=reverse,
                                                                    cb_label=cb_label)
 
         if save_pdf:
@@ -357,29 +400,33 @@ class PlotSingle(AdiabaticEvolution):
 if __name__ == "__main__":
     t = 5
     dt = 0.01
-    n = 7
+    n = 3
     δ_start = -30 * 2 * np.pi
-    δ_end = 30 * 2 * np.pi
+    δ_end = -30 * 2 * np.pi
 
     two = ['quench', 'quench']
     two2 = ['quench', 'linear flat']
     two3 = ['linear', 'linear']
 
     three = ['quench'] * 3
+    three2 = ['quench'] + ['linear flat'] * 2
 
     five = ['linear'] * 5
     five1 = ['linear flat'] * 5
     five2 = ['quench'] * 5
     five3 = ['quench'] +['linear flat'] * 4
 
-    seven = ['quench'] + ['linear flat'] * 6
+    seven = ['linear flat'] * 7
     seven2 = ['quench']*7
 
     plotter = PlotSingle(n, t, dt, δ_start, δ_end, detuning_type=None,
-                         single_addressing_list=seven2,
-                         initial_state_list=[0, 0, 0, 0, 0, 0, 0],
+                         single_addressing_list=three,
+                         initial_state_list=[0, 0, 0],
                          )
-    #plotter.colour_bar(show=True)
+
+    #plotter.detuning_shape(types=seven, show=True, save_pdf=True)
+
+    plotter.colour_bar(show=True)
 
     plotter.eigenenergies_lineplot_with_eigenstate_fidelities(show=True)
 

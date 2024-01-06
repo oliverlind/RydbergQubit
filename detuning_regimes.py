@@ -73,7 +73,7 @@ def linear_detuning_quench(δ_start, δ_end, steps, position=pos, show=False):
     linear_steps = math.floor(steps * position)
 
     sweep = np.linspace(δ_start, δ_end, linear_steps)
-    quench = np.linspace(0, 0, steps - linear_steps)
+    quench = np.linspace(0,0, steps - linear_steps)
     detuning = np.hstack((sweep, quench))
 
     if show:

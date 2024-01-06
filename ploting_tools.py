@@ -64,7 +64,7 @@ def set_up_color_bar(n, data, times, ax, type='rydberg', color='viridis', colorb
         labels = [f'E{i}' for i in range(n)]
         color ='cmo.amp'
         norm = mcolors.Normalize(vmin=0, vmax=1)
-        bar_label = r'⟨$\psi_{\lambda}$|$\Psi$⟩'
+        bar_label = r'⟨$\Psi_{\lambda}$|$\Psi$⟩'
 
 
     else:
@@ -80,6 +80,7 @@ def set_up_color_bar(n, data, times, ax, type='rydberg', color='viridis', colorb
     # Set the y-axis ticks and labels
     ax.set_yticks(np.arange(n))
     ax.set_yticklabels(labels)
+    ax.yaxis.set_tick_params(width=0)
 
     # Fill whole figure
     ax.set_xlim(0, times[-1])  # Set the x-axis limits
@@ -111,6 +112,7 @@ def end_colorbar_barchart(n, data, ax):
 
     data = data[:, -1]
 
+
     # Remove y-axis ticks
     ax.tick_params(axis='y', which='both', left=False, right=False)
     ax.set_yticklabels([''])
@@ -119,6 +121,26 @@ def end_colorbar_barchart(n, data, ax):
 
     ax.barh(atoms, data)
 
+def end_eigenenergies_barchart(n, data, ax):
+    energies = np.arange(0, n, 1)
+    labels = [f'E{i}' for i in range(n)]
+    color = 'cmo.amp'
+
+    data = np.array(data)
+
+    data = data[:n, -1]
+
+    norm = mcolors.Normalize(vmin=0, vmax=1)
+    cmap = plt.get_cmap(color)
+    colors = [cmap(norm(value)) for value in data]
+
+    # Remove y-axis ticks
+    ax.tick_params(axis='y', which='both', left=False, right=False)
+    ax.set_yticks(energies)
+    ax.set_yticklabels(labels)
+    ax.set_xlim(0, max(data)+0.1)
+
+    ax.barh(energies, data, color=colors)
 
 def colormap_density_matrices(density_matrices, dt, times, num_of_plots=25, showtime=False):
     num_of_pairs = len(density_matrices)
@@ -253,7 +275,7 @@ def plot_eigenenergies(n, times, eigenvalues, ax, energy_range):
     plt.show()
 
 
-def plot_eigenenergies_fidelities_line(n, times, eigenvalues, eigen_probs, expectation_energies, ax, energy_range, cb=True, cb_label='h'):
+def plot_eigenenergies_fidelities_line(n, times, eigenvalues, eigen_probs, expectation_energies, ax, energy_range, cb=True, cb_label='h', cb_ax=None):
 
     eigenvalues = np.array(eigenvalues)
 
@@ -275,14 +297,26 @@ def plot_eigenenergies_fidelities_line(n, times, eigenvalues, eigen_probs, expec
         lc.set_linewidth(2)
         line = ax.add_collection(lc)
 
-    if cb:
-        plt.colorbar(line, ax=ax, label=cb_label)
 
     ax.set_xlim(0, times[-1])
     ax.set_ylim(min(eigenvalues[:, 0]) - 10, max(eigenvalues[:, energy_range[-1]] + 10))
 
 
-def plot_eigenenergies_state_fidelities_line(n, times, eigenvalues, eigenvectors, state_to_test, ax, energy_range, cb_label='h'):
+
+    if cb:
+        if cb_ax is not None:
+            cb_ax = cb_ax
+            frac = 0.7
+
+        else:
+            cb_ax = ax
+            frac = 0.1
+
+        plt.colorbar(line, ax=cb_ax, label=cb_label, orientation='vertical', shrink=0.9, fraction=frac)
+
+
+
+def plot_eigenenergies_state_fidelities_line(n, times, eigenvalues, eigenvectors, state_to_test, ax, energy_range, reverse=True, cb_label='h'):
 
     eigenvalues = np.array(eigenvalues)/(2*np.pi) #convert to frequency
     eigenstate_state_probs = [[] for _ in range(0, energy_range[-1] + 1)]
@@ -291,7 +325,6 @@ def plot_eigenenergies_state_fidelities_line(n, times, eigenvalues, eigenvectors
         v_state_to_test = (1/np.sqrt(2)) * (vm.initial_state([1, 0]) + vm.initial_state([0, 1]))
     elif state_to_test == 'psi minus':
         v_state_to_test = (1/np.sqrt(2)) * (vm.initial_state([1, 0]) - vm.initial_state([0, 1]))
-
 
     else:
         v_state_to_test = vm.initial_state(state_to_test)
@@ -306,8 +339,13 @@ def plot_eigenenergies_state_fidelities_line(n, times, eigenvalues, eigenvectors
             eigenstate_state_prob = da.state_prob(v_state_to_test, v)
             eigenstate_state_probs[i] += [eigenstate_state_prob]
 
+    if reverse:
+        plot_order = reversed(energy_range)
 
-    for i in energy_range:
+    else:
+        plot_order = energy_range
+
+    for i in plot_order:
 
         points = np.array([times, eigenvalues[:, i]]).T.reshape(-1, 1, 2)
         segments = np.concatenate([points[:-1], points[1:]], axis=1)
