@@ -398,10 +398,10 @@ class PlotSingle(AdiabaticEvolution):
 
 
 if __name__ == "__main__":
-    t = 5
+    t = 0.2
     dt = 0.01
-    n = 3
-    δ_start = -30 * 2 * np.pi
+    n = 9
+    δ_start = 30 * 2 * np.pi
     δ_end = -30 * 2 * np.pi
 
     two = ['quench', 'quench']
@@ -419,9 +419,11 @@ if __name__ == "__main__":
     seven = ['linear flat'] * 7
     seven2 = ['quench']*7
 
+    nine = ['linear'] * 9
+
     plotter = PlotSingle(n, t, dt, δ_start, δ_end, detuning_type=None,
-                         single_addressing_list=three,
-                         initial_state_list=[0, 0, 0],
+                         single_addressing_list=nine,
+                         initial_state_list=[0, 0, 0, 0, 0, 0, 0, 0, 0],
                          )
 
     #plotter.detuning_shape(types=seven, show=True, save_pdf=True)

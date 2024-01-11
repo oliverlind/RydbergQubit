@@ -5,6 +5,7 @@ from scipy import sparse
 from scipy.linalg import expm
 from scipy.linalg import logm
 from matplotlib import pyplot as plt
+import math
 
 
 from rydberg_hamiltonian_1d import RydbergHamiltonian1D
@@ -17,7 +18,7 @@ import rabi_regimes
 
 
 class AdiabaticEvolution(RydbergHamiltonian1D):
-    def __init__(self, n, t, dt, δ_start, δ_end, a=5.48, rabi_osc=False, no_int=False, detuning_type=None,
+    def __init__(self, n, t, dt, δ_start, δ_end, a=5.48, rabi_osc=False, no_int=False, detuning_type='linear',
                  single_addressing_list=None, initial_state_list=None, rabi_regime="constant"):
         super().__init__(n, a=a)
         self.t = t
@@ -35,12 +36,14 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
             self.C_6 = 0
 
         # Detuning Regime
-        # self.detunning = detuning_regimes.global_detuning(t, dt, δ_start, δ_end, detuning_type)
 
         if single_addressing_list is not None:
 
             self.detunning = detuning_regimes.single_addressing(self.t, self.dt, self.δ_start, self.δ_end,
                                                                 single_addressing_list)
+
+        else:
+            self.detunning = detuning_regimes.global_detuning(t, dt, δ_start, δ_end, detuning_type)
 
         # Rabi regime
         self.rabi_regime = rabi_regimes.global_rabi(self.t, self.dt, self.steps, type=rabi_regime)
@@ -224,7 +227,7 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
             n = int(np.log2(cols))
 
             # Convert the basis vector to binary representation
-            basis_int = int(np.log2(int(''.join(map(str, reversed(basis_vector[0]))), 2)))
+            basis_int = int(math.log2(int(''.join(map(str, reversed(basis_vector[0]))), 2)))
             binary_rep = format(basis_int, f'0{n}b')
 
             # Initialize a list to store individual qubit states
@@ -240,7 +243,7 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
             n = int(np.log2(rows))
 
             # Convert the basis vector to binary representation
-            basis_int = int(np.log2(int(''.join(map(str, reversed(basis_vector[:, 0]))), 2)))
+            basis_int = int(math.log2(int(''.join(map(str, reversed(basis_vector[:, 0]))), 2)))
             binary_rep = format(basis_int, f'0{n}b')
 
             # Initialize a list to store individual qubit states
@@ -398,16 +401,24 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
 
 
 if __name__ == "__main__":
-    t = 5
+    t = 1
     dt = 0.01
     n = 3
     δ_start = -200
     δ_end = 200
 
-    evol = AdiabaticEvolution(n, t, dt, δ_start, δ_end)
+    evol = AdiabaticEvolution(n, t, dt, δ_start, δ_end, detuning_type='linear')
+
+    psi = evol.time_evolve(states_list=True)
+
+    print(psi[0])
+
+
+
+
+    print(evol.reduced_density_matrix(psi[0],1))
 
     # rdms = evol.time_evolve(reduced_density_matrix_pair=True)
 
-    v = evol.bel_psi_minus()
+    # v = evol.bel_psi_minus()
 
-    print(v)

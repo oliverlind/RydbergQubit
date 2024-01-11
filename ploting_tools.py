@@ -366,6 +366,11 @@ def plot_eigenenergies_state_fidelities_line(n, times, eigenvalues, eigenvectors
 
     ax.set_ylabel(r'$E_{\lambda}$ (MHz)')
 
+def plot_domain_wall_density():
+    pass
+
+
+
 
 
 

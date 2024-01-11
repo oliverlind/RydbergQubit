@@ -241,11 +241,11 @@ class CombinedPlots(PlotSingle):
         plt.show()
 
 if __name__ == "__main__":
-    t = 5
+    t = 3.8
     dt = 0.01
-    n = 2
-    δ_start = -30 * 2 * np.pi
-    δ_end = 40 * 2 * np.pi
+    n = 7
+    δ_start = 30 * 2 * np.pi
+    δ_end = 30 * 2 * np.pi
 
     two = ['quench', 'quench']
     two2 = ['quench', 'linear flat']
@@ -262,22 +262,27 @@ if __name__ == "__main__":
     seven = ['linear flat'] * 7
     seven2 = ['quench'] * 7
     seven3 = ['quench'] +['linear flat'] * 6
+    seven4 = ['short quench'] +['linear flat'] * 6
 
     plotter = CombinedPlots(n, t, dt, δ_start, δ_end, detuning_type=None,
-                         single_addressing_list=two3,
-                         initial_state_list=[0, 0], rabi_regime='constant'
+                         single_addressing_list=seven4,
+                         initial_state_list=[1, 0, 1, 0, 1, 0, 1], rabi_regime='constant'
+
+
                          )
 
-    plotter.two_atom_eigenstates(save_pdf=True)
+    plotter.colour_bar(show=True)
 
-    #plotter.sweep_colourbar(three3, save_pdf=True)
+    #plotter.two_atom_eigenstates(save_pdf=True)
+
+    plotter.sweep_colourbar(three3, save_pdf=True)
     #
-    plotter.eigenstate_fidelities(save_pdf=True)
+    #plotter.eigenstate_fidelities(save_pdf=True)
     #
-    # plotter.quantum_mutual_informations(save_pdf=True)
+    plotter.quantum_mutual_informations(save_pdf=True)
     #
     # plotter.colorbar_state_fidelity([[1, 0, 1, 0, 1, 0, 1]], save_pdf=True)
     #
     # #plotter.eigenvalue_lineplot(show=True)
 
-    plotter.ordered_state_colourbars([5.48, 3.16], [0, 0, 0, 0, 0, 0, 0], seven, save_pdf=True)
+    #plotter.ordered_state_colourbars([5.48, 3.16], [0, 0, 0, 0, 0, 0, 0], seven, save_pdf=True)

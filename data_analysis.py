@@ -74,6 +74,9 @@ def get_state_fidelities(q_states, state_to_test):
 
     return state_fidelities
 
+def croberg_density_density_correlation_map():
+    pass
+
 
 
 

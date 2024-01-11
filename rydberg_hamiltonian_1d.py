@@ -76,7 +76,7 @@ class RydbergHamiltonian1D:
 
         return m
 
-    def vdw(self, first_atom_move=0, NN=False):
+    def vdw(self, first_atom_move=0, NN=True):
 
         m_vdw = self.zeros
 
