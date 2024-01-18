@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 
-pos = 0.9
+pos = 0.99
 
 
 def global_rabi(t, dt, steps, type='constant', position=pos):

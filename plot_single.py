@@ -67,22 +67,33 @@ class PlotSingle(AdiabaticEvolution):
                 data = eigenstate_probs
                 n = self.dimension
 
+            if type == 'correlation':
+                states = self.time_evolve(states_list=True)
+
+                g_r_list = [[] for _ in range(self.steps)]
+
+                for i in range(0, self.steps):
+                    g_r = self.rydberg_rydberg_density_corr_function(states[i])
+                    g_r_list[i] = g_r
+
+                data = np.array(g_r_list)
+                data = data.T
+                print(data[-1])
+
+                n = self.n - 1
+
+
         else:
             if type == 'rydberg':
                 n = self.n
-                
-            elif type == 'eigen energies':
-                n = 10#self.dimension
-            
 
+            elif type == 'eigen energies':
+                n = 10  # self.dimension
 
         ploting_tools.set_up_color_bar(n, data, self.times, ax=ax, type=type, colorbar=cb, cb_ax=cb_ax)
 
-
         if end_ax is not None:
             ploting_tools.end_colorbar_barchart(self.n, data, ax=end_ax)
-
-
 
         if show:
             plt.show()
@@ -131,18 +142,18 @@ class PlotSingle(AdiabaticEvolution):
             if type == 'quench':
                 color = 'b'
                 d = detuning_regimes.linear_detuning_quench(self.δ_start, self.δ_end, self.steps)
-                ax.plot(self.times, d/self.two_pi, color=color)
+                ax.plot(self.times, d / self.two_pi, color=color)
             elif type == 'linear flat':
                 if i == 1:
                     color = 'r'
                     d = detuning_regimes.linear_detuning_flat(self.δ_start, self.δ_end, self.steps)
-                    ax.plot(self.times, d/self.two_pi, color=color)
+                    ax.plot(self.times, d / self.two_pi, color=color)
                 else:
                     pass
             else:
                 pass
 
-        ax.set_ylim(- 40, max(self.δ_start, self.δ_end)/self.two_pi + 10) #min(self.δ_start, self.δ_end)/self.two_pi
+        ax.set_ylim(- 40, max(self.δ_start, self.δ_end) / self.two_pi + 10)  # min(self.δ_start, self.δ_end)/self.two_pi
         ax.set_ylabel(r'$\Delta$ (MHz)')
 
         if save_pdf:
@@ -151,8 +162,6 @@ class PlotSingle(AdiabaticEvolution):
         if show:
             plt.tight_layout()
             plt.show()
-
-
 
     def state_fidelity(self, states_to_test, q_states=None, ax=None, sum_probs=False, show=False, colors_num=0):
 
@@ -259,11 +268,11 @@ class PlotSingle(AdiabaticEvolution):
             plt.xlabel('Time (s)')
             plt.show()
 
-
-
     def eigenenergies_lineplot_with_eigenstate_fidelities(self, eigenvalues=None, eigenstate_probs=None,
-                                                          expectation_energies=None, eigenstate_fidelities=None, ax=None,
-                                                          show=False, cb=True, cb_label=r'|$\Psi^{+}$⟩ Fidelity', cb_ax=None):
+                                                          expectation_energies=None, eigenstate_fidelities=None,
+                                                          ax=None,
+                                                          show=False, cb=True, cb_label=r'|$\Psi^{+}$⟩ Fidelity',
+                                                          cb_ax=None):
 
         if ax is None:
             eigenvalues, eigenvectors, expectation_energies, eigenstate_probs = self.time_evolve(eigen_list=True,
@@ -273,16 +282,16 @@ class PlotSingle(AdiabaticEvolution):
             ax.set_xlabel(r'Time ($\mu$s)')
 
         ploting_tools.plot_eigenenergies_fidelities_line(self.n, self.times, eigenvalues, eigenstate_probs,
-                                                         expectation_energies, ax, range(0, self.dimension), cb=cb, cb_label=r'⟨$\Psi_{\lambda}$|$\Psi$⟩', cb_ax=cb_ax)
-
-
-
+                                                         expectation_energies, ax, range(0, self.dimension), cb=cb,
+                                                         cb_label=r'⟨$\Psi_{\lambda}$|$\Psi$⟩', cb_ax=cb_ax)
 
         if show:
             plt.show()
 
-    def eigenenergies_lineplot_with_state_fidelities(self, state_to_test, eigenvalues=None, eigenvectors=None, detuning=False, ax=None,
-                                                     cb_label=r'|$\Psi^{+}$⟩ Fidelity', save_pdf=False, reverse=True, show=False):
+    def eigenenergies_lineplot_with_state_fidelities(self, state_to_test, eigenvalues=None, eigenvectors=None,
+                                                     detuning=False, ax=None,
+                                                     cb_label=r'|$\Psi^{+}$⟩ Fidelity', save_pdf=False, reverse=True,
+                                                     show=False, cb_ax=None):
 
         if ax is None:
 
@@ -297,13 +306,15 @@ class PlotSingle(AdiabaticEvolution):
         if detuning:
             ploting_tools.plot_eigenenergies_state_fidelities_line(self.n, self.detunning[0] / (2 * np.pi), eigenvalues,
                                                                    eigenvectors,
-                                                                   state_to_test, ax, range(0, self.dimension), reverse=reverse,
-                                                                   cb_label=cb_label)
+                                                                   state_to_test, ax, range(0, self.dimension),
+                                                                   reverse=reverse,
+                                                                   cb_label=cb_label, cb_ax=cb_ax)
 
         else:
             ploting_tools.plot_eigenenergies_state_fidelities_line(self.n, self.times, eigenvalues, eigenvectors,
-                                                                   state_to_test, ax, range(0, self.dimension),reverse=reverse,
-                                                                   cb_label=cb_label)
+                                                                   state_to_test, ax, range(0, self.dimension),
+                                                                   reverse=reverse,
+                                                                   cb_label=cb_label, cb_ax=cb_ax)
 
         if save_pdf:
             plt.savefig(f'Quick Save Plots/output.pdf', format='pdf', bbox_inches='tight', dpi=700)
@@ -313,12 +324,15 @@ class PlotSingle(AdiabaticEvolution):
             plt.show()
 
     def eigenvalues_distance(self, save_pdf=False, show=False):
-        fig, ax = plt.subplots(figsize=(4, 3))
+        fig, ax = plt.subplots(figsize=(8, 3.5))
 
         ax.set_xlabel(r'$a$ ($\mu$m)', fontsize=12)
-        ax.set_ylabel(r'$E_{\lambda}$ (MHz)')
+        ax.set_ylabel(r'$E$ (MHz)')
 
-        a_list = np.linspace(5.5, 15, 500)
+        xmin = 4
+        xmax = 13
+
+        a_list = np.linspace(xmin, xmax, 1000)
 
         eigenvalues_list = []
 
@@ -334,36 +348,36 @@ class PlotSingle(AdiabaticEvolution):
         eigenvalues_list = np.array(eigenvalues_list)
 
         for i in reversed(range(0, 4)):
-            ax.plot(a_list, eigenvalues_list[:, i]/self.two_pi, label=labels[i], linewidth=2, zorder=1)
+            ax.plot(a_list, eigenvalues_list[:, i] / self.two_pi, label=labels[i], linewidth=2, zorder=1)
 
         ax.set_xlim(min(a_list), max(a_list))
 
         ax.spines['right'].set_position(('data', max(a_list)))
 
-
         pale_blue = (0.7, 0.8, 1.0)
 
-        plt.axhline(y=self.Rabi/self.two_pi, color='black', linestyle='--', linewidth=1, alpha=0.5)
-        plt.axhline(y=-self.Rabi/self.two_pi, color='black', linestyle='--', linewidth=1, alpha=0.5)
-        plt.axhspan(ymin=-self.Rabi/self.two_pi, ymax=self.Rabi/self.two_pi, color='grey', alpha=0.2)
+        plt.axhline(y=self.Rabi / self.two_pi, color='black', linestyle='--', linewidth=1, alpha=0.1)
+        plt.axhline(y=-self.Rabi / self.two_pi, color='black', linestyle='--', linewidth=1, alpha=0.1)
+        plt.axhspan(ymin=-self.Rabi / self.two_pi, ymax=self.Rabi / self.two_pi, color='grey', alpha=0.1)
 
         plt.axvline(x=self.r_b, color=pale_blue, linestyle='--', linewidth=2, alpha=0.8)
 
-        print(self.Rabi)
+        print(self.r_b)
 
-        plt.text(self.r_b + 0.35, 125/self.two_pi, r'$R_{B}$', ha='center', va='center', rotation=-90, fontsize=12)
+        plt.text(self.r_b + 0.35, 10, r'$R_{B}$', ha='center', va='center', rotation=-90, fontsize=12)
 
         # plt.text(5.25, 315, r'$|rr⟩$', ha='center', va='center', fontsize=18)  # Displaying 1/2
 
-        plt.axvspan(xmin=5.5, xmax=self.r_b, color=pale_blue, alpha=0.2)
+        plt.axvspan(xmin=xmin, xmax=self.r_b, color=pale_blue, alpha=0.2)
 
         plt.subplots_adjust(right=0.8)
         plt.legend(loc='upper right', fontsize=12)
+        plt.ylim(-5, 15)
 
         # plt.arrow(13, -25+23.7, 0, -22.7, head_width=0.1, head_length=2, ec='black', fc='black', linewidth=2, zorder=2)
 
         # Create an inset axes in the top right corner
-        #axins = inset_axes(plt.gca(), width="45%", height="40%", loc='upper right')
+        # axins = inset_axes(plt.gca(), width="45%", height="40%", loc='upper right')
 
         # Specify the region to zoom in (adjust these values accordingly)
         x1, x2, y1, y2 = 11.2, 15, -35, 40  # Define the zoomed-in region
@@ -396,13 +410,43 @@ class PlotSingle(AdiabaticEvolution):
             plt.tight_layout()
             plt.show()
 
+    def plot_half_sys_entanglement_entropy(self, ax=None, entanglement_entropy=None, save_pdf=False, show=False):
+
+        if ax is None:
+            entanglement_entropy = self.time_evolve(entanglement_entropy=True)
+
+            fig, ax = plt.subplots(figsize=(4, 3))
+            ax.set_xlabel(r'Time ($\mu$s)')
+
+        ax.plot(self.times, entanglement_entropy)
+
+        if show:
+            plt.show()
+
+    def correlation(self, ax=None, states=None, save_pdf=False, show=False):
+
+        if ax is None:
+            states = self.time_evolve(states_list=True)
+
+            fig, ax = plt.subplots(figsize=(4, 3))
+            ax.set_xlabel(r'r')
+
+        g_r = self.rydberg_rydberg_density_corr_function(states[-1])
+        r = np.arange(1, self.n, 1)
+
+        ax.plot(r, g_r)
+
+        plt.show()
+
+
+
 
 if __name__ == "__main__":
-    t = 0.2
+    t = 5
     dt = 0.01
-    n = 9
+    n = 5
     δ_start = 30 * 2 * np.pi
-    δ_end = -30 * 2 * np.pi
+    δ_end = 30 * 2 * np.pi
 
     two = ['quench', 'quench']
     two2 = ['quench', 'linear flat']
@@ -410,33 +454,43 @@ if __name__ == "__main__":
 
     three = ['quench'] * 3
     three2 = ['quench'] + ['linear flat'] * 2
+    three3 = ['linear flat'] * 3
+
+    four = ['quench'] * 4
 
     five = ['linear'] * 5
     five1 = ['linear flat'] * 5
     five2 = ['quench'] * 5
-    five3 = ['quench'] +['linear flat'] * 4
+    five3 = ['quench'] + ['linear flat'] * 4
 
     seven = ['linear flat'] * 7
-    seven2 = ['quench']*7
+    seven2 = ['quench'] * 7
+    seven3 = ['quench'] + ['linear flat'] * 6
 
     nine = ['linear'] * 9
 
     plotter = PlotSingle(n, t, dt, δ_start, δ_end, detuning_type=None,
-                         single_addressing_list=nine,
-                         initial_state_list=[0, 0, 0, 0, 0, 0, 0, 0, 0],
+                         single_addressing_list=five3,
+                         initial_state_list=[1, 0, 1, 0, 1],
+                         a=5.48
                          )
 
-    #plotter.detuning_shape(types=seven, show=True, save_pdf=True)
+    #plotter.colour_bar(show=True)
 
-    plotter.colour_bar(show=True)
+    plotter.colour_bar(type='correlation', show=True)
+
+    plotter.eigenvalues_distance(show=True, save_pdf=True)
+    plotter.plot_half_sys_entanglement_entropy()
+
+    # plotter.detuning_shape(types=seven, show=True, save_pdf=True)
 
     plotter.eigenenergies_lineplot_with_eigenstate_fidelities(show=True)
 
-    #plotter.colour_bar(show=True, type='eigen energies')
+    # plotter.colour_bar(show=True, type='eigen energies')
 
-    #plotter.eigenvalues_distance(show=True, save_pdf=True)
+    # plotter.eigenvalues_distance(show=True, save_pdf=True)
 
-    #plotter.eigenenergies_lineplot_with_state_fidelities('psi plus', detuning=True, save_pdf=True, show=True)
+    # plotter.eigenenergies_lineplot_with_state_fidelities('psi plus', detuning=True, save_pdf=True, show=True)
 
     plotter.state_fidelity([[0, 0]])
 

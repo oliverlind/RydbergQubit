@@ -66,6 +66,11 @@ def set_up_color_bar(n, data, times, ax, type='rydberg', color='viridis', colorb
         norm = mcolors.Normalize(vmin=0, vmax=1)
         bar_label = r'⟨$\Psi_{\lambda}$|$\Psi$⟩'
 
+    elif type == 'correlation':
+        labels = [f'r={i}' for i in range(1,n+1)]
+        color = 'PiYG'
+        norm = mcolors.Normalize(vmin=-0.2, vmax=0.2)
+        bar_label = r'label'
 
     else:
         sys.exit()
@@ -316,7 +321,7 @@ def plot_eigenenergies_fidelities_line(n, times, eigenvalues, eigen_probs, expec
 
 
 
-def plot_eigenenergies_state_fidelities_line(n, times, eigenvalues, eigenvectors, state_to_test, ax, energy_range, reverse=True, cb_label='h'):
+def plot_eigenenergies_state_fidelities_line(n, times, eigenvalues, eigenvectors, state_to_test, ax, energy_range, reverse=True, cb_label='h', cb_ax=None):
 
     eigenvalues = np.array(eigenvalues)/(2*np.pi) #convert to frequency
     eigenstate_state_probs = [[] for _ in range(0, energy_range[-1] + 1)]
@@ -359,12 +364,13 @@ def plot_eigenenergies_state_fidelities_line(n, times, eigenvalues, eigenvectors
         lc.set_linewidth(2)
         line = ax.add_collection(lc)
 
-    plt.colorbar(line, ax=ax, label=cb_label, shrink=0.9)
+    if cb_ax is not None:
+        plt.colorbar(line, ax=cb_ax, label=cb_label, shrink=0.9, fraction=0.7)
 
     ax.set_xlim(times[0], times[-1])
     ax.set_ylim(min(eigenvalues[:, 0]) - 10, max(eigenvalues[:, energy_range[-1]] + 10))
 
-    ax.set_ylabel(r'$E_{\lambda}$ (MHz)')
+    ax.set_ylabel(r'$E$ / 2$\pi$ (MHz)')
 
 def plot_domain_wall_density():
     pass

@@ -159,6 +159,7 @@ class CombinedPlots(PlotSingle):
 
 
         plt.tight_layout()
+        plt.subplots_adjust(hspace=0)
 
         if save_pdf:
             plt.savefig(f'Quick Save Plots/output.pdf', format='pdf', bbox_inches='tight', dpi=700)
@@ -209,30 +210,35 @@ class CombinedPlots(PlotSingle):
         eigenvalues, eigenvectors, eigenstate_probs = self.time_evolve(eigen_list=True,
                                                                        eigenstate_fidelities=True)
 
-        fig, axs = plt.subplots(2, 2, figsize=(8, 3.5), sharex=True, sharey=True,
-                                gridspec_kw={'width_ratios': [1,1]})
+        fig, axs = plt.subplots(2, 3, figsize=(8, 4.5), sharex=True, sharey=True,
+                                gridspec_kw={'width_ratios': [1,1,0.2]})
 
         labels = [r'|00⟩ Fidelity', r'|$\Psi^{-}$⟩ Fidelity', r'|$\Psi^{+}$⟩ Fidelity', r'|rr⟩ Fidelity']
         states_to_test = [[0,0], 'psi minus', 'psi plus', [1,1]]
 
-        self.eigenenergies_lineplot_with_state_fidelities(states_to_test[0], eigenvalues=eigenvalues, eigenvectors=eigenvectors, detuning=True, ax=axs[0,0], cb_label=labels[0])
+        self.eigenenergies_lineplot_with_state_fidelities(states_to_test[0], eigenvalues=eigenvalues, eigenvectors=eigenvectors, detuning=True, ax=axs[0,0], cb_label=None)
         self.eigenenergies_lineplot_with_state_fidelities(states_to_test[1], eigenvalues=eigenvalues,
                                                           eigenvectors=eigenvectors, detuning=True, ax=axs[0,1],
-                                                          cb_label=labels[1])
+                                                          cb_label=None)
 
         self.eigenenergies_lineplot_with_state_fidelities(states_to_test[2], eigenvalues=eigenvalues,
                                                           eigenvectors=eigenvectors, detuning=True, ax=axs[1,0],
-                                                          cb_label=labels[2], reverse=False)
+                                                          cb_label=None, reverse=False)
 
         self.eigenenergies_lineplot_with_state_fidelities(states_to_test[3], eigenvalues=eigenvalues,
                                                           eigenvectors=eigenvectors, detuning=True, ax=axs[1,1],
-                                                          cb_label=labels[3])
+                                                          cb_label='State Fidelity', cb_ax=axs[:,2])
 
         axs[0, 1].set_ylabel('')
         axs[1, 1].set_ylabel('')
 
-        axs[1, 0].set_xlabel(r'$\Delta$ (MHz)')
-        axs[1, 1].set_xlabel(r'$\Delta$ (MHz)')
+        axs[1, 0].set_xlabel(r'$\Delta$/2$\pi$ (MHz)')
+        axs[1, 1].set_xlabel(r'$\Delta$/2$\pi$ (MHz)')
+
+        plt.ylim(-60, 55)
+
+        for ax in axs[:, 2]:
+            ax.axis('off')
 
         if save_pdf:
             plt.savefig(f'Quick Save Plots/output.pdf', format='pdf', bbox_inches='tight', dpi=700)
@@ -241,7 +247,7 @@ class CombinedPlots(PlotSingle):
         plt.show()
 
 if __name__ == "__main__":
-    t = 3.8
+    t = 0.5
     dt = 0.01
     n = 7
     δ_start = 30 * 2 * np.pi
@@ -262,26 +268,27 @@ if __name__ == "__main__":
     seven = ['linear flat'] * 7
     seven2 = ['quench'] * 7
     seven3 = ['quench'] +['linear flat'] * 6
-    seven4 = ['short quench'] +['linear flat'] * 6
+    seven4 = ['short quench'] + ['linear flat'] * 6
 
     plotter = CombinedPlots(n, t, dt, δ_start, δ_end, detuning_type=None,
-                         single_addressing_list=seven4,
+                         single_addressing_list=seven2,
                          initial_state_list=[1, 0, 1, 0, 1, 0, 1], rabi_regime='constant'
 
 
                          )
 
-    plotter.colour_bar(show=True)
 
-    #plotter.two_atom_eigenstates(save_pdf=True)
+    #plotter.colorbar_state_fidelity([[1, 0, 1, 0, 1, 0, 1]], save_pdf=True)
 
-    plotter.sweep_colourbar(three3, save_pdf=True)
+    # plotter.two_atom_eigenstates(save_pdf=True)
+    #
+    # plotter.sweep_colourbar(three3, save_pdf=True)
     #
     #plotter.eigenstate_fidelities(save_pdf=True)
     #
     plotter.quantum_mutual_informations(save_pdf=True)
     #
-    # plotter.colorbar_state_fidelity([[1, 0, 1, 0, 1, 0, 1]], save_pdf=True)
+
     #
     # #plotter.eigenvalue_lineplot(show=True)
 

@@ -76,7 +76,7 @@ class RydbergHamiltonian1D:
 
         return m
 
-    def vdw(self, first_atom_move=0, NN=True):
+    def vdw(self, first_atom_move=0, NN=False):
 
         m_vdw = self.zeros
 
@@ -98,7 +98,6 @@ class RydbergHamiltonian1D:
 
                     else:
                         v = self.C_6 / r ** 6
-
 
                     m_ik = v * np.dot(self.n_i(i), self.n_i(k))
                     m_vdw = m_vdw + m_ik

@@ -83,7 +83,7 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
 
     def time_evolve(self, density_matrix=False, rydberg_fidelity=False, bell_fidelity=False, bell_fidelity_types=None,
                     states_list=False, reduced_density_matrix_pair=False, hms=False, expec_energy=False,
-                    eigen_list=False, eigenstate_fidelities=False, rabi_regime_type='constant'):
+                    eigen_list=False, eigenstate_fidelities=False, rabi_regime_type='constant', entanglement_entropy=False):
 
         ψ = self.initial_psi
         j = self.row_basis_vectors(2 ** (self.n - 1))
@@ -99,6 +99,7 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
                               'phi plus': [[] for _ in range(self.n - 1)], 'phi minus': [[] for _ in range(self.n - 1)]}
         states = []
         rdms_pairs_list = [[] for _ in range(self.n - 1)]
+        entanglement_entropy_list = []
 
         # Moving the first atom
         first_atom_move = np.linspace(0, 0,
@@ -132,6 +133,11 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
                         eigenstate_prob = data_analysis.state_prob(v, ψ)
                         eigenstate_probs[i] += [eigenstate_prob]
 
+            if entanglement_entropy:
+                rdm = self.reduced_density_matrix_half(ψ)
+                vne = self.entanglement_entropy(rdm)
+
+                entanglement_entropy_list += [vne]
 
             if hms:
                 hamiltonian_matrices += [h_m]
@@ -213,6 +219,10 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
         elif reduced_density_matrix_pair:
             return rdms_pairs_list
 
+        elif entanglement_entropy:
+            print(entanglement_entropy_list)
+            return entanglement_entropy_list
+
         else:
             return ψ
 
@@ -239,7 +249,7 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
                 qubit_states.append(np.array([1 - int(qubit_binary), int(qubit_binary)]))  # Convert to 2D state vector
 
         # Case for ket vector
-        if rows > cols:
+        elif rows > cols:
             n = int(np.log2(rows))
 
             # Convert the basis vector to binary representation
@@ -253,6 +263,10 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
             for i in range(n):
                 qubit_binary = binary_rep[i]  # Get the binary value for the i-th qubit
                 qubit_states += [np.array([[1 - int(qubit_binary), int(qubit_binary)]]).T]  # Convert to 2D state vector
+
+        else:
+            raise ValueError('rows and cols equal')
+            sys.exit()
 
         return qubit_states
 
@@ -357,6 +371,53 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
 
         return reduced_density_matrix
 
+    def reduced_density_matrix_half(self, ψ):
+
+        if self.n == 1:
+            sys.exit()
+
+        n_A = round(self.n / 2)
+        n_B = self.n - n_A
+
+        d_A = 2 ** n_A
+        d_B = 2 ** n_B
+
+        m_left_list = []
+        m_right_list = []
+
+        # Produce list of matrices on left side of sum
+        row_basis_vectors = self.row_basis_vectors(d_B)
+        for row_vector in row_basis_vectors:
+            bra_vectors = self.comp_basis_vector_to_qubit_states(row_vector)
+
+            m_left = np.eye(d_A)  # initialise left matrix
+
+            for bra in bra_vectors:
+                m_left = np.kron(m_left, bra)  # taking tensor product left to right
+
+            m_left_list += [m_left]
+
+        # Produce list of matrices on right side of sum
+        col_basis_vectors = self.col_basis_vectors(d_B)
+        for col_vector in col_basis_vectors:
+            ket_vectors = self.comp_basis_vector_to_qubit_states(col_vector)
+
+            m_right = np.eye(d_A) # initialise right matrix
+
+            for ket in ket_vectors:
+                m_right = np.kron(m_right, ket)  # taking tensor product left to right
+
+            m_right_list += [m_right]
+
+        reduced_density_matrix = np.zeros((d_A, d_A))
+
+        for j in range(0, d_B):
+            m_left = m_left_list[j]
+            m_right = m_right_list[j]
+            reduced_density_matrix = reduced_density_matrix + np.dot(np.dot(m_left, ψ), np.dot(ψ.conj().T, m_right))
+
+        return reduced_density_matrix
+
     def rydberg_fidelity(self, rydberg_fidelity_list, ψ):
 
         for i in range(1, self.n + 1):
@@ -399,9 +460,33 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
             bf = data_analysis.expectation_value(rdm, bell_state)
             bell_fidelity_list[i - 1] += [bf]
 
+    def entanglement_entropy(self, rdm):
+
+        vne = data_analysis.von_nuemann_entropy(rdm)
+
+        return vne
+
+    def rydberg_rydberg_density_corr_function(self, psi):
+
+        g = [0]*(self.n-1)
+
+        for r in range(1, self.n):
+            for k in range(1, self.n+1-r):
+                g[r-1] = g[r-1] + data_analysis.correlation_funtction(self.reduced_density_matrix_pair(psi, k, k+r), self.reduced_density_matrix(psi, k), self.reduced_density_matrix(psi, k+r))
+
+            g[r-1] = g[r-1]/(self.n-r)
+
+        return g
+
+
+
+
+
+
+
 
 if __name__ == "__main__":
-    t = 1
+    t = 6
     dt = 0.01
     n = 3
     δ_start = -200
@@ -411,12 +496,20 @@ if __name__ == "__main__":
 
     psi = evol.time_evolve(states_list=True)
 
-    print(psi[0])
+    psi = psi[-1]
+    print(psi)
+
+    #psi = np.array([[0], [0], [0], [0], [0], [1], [0], [0]])
+
+
+    g = evol.rydberg_rydberg_density_corr_function(psi)
+
+    print(g)
 
 
 
 
-    print(evol.reduced_density_matrix(psi[0],1))
+
 
     # rdms = evol.time_evolve(reduced_density_matrix_pair=True)
 

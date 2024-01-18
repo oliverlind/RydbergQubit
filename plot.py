@@ -100,6 +100,7 @@ class Plot(AdiabaticEvolution):
 
         if show:
             plt.tight_layout
+            plt.xlabel('Time (μs)')
             plt.show()
 
     def plot_line_rydberg_prob(self):
@@ -1189,10 +1190,10 @@ class Plot(AdiabaticEvolution):
 if __name__ == "__main__":
     start_time = time.time()
 
-    t = 5
+    t = 0.5
     dt = 0.01
-    n = 5
-    δ_start = -200
+    n = 7
+    δ_start = 200
     δ_end = 200
 
     two = ['quench', 'quench']
@@ -1227,13 +1228,16 @@ if __name__ == "__main__":
     seven3 = ['flat zero'] + ['flat positive'] * 6
     seven4 = ['linear flat'] + ['flat start'] * 6
     seven5 = 2 * ['linear flat'] + ['quench'] + 4 * ['linear flat']
+    seven6 = ['quench']*7
 
     nine = ['quench'] + 8 * ['linear flat']
 
     evol = Plot(n, t, dt, δ_start, δ_end, detuning_type=None,
-                single_addressing_list=five3,
-                initial_state_list=[0, 0, 0, 0, 0]
+                single_addressing_list=seven6,
+                initial_state_list=[1, 0, 1, 0, 1, 0, 1]
                 )
+
+    evol.eigenstate_table(time=0.2)
 
 
     #evol.eigenvalue_lineplot(show=True)
@@ -1249,7 +1253,7 @@ if __name__ == "__main__":
     #
     # evol.state_fidelity_rf_colorbar([[1, 0, 1, 0, 1, 0, 1], [0, 1, 0, 1, 0, 1, 0]])
     #
-    evol.state_fidelity_rf_colorbar([[1, 0, 1, 0, 0]])
+    #evol.state_fidelity_rf_colorbar([[1, 0, 1, 0, 0]])
 
 
     end_time = time.time()
