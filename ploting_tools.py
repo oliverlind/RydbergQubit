@@ -30,7 +30,7 @@ def set_up_color_bar(n, data, times, ax, type='rydberg', color='viridis', colorb
 
     elif type == 'vne':
         labels = [f'Atom {i + 1}' for i in range(n)]
-        norm = mcolors.Normalize(vmin=0, vmax=np.log(n))
+        norm = mcolors.Normalize(vmin=0, vmax=1)
         bar_label = "Von Neumann Entropy"
 
     elif type == 'psi plus':
@@ -67,9 +67,9 @@ def set_up_color_bar(n, data, times, ax, type='rydberg', color='viridis', colorb
         bar_label = r'⟨$\Psi_{\lambda}$|$\Psi$⟩'
 
     elif type == 'correlation':
-        labels = [f'r={i}' for i in range(1,n+1)]
+        labels = [f'g(r={i+1})' for i in range(1, n+1)]
         color = 'PiYG'
-        norm = mcolors.Normalize(vmin=-0.2, vmax=0.2)
+        norm = mcolors.Normalize(vmin=-0.25, vmax=0.25)
         bar_label = r'label'
 
     else:
@@ -374,6 +374,8 @@ def plot_eigenenergies_state_fidelities_line(n, times, eigenvalues, eigenvectors
 
 def plot_domain_wall_density():
     pass
+
+
 
 
 

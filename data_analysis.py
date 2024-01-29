@@ -2,6 +2,7 @@ import numpy as np
 from scipy.linalg import expm
 from scipy.linalg import logm
 from scipy.linalg import svd
+from scipy.optimize import curve_fit
 
 import vector_manipluation_tools as vm
 
@@ -22,7 +23,7 @@ def has_sublists(my_list):
 
 
 def von_nuemann_entropy(density_matrix):
-    vne = -np.trace(np.dot(density_matrix, logm(density_matrix)) / np.log(2))
+    vne = -np.trace(np.dot(density_matrix, logm(density_matrix)))
     if vne.imag > 0.01:
         raise ValueError("Imaginary Entanglement")
         sys.exit()
@@ -38,8 +39,8 @@ def quantum_relative_entropy(density_matrix_1, density_matrix_2):
     :param density_matrix_2:
     :return:
     """
-    qre = np.trace(np.dot(density_matrix_1, logm(density_matrix_1) / np.log(2))) - np.trace(
-        np.dot(density_matrix_1, logm(density_matrix_2) / np.log(2)))
+    qre = np.trace(np.dot(density_matrix_1, logm(density_matrix_1))) - np.trace(
+        np.dot(density_matrix_1, logm(density_matrix_2)))
 
     if qre.imag > 0.01:
         raise ValueError("Imaginary Entanglement")
@@ -74,9 +75,6 @@ def get_state_fidelities(q_states, state_to_test):
         state_fidelities += [state_fidelity]
 
     return state_fidelities
-
-def croberg_density_density_correlation_map():
-    pass
 
 def schmidt_coeffients_red(state, n, n_A):
     # Reshape the state vector to a matrix
@@ -113,22 +111,25 @@ def correlation_funtction(rho_ij, rho_i, rho_j):
 
     return g_ij
 
+def correlation_length(n, g_r):
 
+    g_r = np.array(g_r)
 
+    g_r = np.abs(g_r)
+    x_data = np.arange(1, n, 1)
 
+    params, covariance = curve_fit(exponential_function, x_data, g_r)
 
+    # Extract the optimized parameters
+    a_opt, b_opt = params
 
+    # Calculate the characteristic length
+    corr_length = 1 / abs(b_opt)
 
+    return corr_length
 
-
-
-
-
-
-
-
-
-
+def exponential_function(x, a, b):
+    return a * np.exp(b * x)
 
 if __name__ == "__main__":
     n_qubits = 2

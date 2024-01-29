@@ -166,6 +166,36 @@ class CombinedPlots(PlotSingle):
 
         plt.show()
 
+    def rydberg_correlation_cbs(self, i=None, save_pdf=False):
+
+        rydberg_fidelity_data, states = self.time_evolve(rydberg_fidelity=True, states_list=True)
+
+        # Get correlation data
+        g_list = [[] for _ in range(self.steps)]
+
+        for j in range(0, self.steps):
+            g = self.rydberg_rydberg_density_corr_function(states[j], i=i)
+            g_list[j] = g
+
+        plotting_g_data = np.array(g_list)
+        plotting_g_data = plotting_g_data.T
+
+        fig, axs = plt.subplots(2, 2, sharex=True, figsize=(8, 2.2),
+                                gridspec_kw={'width_ratios': [10, 1], 'height_ratios': [1, 1]})
+
+        self.colour_bar(type='rydberg', data=rydberg_fidelity_data, ax=axs[0, 0], cb_ax=axs[0, 1])
+        self.colour_bar(type='correlation', data=plotting_g_data, ax=axs[1, 0], cb_ax=axs[1, 1])
+
+        plt.subplots_adjust(hspace=0)
+
+        for ax in axs[:, 1]:
+            ax.axis('off')
+
+        if save_pdf:
+            plt.savefig(f'Quick Save Plots/output.pdf', format='pdf', bbox_inches='tight', dpi=700)
+
+        plt.show()
+
     def eigenstate_fidelities(self, save_pdf=False):
 
         eigenvalues, eigenvectors, eigenstate_probs = self.time_evolve(eigen_list=True,
@@ -246,11 +276,32 @@ class CombinedPlots(PlotSingle):
 
         plt.show()
 
+    def cb_entanglement_entropy(self, atom_i=None, save_pdf=False):
+
+        if atom_i is not None:
+            rydberg_fidelity_data, states, ee = self.time_evolve(rydberg_fidelity=True, entanglement_entropy=True, states_list=True)
+        else:
+            rydberg_fidelity_data, ee = self.time_evolve(rydberg_fidelity=True, entanglement_entropy=True)
+            states = None
+
+        fig, axs = plt.subplots(2, 1, sharex=True, figsize=(8, 2.2))
+
+        self.colour_bar(type='rydberg', data=rydberg_fidelity_data, ax=axs[0], cb=False)
+        self.plot_half_sys_entanglement_entropy(ax=axs[1], atom_i=atom_i, entanglement_entropy=ee, states=states)
+
+        plt.subplots_adjust(hspace=0)
+
+        if save_pdf:
+            plt.savefig(f'Quick Save Plots/output.pdf', format='pdf', bbox_inches='tight', dpi=700)
+
+        plt.show()
+
+
 if __name__ == "__main__":
-    t = 0.5
+    t = 9
     dt = 0.01
-    n = 7
-    δ_start = 30 * 2 * np.pi
+    n = 5
+    δ_start = -30 * 2 * np.pi
     δ_end = 30 * 2 * np.pi
 
     two = ['quench', 'quench']
@@ -271,12 +322,13 @@ if __name__ == "__main__":
     seven4 = ['short quench'] + ['linear flat'] * 6
 
     plotter = CombinedPlots(n, t, dt, δ_start, δ_end, detuning_type=None,
-                         single_addressing_list=seven2,
-                         initial_state_list=[1, 0, 1, 0, 1, 0, 1], rabi_regime='constant'
-
-
+                         single_addressing_list=five2,
+                         initial_state_list=[0, 0, 0, 0, 0], rabi_regime='constant'
                          )
 
+    #plotter.cb_entanglement_entropy(atom_i=1)
+
+    plotter.rydberg_correlation_cbs()
 
     #plotter.colorbar_state_fidelity([[1, 0, 1, 0, 1, 0, 1]], save_pdf=True)
 

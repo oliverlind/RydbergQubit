@@ -544,7 +544,7 @@ class Plot(AdiabaticEvolution):
         plt.legend(loc='upper left')
 
         if show:
-            plt.xlabel('Time (μs)')
+            plt.xlabel(r'Time ($\mus)')
             plt.show()
 
     def entanglement_entropy_colorbar(self, atom=None, show=False, ax=None, states=None):
@@ -1190,9 +1190,9 @@ class Plot(AdiabaticEvolution):
 if __name__ == "__main__":
     start_time = time.time()
 
-    t = 0.5
+    t = 1
     dt = 0.01
-    n = 7
+    n = 3
     δ_start = 200
     δ_end = 200
 
@@ -1233,21 +1233,22 @@ if __name__ == "__main__":
     nine = ['quench'] + 8 * ['linear flat']
 
     evol = Plot(n, t, dt, δ_start, δ_end, detuning_type=None,
-                single_addressing_list=seven6,
-                initial_state_list=[1, 0, 1, 0, 1, 0, 1]
+                single_addressing_list=three,
+                initial_state_list=[1, 0, 1]
                 )
 
-    evol.eigenstate_table(time=0.2)
+    #evol.eigenstate_table(time=0.2)
 
 
+    #evol.entanglement_entropy(show=True)
     #evol.eigenvalue_lineplot(show=True)
 
     #evol.eigenstate_fidelity_colorbar()
 
     #
-    # evol.entanglement_entropy_colorbar(show=True)
+    #evol.entanglement_entropy_colorbar(show=True)
     #
-    # evol.bell_fidelity_colorbars()
+    evol.bell_fidelity_colorbars()
     #
     #evol.colorbars_ghz()
     #

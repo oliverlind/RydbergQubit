@@ -135,6 +135,7 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
 
             if entanglement_entropy:
                 rdm = self.reduced_density_matrix_half(ψ)
+
                 vne = self.entanglement_entropy(rdm)
 
                 entanglement_entropy_list += [vne]
@@ -162,7 +163,10 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
 
         if rydberg_fidelity:
             if states_list:
-                return rydberg_fidelity_list, states
+                if entanglement_entropy:
+                    return rydberg_fidelity_list, states, entanglement_entropy_list
+                else:
+                    return rydberg_fidelity_list, states
             elif bell_fidelity_types:
                 return rydberg_fidelity_list, bell_fidelity_dict
             elif bell_fidelity:
@@ -178,6 +182,8 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
                     return rydberg_fidelity_list, eigenvalues, eigenvectors, eigenstate_probs
             elif density_matrix:
                 return rydberg_fidelity_list, density_matrices
+            elif entanglement_entropy:
+                return rydberg_fidelity_list, entanglement_entropy_list
             else:
                 return rydberg_fidelity_list
 
@@ -208,7 +214,10 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
             return hamiltonian_matrices
 
         elif states_list:
-            return states
+            if entanglement_entropy:
+                return states, entanglement_entropy_list
+            else:
+                return states
 
         elif bell_fidelity:
             return bell_fidelity_list
@@ -220,7 +229,6 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
             return rdms_pairs_list
 
         elif entanglement_entropy:
-            print(entanglement_entropy_list)
             return entanglement_entropy_list
 
         else:
@@ -376,7 +384,7 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
         if self.n == 1:
             sys.exit()
 
-        n_A = round(self.n / 2)
+        n_A = math.ceil(self.n / 2)
         n_B = self.n - n_A
 
         d_A = 2 ** n_A
@@ -394,6 +402,8 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
 
             for bra in bra_vectors:
                 m_left = np.kron(m_left, bra)  # taking tensor product left to right
+            # m_left = np.eye(d_A)
+            # m_left = np.kron(m_left, row_vector)
 
             m_left_list += [m_left]
 
@@ -466,17 +476,27 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
 
         return vne
 
-    def rydberg_rydberg_density_corr_function(self, psi):
+    def rydberg_rydberg_density_corr_function(self, psi, i=None):
 
         g = [0]*(self.n-1)
 
-        for r in range(1, self.n):
-            for k in range(1, self.n+1-r):
-                g[r-1] = g[r-1] + data_analysis.correlation_funtction(self.reduced_density_matrix_pair(psi, k, k+r), self.reduced_density_matrix(psi, k), self.reduced_density_matrix(psi, k+r))
+        if i is None:
+            print('yes')
 
-            g[r-1] = g[r-1]/(self.n-r)
+            for r in range(1, self.n):
+                for k in range(1, self.n+1-r):
+                    g[r-1] = g[r-1] + data_analysis.correlation_funtction(self.reduced_density_matrix_pair(psi, k, k+r), self.reduced_density_matrix(psi, k), self.reduced_density_matrix(psi, k+r))
+
+                g[r-1] = g[r-1]/(self.n-r)
+
+        else:
+            for i in range(2, self.n+1):
+                g[i-2] = data_analysis.correlation_funtction(self.reduced_density_matrix_pair(psi, 1, i), self.reduced_density_matrix(psi, 1), self.reduced_density_matrix(psi, i))
 
         return g
+
+
+
 
 
 

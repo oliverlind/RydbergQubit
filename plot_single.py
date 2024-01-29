@@ -58,22 +58,21 @@ class PlotSingle(AdiabaticEvolution):
                 data = self.time_evolve(rydberg_fidelity=True)
                 n = self.n
 
-            if type == 'eigen energies':
+            elif type == 'eigen energies':
                 eigenvalues, eigenvectors, expectation_energies, eigenstate_probs = self.time_evolve(expec_energy=True,
                                                                                                      eigen_list=True,
                                                                                                      eigenstate_fidelities=True,
                                                                                                      )
-
                 data = eigenstate_probs
                 n = self.dimension
 
-            if type == 'correlation':
+            elif type == 'correlation':
                 states = self.time_evolve(states_list=True)
 
                 g_r_list = [[] for _ in range(self.steps)]
 
                 for i in range(0, self.steps):
-                    g_r = self.rydberg_rydberg_density_corr_function(states[i])
+                    g_r = self.rydberg_rydberg_density_corr_function(states[i], i=1)
                     g_r_list[i] = g_r
 
                 data = np.array(g_r_list)
@@ -82,6 +81,9 @@ class PlotSingle(AdiabaticEvolution):
 
                 n = self.n - 1
 
+            else:
+                sys.exit()
+
 
         else:
             if type == 'rydberg':
@@ -89,6 +91,13 @@ class PlotSingle(AdiabaticEvolution):
 
             elif type == 'eigen energies':
                 n = 10  # self.dimension
+
+            elif type == 'correlation':
+                n = self.n - 1
+
+            else:
+                sys.exit()
+
 
         ploting_tools.set_up_color_bar(n, data, self.times, ax=ax, type=type, colorbar=cb, cb_ax=cb_ax)
 
@@ -410,20 +419,35 @@ class PlotSingle(AdiabaticEvolution):
             plt.tight_layout()
             plt.show()
 
-    def plot_half_sys_entanglement_entropy(self, ax=None, entanglement_entropy=None, save_pdf=False, show=False):
+    def plot_half_sys_entanglement_entropy(self, ax=None, atom_i=None, entanglement_entropy=None, states=None, save_pdf=False, show=False):
 
         if ax is None:
-            entanglement_entropy = self.time_evolve(entanglement_entropy=True)
+            states, entanglement_entropy = self.time_evolve(states_list=True, entanglement_entropy=True)
 
             fig, ax = plt.subplots(figsize=(4, 3))
             ax.set_xlabel(r'Time ($\mu$s)')
 
-        ax.plot(self.times, entanglement_entropy)
+        ax.plot(self.times, entanglement_entropy, color='blue', label='Half Chain (1, 2, 3)')
+
+        if atom_i is not None:
+            vne_list = []
+            for i in range(0, self.steps):
+                rdm = self.reduced_density_matrix(states[i], atom_i)
+                vne = da.von_nuemann_entropy(rdm)
+                vne_list += [vne]
+
+            ax.plot(self.times, vne_list, color='orange', label='Atom 1')
+
+        ax.legend(loc='upper left')
+
+        plt.axhline(y=np.log(4), color='blue', linestyle='--', linewidth=1, alpha=0.5)
+
+        plt.axhline(y=np.log(2), color='orange', linestyle='--', linewidth=1, alpha=0.5)
 
         if show:
             plt.show()
 
-    def correlation(self, ax=None, states=None, save_pdf=False, show=False):
+    def correlation(self, ax=None, states=None, corr_lengths=False, save_pdf=False, show=False):
 
         if ax is None:
             states = self.time_evolve(states_list=True)
@@ -431,21 +455,37 @@ class PlotSingle(AdiabaticEvolution):
             fig, ax = plt.subplots(figsize=(4, 3))
             ax.set_xlabel(r'r')
 
-        g_r = self.rydberg_rydberg_density_corr_function(states[-1])
+        corr_lengths_list = []
+        x = np.arange(0,self.t, 50*self.dt)
+
+        for i in np.arange(0,self.steps,50):
+
+            g_r = self.rydberg_rydberg_density_corr_function(states[i])
+
+            corr_length = data_analysis.correlation_length(self.n, g_r)
+
+            corr_lengths_list +=[corr_length]
+
+            print(corr_length)
+
         r = np.arange(1, self.n, 1)
 
-        ax.plot(r, g_r)
+        ax.plot(x, corr_lengths_list)
 
         plt.show()
 
 
 
 
+
+
+
+
 if __name__ == "__main__":
-    t = 5
+    t = 12
     dt = 0.01
     n = 5
-    δ_start = 30 * 2 * np.pi
+    δ_start = -30 * 2 * np.pi
     δ_end = 30 * 2 * np.pi
 
     two = ['quench', 'quench']
@@ -463,7 +503,7 @@ if __name__ == "__main__":
     five2 = ['quench'] * 5
     five3 = ['quench'] + ['linear flat'] * 4
 
-    seven = ['linear flat'] * 7
+    seven = ['linear'] * 7
     seven2 = ['quench'] * 7
     seven3 = ['quench'] + ['linear flat'] * 6
 
@@ -471,27 +511,22 @@ if __name__ == "__main__":
 
     plotter = PlotSingle(n, t, dt, δ_start, δ_end, detuning_type=None,
                          single_addressing_list=five3,
-                         initial_state_list=[1, 0, 1, 0, 1],
+                         initial_state_list=[0, 0, 0, 0, 0],
                          a=5.48
                          )
 
     #plotter.colour_bar(show=True)
+    #plotter.correlation(show=True)
 
-    plotter.colour_bar(type='correlation', show=True)
+    #plotter.colour_bar(type='correlation', show=True)
 
-    plotter.eigenvalues_distance(show=True, save_pdf=True)
-    plotter.plot_half_sys_entanglement_entropy()
+    #plotter.eigenvalues_distance(show=True, save_pdf=True)
+    plotter.plot_half_sys_entanglement_entropy(atom_i=1, show=True)
 
     # plotter.detuning_shape(types=seven, show=True, save_pdf=True)
 
     plotter.eigenenergies_lineplot_with_eigenstate_fidelities(show=True)
 
-    # plotter.colour_bar(show=True, type='eigen energies')
-
-    # plotter.eigenvalues_distance(show=True, save_pdf=True)
-
-    # plotter.eigenenergies_lineplot_with_state_fidelities('psi plus', detuning=True, save_pdf=True, show=True)
-
-    plotter.state_fidelity([[0, 0]])
+    plotter.state_fidelity([[]])
 
     plotter.eigenenergies_lineplot(detuning=True)
