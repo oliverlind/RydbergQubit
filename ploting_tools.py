@@ -67,7 +67,7 @@ def set_up_color_bar(n, data, times, ax, type='rydberg', color='viridis', colorb
         bar_label = r'⟨$\Psi_{\lambda}$|$\Psi$⟩'
 
     elif type == 'correlation':
-        labels = [f'g(r={i+1})' for i in range(1, n+1)]
+        labels = [f'g(1, {i+1})' for i in range(1, n+1)]
         color = 'PiYG'
         norm = mcolors.Normalize(vmin=-0.25, vmax=0.25)
         bar_label = r'label'

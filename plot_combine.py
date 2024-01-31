@@ -178,6 +178,7 @@ class CombinedPlots(PlotSingle):
             g_list[j] = g
 
         plotting_g_data = np.array(g_list)
+        print(plotting_g_data)
         plotting_g_data = plotting_g_data.T
 
         fig, axs = plt.subplots(2, 2, sharex=True, figsize=(8, 2.2),
@@ -296,12 +297,71 @@ class CombinedPlots(PlotSingle):
 
         plt.show()
 
+    def correlation_averages(self, qsteps_list,  initial_state, single_addressing_list, save_pdf=False):
+
+        averages_list = [[] for _ in range(len(qsteps_list))]
+        averages_dict = {}
+
+        for j, q_step in enumerate(qsteps_list):
+            single_addressing_list[0] = int(q_step)
+
+            print(single_addressing_list)
+
+            singleplot = PlotSingle(self.n, self.t, self.dt, self.δ_start, self.δ_end, detuning_type=None,
+                                   single_addressing_list=single_addressing_list,
+                                   initial_state_list=initial_state, rabi_regime='constant')
+
+            states = singleplot.time_evolve(states_list=True)
+
+            g_r_list = [[] for _ in range(self.steps)]
+
+            for i in range(0, self.steps):
+                g_r = self.rydberg_rydberg_density_corr_function(states[i], i=1)
+                g_r_list[i] = g_r
+
+            data = np.array(g_r_list)
+            data = data.T
+
+            averages = []
+
+            for i in range(0, self.n-1):
+                av = np.abs(np.average(data[i][q_step:q_step+398]))
+                averages += [av]
+
+            averages_dict[q_step] = averages
+            averages_list[j] = averages
+
+        print(averages_dict)
+
+        averages_list = np.array(averages_list)
+        averages_list = averages_list.T
+
+        qsteps_list = np.array(qsteps_list)
+
+        print(averages_list)
+
+        #speeds = np.ones(len(qsteps_list)) / np.array(qsteps_list) * self.dt
+
+        #print(speeds)
+
+        for k in range(0, self.n-1):
+
+            plt.scatter(qsteps_list*self.dt, averages_list[k], label=f'|G(1, {k+2})|')
+            plt.plot(qsteps_list*self.dt, averages_list[k])
+
+        plt.xlabel(r'$\Delta$$t_{quench}$ ($\mu$s)')
+        plt.ylabel('|⟨G(1, i)⟩|')
+
+        plt.legend()
+
+        plt.show()
+
 
 if __name__ == "__main__":
-    t = 9
+    t = 6
     dt = 0.01
-    n = 5
-    δ_start = -30 * 2 * np.pi
+    n = 7
+    δ_start = 30 * 2 * np.pi
     δ_end = 30 * 2 * np.pi
 
     two = ['quench', 'quench']
@@ -318,17 +378,19 @@ if __name__ == "__main__":
 
     seven = ['linear flat'] * 7
     seven2 = ['quench'] * 7
-    seven3 = ['quench'] +['linear flat'] * 6
+    seven3 = [175] +['linear flat'] * 6
     seven4 = ['short quench'] + ['linear flat'] * 6
 
     plotter = CombinedPlots(n, t, dt, δ_start, δ_end, detuning_type=None,
-                         single_addressing_list=five2,
-                         initial_state_list=[0, 0, 0, 0, 0], rabi_regime='constant'
+                         single_addressing_list=seven3,
+                         initial_state_list=[1, 0, 1, 0, 1, 0, 1], rabi_regime='constant'
                          )
+
+    plotter.correlation_averages(np.arange(1,200, 20), [1, 0, 1, 0, 1, 0, 1], seven4)
 
     #plotter.cb_entanglement_entropy(atom_i=1)
 
-    plotter.rydberg_correlation_cbs()
+    plotter.rydberg_correlation_cbs(i=1)
 
     #plotter.colorbar_state_fidelity([[1, 0, 1, 0, 1, 0, 1]], save_pdf=True)
 

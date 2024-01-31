@@ -77,7 +77,6 @@ class PlotSingle(AdiabaticEvolution):
 
                 data = np.array(g_r_list)
                 data = data.T
-                print(data[-1])
 
                 n = self.n - 1
 
@@ -106,6 +105,8 @@ class PlotSingle(AdiabaticEvolution):
 
         if show:
             plt.show()
+
+        return data
 
     def rabi_and_detuning_shape(self, ax=None, show=False):
 
@@ -482,9 +483,9 @@ class PlotSingle(AdiabaticEvolution):
 
 
 if __name__ == "__main__":
-    t = 12
+    t = 6
     dt = 0.01
-    n = 5
+    n = 3
     δ_start = -30 * 2 * np.pi
     δ_end = 30 * 2 * np.pi
 
@@ -495,6 +496,7 @@ if __name__ == "__main__":
     three = ['quench'] * 3
     three2 = ['quench'] + ['linear flat'] * 2
     three3 = ['linear flat'] * 3
+    three4 = [20] + ['linear flat'] * 2
 
     four = ['quench'] * 4
 
@@ -505,20 +507,23 @@ if __name__ == "__main__":
 
     seven = ['linear'] * 7
     seven2 = ['quench'] * 7
-    seven3 = ['quench'] + ['linear flat'] * 6
+    seven3 = [15] + ['linear flat'] * 6
+
 
     nine = ['linear'] * 9
 
     plotter = PlotSingle(n, t, dt, δ_start, δ_end, detuning_type=None,
-                         single_addressing_list=five3,
-                         initial_state_list=[0, 0, 0, 0, 0],
+                         single_addressing_list=three3,
+                         initial_state_list=[0,0,0],
                          a=5.48
                          )
 
-    #plotter.colour_bar(show=True)
+    plotter.colour_bar(show=True)
     #plotter.correlation(show=True)
 
-    #plotter.colour_bar(type='correlation', show=True)
+    data = plotter.colour_bar(type='correlation', show=True)
+
+    print(np.average(data[0][10:]),np.average(data[1][10:]))
 
     #plotter.eigenvalues_distance(show=True, save_pdf=True)
     plotter.plot_half_sys_entanglement_entropy(atom_i=1, show=True)

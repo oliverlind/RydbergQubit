@@ -43,7 +43,7 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
                                                                 single_addressing_list)
 
         else:
-            self.detunning = detuning_regimes.global_detuning(t, dt, δ_start, δ_end, detuning_type)
+            self.detunning = detuning_regimes.global_detuning(t, dt, δ_start, δ_end, d_type=detuning_type)
 
         # Rabi regime
         self.rabi_regime = rabi_regimes.global_rabi(self.t, self.dt, self.steps, type=rabi_regime)
@@ -102,8 +102,9 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
         entanglement_entropy_list = []
 
         # Moving the first atom
-        first_atom_move = np.linspace(0, 0,
-                                      self.steps)  # np.hstack((np.linspace(0,0, int(self.steps/2)), np.linspace(0,10, int(self.steps/2))))
+        first_atom_move = np.linspace(0, 0, self.steps) #np.hstack((np.linspace(1000,0, int(self.steps/2)), np.linspace(0,0, int(self.steps/2))))
+
+        #np.hstack((np.linspace(0,0, int(self.steps/2)), np.linspace(0,10, int(self.steps/2))))
 
         for k in range(0, self.steps):
 
