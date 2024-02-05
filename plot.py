@@ -81,7 +81,7 @@ class Plot(AdiabaticEvolution):
         ax.tick_params(which='minor', size=4)
 
         # Label figure
-        ax.set_xlabel('Time (μs)')
+        ax.set_xlabel('Time (s)')
         # plt.title(
         # f'{"$R_{b}$"}={round(self.r_b, 2)}μm, a={self.a}μm')  # Ω={int(self.Rabi/(2*np.pi))}(2πxMHz),
         # plt.title(f'Rabi Oscillations: No Interaction (V=0)')
@@ -95,12 +95,12 @@ class Plot(AdiabaticEvolution):
         bar.set_label("Rydberg Probabilty")  # label colour bar
 
         # Add a description below the plot
-        description = f' {"$R_{b}$"}={round(self.r_b, 2)}μm, a={self.a}μm'
+        # description = f' {"$R_{b}$"}={round(self.r_b, 2)}μm, a={self.a}μm'
         plt.text(2.5, -2, description, fontsize=12, ha='center')
 
         if show:
             plt.tight_layout
-            plt.xlabel('Time (μs)')
+            plt.xlabel('Time (s)')
             plt.show()
 
     def plot_line_rydberg_prob(self):
@@ -962,7 +962,7 @@ class Plot(AdiabaticEvolution):
         binary_strings = ploting_tools.ascending_binary_strings(self.n)
 
         df.index = ['Energy Eigenvalue', 'Probability'] + binary_strings
-        path = 'Eigenstate Tables/data.csv'
+        path = 'Output csv tables/data.csv'
 
         df.to_csv(path, index=True)
 
@@ -1192,9 +1192,9 @@ if __name__ == "__main__":
 
     t = 1
     dt = 0.01
-    n = 3
-    δ_start = 200
-    δ_end = 200
+    n = 2
+    δ_start = 0
+    δ_end = 0
 
     two = ['quench', 'quench']
     two2 = ['quench', 'linear flat']
@@ -1233,12 +1233,13 @@ if __name__ == "__main__":
     nine = ['quench'] + 8 * ['linear flat']
 
     evol = Plot(n, t, dt, δ_start, δ_end, detuning_type=None,
-                single_addressing_list=three,
-                initial_state_list=[1, 0, 1]
+                single_addressing_list=two3,
+                initial_state_list=[0, 0]
                 )
 
-    #evol.eigenstate_table(time=0.2)
+    evol.eigenstate_table(time=0.2)
 
+    evol.plot_colour_bar(show=True)
 
     #evol.entanglement_entropy(show=True)
     #evol.eigenvalue_lineplot(show=True)

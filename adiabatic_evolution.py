@@ -26,7 +26,7 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
         self.steps = int(t / dt)
         self.δ_start = δ_start
         self.δ_end = δ_end
-        self.times = np.linspace(0, t, self.steps)
+        self.times = np.arange(0, t, self.dt)
         self.reduced_den_initial = np.zeros((2, 2))
 
         if rabi_osc:
@@ -73,7 +73,7 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
 
     def initial_state(self, state_list):
         state_list = list(reversed(state_list))
-        v = self.col_basis_vectors(2)[state_list[0]]  # self.bel_psi_minus(
+        v = self.col_basis_vectors(2)[state_list[0]] #self.bel_psi_minus()
 
         for i in state_list[1:]:
             u = self.col_basis_vectors(2)[i]
@@ -83,7 +83,8 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
 
     def time_evolve(self, density_matrix=False, rydberg_fidelity=False, bell_fidelity=False, bell_fidelity_types=None,
                     states_list=False, reduced_density_matrix_pair=False, hms=False, expec_energy=False,
-                    eigen_list=False, eigenstate_fidelities=False, rabi_regime_type='constant', entanglement_entropy=False):
+                    eigen_list=False, eigenstate_fidelities=False, rabi_regime_type='constant',
+                    entanglement_entropy=False, std_energy_list=False):
 
         ψ = self.initial_psi
         j = self.row_basis_vectors(2 ** (self.n - 1))
@@ -100,6 +101,7 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
         states = []
         rdms_pairs_list = [[] for _ in range(self.n - 1)]
         entanglement_entropy_list = []
+        std_energies = []
 
         # Moving the first atom
         first_atom_move = np.linspace(0, 0, self.steps) #np.hstack((np.linspace(1000,0, int(self.steps/2)), np.linspace(0,0, int(self.steps/2))))
@@ -122,6 +124,12 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
                 density_m = np.dot(ψ, ψ.conj().T)
                 ee = data_analysis.expectation_value(density_m, h_m)
                 expectation_energies += [ee]
+
+            if std_energy_list:
+                density_m = np.dot(ψ, ψ.conj().T)
+                std = data_analysis.std_observable(density_m, h_m)
+                std_energies += [std]
+
 
             if eigen_list:
                 eigenvalue, eigenvector = np.linalg.eigh(h_m)
@@ -211,6 +219,10 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
             else:
                 return eigenvalues, eigenvectors
 
+        elif expec_energy:
+            if std_energy_list:
+                return expectation_energies, std_energies
+
         elif hms:
             return hamiltonian_matrices
 
@@ -231,6 +243,9 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
 
         elif entanglement_entropy:
             return entanglement_entropy_list
+
+        elif std_energy_list:
+            return std_energies
 
         else:
             return ψ

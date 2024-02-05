@@ -128,6 +128,7 @@ def quench_ramped(δ_start, δ_end, steps, quench_steps, position=0.5, show=Fals
 
     detuning = np.hstack((flat_1, quench, flat_2))
 
+
     if show:
         x = np.arange(0, steps)
         plt.plot(x, detuning)

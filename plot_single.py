@@ -25,6 +25,7 @@ import config.config as cf
 from config.config import plotcolors
 import ploting_tools
 from matplotlib.colors import Normalize
+import pandas as pd
 
 mpl.rcParams['font.size'] = 12
 mpl.rcParams['font.family'] = 'serif'
@@ -48,6 +49,7 @@ class PlotSingle(AdiabaticEvolution):
                          single_addressing_list=single_addressing_list, initial_state_list=initial_state_list,
                          rabi_regime=rabi_regime, a=a)
 
+    '''ColourBar'''
     def colour_bar(self, type='rydberg', data=None, title=None, show=False, ax=None, cb=True, cb_ax=None, end_ax=None):
 
         if ax is None:
@@ -108,6 +110,7 @@ class PlotSingle(AdiabaticEvolution):
 
         return data
 
+    '''Rabi and Detunning shape'''
     def rabi_and_detuning_shape(self, ax=None, show=False):
 
         if ax is None:
@@ -173,6 +176,9 @@ class PlotSingle(AdiabaticEvolution):
             plt.tight_layout()
             plt.show()
 
+
+    '''State Fidelity Functions'''
+
     def state_fidelity(self, states_to_test, q_states=None, ax=None, sum_probs=False, show=False, colors_num=0):
 
         if ax is None:
@@ -234,6 +240,9 @@ class PlotSingle(AdiabaticEvolution):
             fourier_transform = np.abs(fft(state_fidelities[i][200:]))  # Taken absolute value to get the magnitude of
             # each phase component
 
+
+    '''Eigenenergies functions'''
+
     def eigenenergies_lineplot(self, eigenvalues=None, detuning=False, ax=None):
 
         if eigenvalues is None:
@@ -246,37 +255,6 @@ class PlotSingle(AdiabaticEvolution):
 
         else:
             ploting_tools.plot_eigenenergies(self.n, self.times, eigenvalues, ax, range(0, self.dimension))
-
-    def quantum_mutual_information(self, i, j, states=None, ax=None, show=False):
-
-        if ax is None:
-            states = self.time_evolve(states_list=True)
-            fig = plt.figure(figsize=(10, 5))
-            plt.xlim(0, self.t)
-            ax = plt.gca()
-        elif ax is not None:
-            ax = ax
-        else:
-            sys.exit()
-
-        qmi_list = []
-
-        for state in states:
-            rdm_i = self.reduced_density_matrix(state, i)
-            rdm_j = self.reduced_density_matrix(state, j)
-            rdm_ij = self.reduced_density_matrix_pair(state, i, j)
-
-            qmi = da.q_mutual_info(rdm_i, rdm_j, rdm_ij)
-
-            qmi_list += [qmi]
-
-        ax.plot(self.times, qmi_list)
-        print(f'Atom {j}', np.average(qmi_list))
-
-        if show:
-            plt.ylabel('Quantum Relative Entropy')
-            plt.xlabel('Time (s)')
-            plt.show()
 
     def eigenenergies_lineplot_with_eigenstate_fidelities(self, eigenvalues=None, eigenstate_probs=None,
                                                           expectation_energies=None, eigenstate_fidelities=None,
@@ -419,6 +397,69 @@ class PlotSingle(AdiabaticEvolution):
         if show:
             plt.tight_layout()
             plt.show()
+            
+    '''Expectation Energy'''
+    
+    def energy_std(self, save_pdf=False, show=False):
+        
+        expectation_energies, std_energies_list = self.time_evolve(expec_energy=True, std_energy_list=True)
+        
+        energy_spread_percentage = data_analysis.energy_spread(expectation_energies, std_energies_list)
+
+        if show:
+            plt.plot(self.times, energy_spread_percentage)
+
+            plt.show()
+        
+        
+        
+
+    '''Quantum Correlation and entanglement functions'''
+
+    def quantum_mutual_information(self, i, j, states=None, ax=None, show=False, data=False, purity=False, label=''):
+
+        if ax is None:
+            states = self.time_evolve(states_list=True)
+            fig = plt.figure(figsize=(10, 5))
+            plt.xlim(0, self.t)
+            ax = plt.gca()
+        elif ax is not None:
+            ax = ax
+        else:
+            sys.exit()
+
+        qmi_list = []
+        purity_list = []
+
+
+        for state in states:
+            rdm_i = self.reduced_density_matrix(state, i)
+            rdm_j = self.reduced_density_matrix(state, j)
+            rdm_ij = self.reduced_density_matrix_pair(state, i, j)
+
+            qmi = da.q_mutual_info(rdm_i, rdm_j, rdm_ij)
+            qmi_list += [qmi]
+
+            if purity:
+                p = np.trace(np.dot(rdm_ij, rdm_ij))
+                purity_list += [p]
+
+        ax.plot(self.times, qmi_list, label=label)
+        ax.set_ylim(0, 0.75)
+        print(f'Atom {j} QMI_av', np.average(qmi_list))
+
+        if purity:
+            print(f'Atom {j} Purity_av', np.average(purity_list))
+
+            ax.plot(self.times, purity_list)
+
+        if show:
+            plt.ylabel('Quantum Relative Entropy')
+            plt.xlabel('Time (s)')
+            plt.show()
+
+        if data:
+            return qmi_list
 
     def plot_half_sys_entanglement_entropy(self, ax=None, atom_i=None, entanglement_entropy=None, states=None, save_pdf=False, show=False):
 
@@ -447,6 +488,42 @@ class PlotSingle(AdiabaticEvolution):
 
         if show:
             plt.show()
+
+    def plot_entanglement_entropy_single_atom(self, j, states=None, ax=None, show=False, data=False, label=''):
+
+        if ax is None:
+            states = self.time_evolve(states_list=True)
+            fig = plt.figure(figsize=(10, 5))
+            plt.xlim(0, self.t)
+            ax = plt.gca()
+        elif ax is not None:
+            ax = ax
+        else:
+            sys.exit()
+
+        vne_list = []
+
+        for i in range(0, self.steps):
+            rdm = self.reduced_density_matrix(states[i], j)
+            vne = da.von_nuemann_entropy(rdm)
+            vne_list += [vne]
+
+
+        ax.plot(self.times, vne_list, label=label)
+        print(f'Atom {j} VNE_av', np.average(vne_list))
+
+
+        if show:
+            plt.ylabel('VNE')
+            plt.xlabel('Time (s)')
+            plt.show()
+
+        if data:
+            return vne_list
+
+
+
+
 
     def correlation(self, ax=None, states=None, corr_lengths=False, save_pdf=False, show=False):
 
@@ -477,16 +554,11 @@ class PlotSingle(AdiabaticEvolution):
 
 
 
-
-
-
-
-
 if __name__ == "__main__":
     t = 6
     dt = 0.01
     n = 3
-    δ_start = -30 * 2 * np.pi
+    δ_start = 30 * 2 * np.pi
     δ_end = 30 * 2 * np.pi
 
     two = ['quench', 'quench']
@@ -496,14 +568,14 @@ if __name__ == "__main__":
     three = ['quench'] * 3
     three2 = ['quench'] + ['linear flat'] * 2
     three3 = ['linear flat'] * 3
-    three4 = [20] + ['linear flat'] * 2
+    three4 = [10] + ['linear flat'] * 2
 
     four = ['quench'] * 4
 
     five = ['linear'] * 5
     five1 = ['linear flat'] * 5
     five2 = ['quench'] * 5
-    five3 = ['quench'] + ['linear flat'] * 4
+    five3 = [1] + ['linear flat'] * 4
 
     seven = ['linear'] * 7
     seven2 = ['quench'] * 7
@@ -513,11 +585,18 @@ if __name__ == "__main__":
     nine = ['linear'] * 9
 
     plotter = PlotSingle(n, t, dt, δ_start, δ_end, detuning_type=None,
-                         single_addressing_list=three3,
-                         initial_state_list=[0,0,0],
+                         single_addressing_list=three2,
+                         initial_state_list=[0, 0, 0],
                          a=5.48
                          )
 
+    plotter.plot_half_sys_entanglement_entropy(atom_i=None, show=True)
+
+    plotter.plot_entanglement_entropy_single_atom(3, show=True)
+
+    #plotter.eigenenergies_lineplot_with_eigenstate_fidelities(show=True)
+
+    plotter.energy_std()
     plotter.colour_bar(show=True)
     #plotter.correlation(show=True)
 
@@ -526,11 +605,11 @@ if __name__ == "__main__":
     print(np.average(data[0][10:]),np.average(data[1][10:]))
 
     #plotter.eigenvalues_distance(show=True, save_pdf=True)
-    plotter.plot_half_sys_entanglement_entropy(atom_i=1, show=True)
+
 
     # plotter.detuning_shape(types=seven, show=True, save_pdf=True)
 
-    plotter.eigenenergies_lineplot_with_eigenstate_fidelities(show=True)
+
 
     plotter.state_fidelity([[]])
 

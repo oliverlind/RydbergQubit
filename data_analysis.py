@@ -3,8 +3,10 @@ from scipy.linalg import expm
 from scipy.linalg import logm
 from scipy.linalg import svd
 from scipy.optimize import curve_fit
+import pandas as pd
 
 import vector_manipluation_tools as vm
+
 
 
 def expectation_value(density_matrix, operator):
@@ -17,7 +19,35 @@ def expectation_value(density_matrix, operator):
     else:
         return expectation_val.real
 
+def std_observable(density_matrix, operator):
+    expec_A = np.trace(np.dot(density_matrix, operator))
+    expec_AA  = np.trace(np.dot(np.dot(density_matrix, operator), operator))
 
+    if expec_A.imag > 0.01 or expec_AA.imag > 0.01:
+        raise ValueError("Imaginary Expectation")
+        sys.exit()
+
+    expec_A = np.abs(expec_A)
+    expec_AA = np.abs(expec_AA)
+
+
+    std = np.sqrt(expec_AA-(expec_A)**2)
+
+    if std.imag > 0.01:
+        raise ValueError("Imaginary Expectation")
+        sys.exit()
+
+    else:
+        return std.real
+
+def energy_spread(expec_vals, std_vals):
+
+    expec_vals = np.array(expec_vals)
+    std_vals = np.array(std_vals)
+
+    energy_spread_percentage = 100*np.abs(std_vals/expec_vals)
+
+    return energy_spread_percentage
 def has_sublists(my_list):
     return any(isinstance(item, list) for item in my_list)
 
@@ -51,7 +81,7 @@ def quantum_relative_entropy(density_matrix_1, density_matrix_2):
 
 def q_mutual_info(rdm_i, rdm_j, rdm_ij):
 
-    qmi = -np.trace(np.dot(rdm_i, logm(rdm_i)/np.log(2))) - np.trace(np.dot(rdm_j, logm(rdm_j)/np.log(2))) + np.trace(np.dot(rdm_ij, logm(rdm_ij) / np.log(2)))
+    qmi = -np.trace(np.dot(rdm_i, logm(rdm_i))) - np.trace(np.dot(rdm_j, logm(rdm_j))) + np.trace(np.dot(rdm_ij, logm(rdm_ij)))
 
     if qmi.imag > 0.01:
         raise ValueError("Imaginary Entanglement")
