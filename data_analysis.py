@@ -4,6 +4,7 @@ from scipy.linalg import logm
 from scipy.linalg import svd
 from scipy.optimize import curve_fit
 import pandas as pd
+from functools import reduce
 
 import vector_manipluation_tools as vm
 
@@ -45,9 +46,9 @@ def energy_spread(expec_vals, std_vals):
     expec_vals = np.array(expec_vals)
     std_vals = np.array(std_vals)
 
-    energy_spread_percentage = 100*np.abs(std_vals/expec_vals)
+    energy_spread_frac = np.abs(std_vals/expec_vals)
 
-    return energy_spread_percentage
+    return energy_spread_frac
 def has_sublists(my_list):
     return any(isinstance(item, list) for item in my_list)
 
@@ -161,15 +162,81 @@ def correlation_length(n, g_r):
 def exponential_function(x, a, b):
     return a * np.exp(b * x)
 
+def thermalization_matrix(h, obs_type='r excitations', eigenvectors_table=False):
+
+    if obs_type == 'r excitations':
+
+        d = h.shape[0]
+        n = int(np.log2(d))
+
+        A = np.zeros((d, d))
+        id = np.eye(2)
+        n_i = np.array([[0, 0],
+                       [0, 1]])
+
+        for i in range(0, n):
+            id_list = [id] * n
+            id_list[i] = n_i
+
+            A_i = reduce(np.kron, id_list)
+
+            A = A + A_i
+
+        print(A)
+
+        eigenvalues, eigenvectors_h = np.linalg.eig(h)
+
+        # Sort eigenvectors based on eigenvalues
+        sorted_indices = np.argsort(eigenvalues)
+        sorted_eigenvalues = eigenvalues[sorted_indices]
+        eigenvectors_h = eigenvectors_h[:, sorted_indices]
+        print(sorted_eigenvalues)
+
+        eigenvectors_hconj = eigenvectors_h.conj().T
+
+        A = np.dot(eigenvectors_hconj, np.dot(A, eigenvectors_h))
+
+        if eigenvectors_table:
+            eigenvectors_df = pd.DataFrame(eigenvectors_h, columns=eigenvalues)
+            print(eigenvectors_df)
+            return A, eigenvectors_h
+
+        else:
+            return A
+
+
+def rydberg_number_expectations(density_matrices):
+
+    ryd_num_expec = []
+
+    d = density_matrices[0].shape[0]
+    n = int(np.log2(d))
+
+    A = np.zeros((d, d))
+    id = np.eye(2)
+    n_i = np.array([[0, 0],
+                    [0, 1]])
+
+    for i in range(0, n):
+        id_list = [id] * n
+        id_list[i] = n_i
+
+        A_i = reduce(np.kron, id_list)
+
+        A = A + A_i
+
+    for density_matrix in density_matrices:
+
+        ryd_num_expec += [expectation_value(density_matrix,A)]
+
+    return ryd_num_expec
+
+
 if __name__ == "__main__":
+
+
     n_qubits = 2
     state_vector = np.array([0, 1, 0, 0]) #/ np.sqrt(2)  # Example state: (|00⟩ + |11⟩) / sqrt(2)
     subsystem_A_indices = 1  # Qubits in subsystem A
 
-    schmidt_coeffs, reduced_density_matrix_A = schmidt_decomposition(state_vector,
-                                                                                                         2,
-                                                                                                         1)
-
-    # Print the results
-    print("Schmidt Coefficients:", schmidt_coeffs)
-    print("Reduced Density Matrix for Subsystem A:\n", reduced_density_matrix_A)
+    print(thermalization_matrix(np.eye(8)))

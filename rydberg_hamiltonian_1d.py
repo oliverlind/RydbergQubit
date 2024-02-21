@@ -124,12 +124,14 @@ class RydbergHamiltonian1D:
 
 if __name__ == "__main__":
 
-    h_m = RydbergHamiltonian1D(2).hamiltonian_matrix([0])
-
-    print(np.linalg.eigh(h_m))
-
+    h_m = RydbergHamiltonian1D(3).hamiltonian_matrix([0])
 
     print(h_m)
+
+    print(data_analysis.thermalization_matrix(h_m))
+
+
+
 
 
 

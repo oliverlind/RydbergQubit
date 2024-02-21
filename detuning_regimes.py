@@ -68,6 +68,12 @@ def global_detuning(t, dt, δ_start, δ_end, d_type='linear', position=pos):
         detuning = quench_ramped(δ_start, δ_end, steps, d_type, position=position)
         detuning = np.array([detuning])
         return detuning
+
+    elif type(d_type) == list:
+        detuning = quench_short(δ_start, δ_end, steps, d_type[0], d_type[1], position=position, show=True)
+        detuning = np.array([detuning])
+        return detuning
+
     else:
         raise ValueError('Detuning type not here')
         sys.exit()
@@ -136,8 +142,23 @@ def quench_ramped(δ_start, δ_end, steps, quench_steps, position=0.5, show=Fals
 
     return detuning
 
+def quench_short(δ_start, δ_end, steps, quench_steps, duration, position=0.5, show=False):
+    flat_steps = math.floor(steps * position)
 
+    flat_1 = np.linspace(δ_start, δ_end, flat_steps)
+    quench_down = np.linspace(δ_end, 0, quench_steps)
+    flat_bottom = np.linspace(0, 0, duration)
+    quench_up = np.linspace(0, δ_end, quench_steps)
+    flat_2 = np.linspace(δ_end, δ_end, steps - flat_steps - 2*quench_steps - duration)
 
+    detuning = np.hstack((flat_1, quench_down, flat_bottom, quench_up, flat_2))
+
+    if show:
+        x = np.arange(0, steps)
+        plt.plot(x, detuning)
+        plt.show()
+
+    return detuning
 
 
 
@@ -221,5 +242,4 @@ if __name__ == "__main__":
     start =200
     end= 200
 
-
-    driving_quench(t,dt,start,end,steps, show=True, position=0.1)
+    quench_short(start,end,steps,0,20, position=0, show=True)

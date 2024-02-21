@@ -471,7 +471,7 @@ class Plot(AdiabaticEvolution):
                                                                                              )
         fig, ax = plt.subplots()
 
-        ploting_tools.set_up_color_bar(self.dimension, eigenstate_probs, self.times, ax=ax, type='eigen energies')
+        ploting_tools.set_up_color_bar(12, eigenstate_probs, self.times, ax=ax, type='eigen energies')
 
         plt.show()
 
@@ -551,7 +551,7 @@ class Plot(AdiabaticEvolution):
 
         if show:
             states = self.time_evolve(states_list=True)
-            fig = plt.figure(figsize=(12.5, 8))
+            fig = plt.figure(figsize=(8, 3))
             plt.xlim(0, self.t)
             ax = plt.gca()
         elif ax and states is not None:
@@ -962,9 +962,11 @@ class Plot(AdiabaticEvolution):
         binary_strings = ploting_tools.ascending_binary_strings(self.n)
 
         df.index = ['Energy Eigenvalue', 'Probability'] + binary_strings
-        path = 'Output csv tables/data.csv'
+        path = 'Output CSV tables/data.csv'
 
         df.to_csv(path, index=True)
+
+        sys.exit()
 
     def eigenstate_basis(self, state_to_convert=[]):
 
@@ -1190,11 +1192,11 @@ class Plot(AdiabaticEvolution):
 if __name__ == "__main__":
     start_time = time.time()
 
-    t = 1
+    t = 7
     dt = 0.01
-    n = 2
-    δ_start = 0
-    δ_end = 0
+    n = 3
+    δ_start = -30 * 2 * np.pi
+    δ_end = 30 * 2 * np.pi
 
     two = ['quench', 'quench']
     two2 = ['quench', 'linear flat']
@@ -1233,21 +1235,25 @@ if __name__ == "__main__":
     nine = ['quench'] + 8 * ['linear flat']
 
     evol = Plot(n, t, dt, δ_start, δ_end, detuning_type=None,
-                single_addressing_list=two3,
-                initial_state_list=[0, 0]
+                single_addressing_list=seven,
+                initial_state_list=[0, 0, 0]
                 )
 
-    evol.eigenstate_table(time=0.2)
+    evol.entanglement_entropy_colorbar(show=True)
+
+    evol.eigenstate_fidelity_colorbar()
+
+    evol.eigenstate_table(time=0.09)
 
     evol.plot_colour_bar(show=True)
 
     #evol.entanglement_entropy(show=True)
     #evol.eigenvalue_lineplot(show=True)
 
-    #evol.eigenstate_fidelity_colorbar()
+
 
     #
-    #evol.entanglement_entropy_colorbar(show=True)
+
     #
     evol.bell_fidelity_colorbars()
     #

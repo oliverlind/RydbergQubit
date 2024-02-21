@@ -243,6 +243,47 @@ class PlotSingle(AdiabaticEvolution):
 
     '''Eigenenergies functions'''
 
+    def eigenenergies_barchart(self, eigenvalues=None, eigenstate_probs=None,
+                               expectation_energies=None, before=False, ax=None, show=False):
+
+        if ax is None:
+            eigenvalues, eigenvectors, expectation_energies, eigenstate_probs = self.time_evolve(eigen_list=True,
+                                                                                                 eigenstate_fidelities=True,
+                                                                                                 expec_energy=True)
+            fig, ax = plt.subplots(1, 1, figsize=(8, 2.2))
+
+
+        eigenstate_probs = np.array(eigenstate_probs)
+        n = len(eigenvalues[-1])
+        bound = np.max(eigenstate_probs[:, -1]) + 0.05
+        initial_fidelity = eigenstate_probs[0, 0]
+        print(initial_fidelity)
+
+
+        if before:
+            ax.bar(eigenvalues[0], [1] * n, color='grey', alpha=0.2, width=4)
+            ax.bar(eigenvalues[0], eigenstate_probs[:, 0], width=4)
+
+        else:
+            ax.bar(eigenvalues[-1], [0.6]*n, color='grey', alpha=0.2, width=4)
+            ax.bar(eigenvalues[-1], eigenstate_probs[:, -1], width=4)
+
+
+        if show:
+            plt.show()
+
+    def eigenstate_fidelity_colorbar(self, show=False):
+        eigenvalues, eigenvectors, expectation_energies, eigenstate_probs = self.time_evolve(expec_energy=True,
+                                                                                             eigen_list=True,
+                                                                                             eigenstate_fidelities=True,
+                                                                                             )
+        fig, ax = plt.subplots()
+
+        ploting_tools.set_up_color_bar(17, eigenstate_probs, self.times, ax=ax, type='eigen energies')
+
+        if show:
+            plt.show()
+
     def eigenenergies_lineplot(self, eigenvalues=None, detuning=False, ax=None):
 
         if eigenvalues is None:
@@ -410,9 +451,6 @@ class PlotSingle(AdiabaticEvolution):
             plt.plot(self.times, energy_spread_percentage)
 
             plt.show()
-        
-        
-        
 
     '''Quantum Correlation and entanglement functions'''
 
@@ -445,7 +483,7 @@ class PlotSingle(AdiabaticEvolution):
                 purity_list += [p]
 
         ax.plot(self.times, qmi_list, label=label)
-        ax.set_ylim(0, 0.75)
+        #ax.set_ylim(0, 0.75)
         print(f'Atom {j} QMI_av', np.average(qmi_list))
 
         if purity:
@@ -461,7 +499,7 @@ class PlotSingle(AdiabaticEvolution):
         if data:
             return qmi_list
 
-    def plot_half_sys_entanglement_entropy(self, ax=None, atom_i=None, entanglement_entropy=None, states=None, save_pdf=False, show=False):
+    def plot_half_sys_entanglement_entropy(self, ax=None, atom_i=None, entanglement_entropy=None, states=None, label='', save_pdf=False, show=False):
 
         if ax is None:
             states, entanglement_entropy = self.time_evolve(states_list=True, entanglement_entropy=True)
@@ -469,7 +507,10 @@ class PlotSingle(AdiabaticEvolution):
             fig, ax = plt.subplots(figsize=(4, 3))
             ax.set_xlabel(r'Time ($\mu$s)')
 
-        ax.plot(self.times, entanglement_entropy, color='blue', label='Half Chain (1, 2, 3)')
+            ax.plot(self.times, entanglement_entropy, color='blue', label='Half Chain')
+
+        else:
+            ax.plot(self.times, entanglement_entropy, label=label)
 
         if atom_i is not None:
             vne_list = []
@@ -485,6 +526,8 @@ class PlotSingle(AdiabaticEvolution):
         plt.axhline(y=np.log(4), color='blue', linestyle='--', linewidth=1, alpha=0.5)
 
         plt.axhline(y=np.log(2), color='orange', linestyle='--', linewidth=1, alpha=0.5)
+
+        plt.ylabel('VNE')
 
         if show:
             plt.show()
@@ -510,6 +553,8 @@ class PlotSingle(AdiabaticEvolution):
 
 
         ax.plot(self.times, vne_list, label=label)
+        ax.set_ylim((0,0.8))
+        ax.axhline(y=np.log(2), color='grey', linestyle='--', linewidth=1, alpha=0.5)
         print(f'Atom {j} VNE_av', np.average(vne_list))
 
 
@@ -520,10 +565,6 @@ class PlotSingle(AdiabaticEvolution):
 
         if data:
             return vne_list
-
-
-
-
 
     def correlation(self, ax=None, states=None, corr_lengths=False, save_pdf=False, show=False):
 
@@ -552,12 +593,42 @@ class PlotSingle(AdiabaticEvolution):
 
         plt.show()
 
+    '''Thermalization'''
+
+    def thermalization_matrix_colour_maps(self, d):
+
+        fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(6, 6))
+
+        h_m = self.hamiltonian_matrix([d])
+
+        t_m, e = data_analysis.thermalization_matrix(h_m, eigenvectors_table=True)
+
+        print(h_m)
+
+        print(t_m)
+
+        # Create a colormap (you can choose a different colormap if desired)
+        cmap = plt.get_cmap('RdYlGn')
+
+        # Set the extent of the heatmap to match the dimensions of the matrix
+        extent = [0, self.dimension, 0, self.dimension]
+
+        ax.imshow(t_m, cmap=cmap, extent=extent, vmin=-self.n, vmax=self.n)
+        ax.set_xticks([])
+        ax.set_yticks([])
+        ax.set_ylabel('')
+
+        plt.show()
+
+
+
+
 
 
 if __name__ == "__main__":
-    t = 6
+    t = 0.2
     dt = 0.01
-    n = 3
+    n = 7
     δ_start = 30 * 2 * np.pi
     δ_end = 30 * 2 * np.pi
 
@@ -568,27 +639,34 @@ if __name__ == "__main__":
     three = ['quench'] * 3
     three2 = ['quench'] + ['linear flat'] * 2
     three3 = ['linear flat'] * 3
-    three4 = [10] + ['linear flat'] * 2
+    three4 = [1] + ['linear flat'] * 2
 
     four = ['quench'] * 4
 
     five = ['linear'] * 5
     five1 = ['linear flat'] * 5
-    five2 = ['quench'] * 5
+    five2 = [5] * 5
     five3 = [1] + ['linear flat'] * 4
+    five4 = [[1, 25]] + ['linear flat'] * 4
 
     seven = ['linear'] * 7
-    seven2 = ['quench'] * 7
-    seven3 = [15] + ['linear flat'] * 6
+    seven2 = [10] * 7
+    seven3 = [10] + ['linear flat'] * 6
 
 
     nine = ['linear'] * 9
 
     plotter = PlotSingle(n, t, dt, δ_start, δ_end, detuning_type=None,
-                         single_addressing_list=three2,
-                         initial_state_list=[0, 0, 0],
+                         single_addressing_list=seven3,
+                         initial_state_list=[1, 0, 1, 0, 1, 0, 1],
                          a=5.48
                          )
+
+    plotter.eigenenergies_barchart(show=True)
+    #plotter.eigenstate_fidelity_colorbar(show=True)
+    plotter.colour_bar(show=True)
+
+    plotter.thermalization_matrix_colour_maps(0)
 
     plotter.plot_half_sys_entanglement_entropy(atom_i=None, show=True)
 
@@ -597,7 +675,7 @@ if __name__ == "__main__":
     #plotter.eigenenergies_lineplot_with_eigenstate_fidelities(show=True)
 
     plotter.energy_std()
-    plotter.colour_bar(show=True)
+
     #plotter.correlation(show=True)
 
     data = plotter.colour_bar(type='correlation', show=True)

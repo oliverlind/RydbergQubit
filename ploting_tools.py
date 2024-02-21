@@ -30,7 +30,7 @@ def set_up_color_bar(n, data, times, ax, type='rydberg', color='viridis', colorb
 
     elif type == 'vne':
         labels = [f'Atom {i + 1}' for i in range(n)]
-        norm = mcolors.Normalize(vmin=0, vmax=1)
+        norm = mcolors.Normalize(vmin=0, vmax=np.log(2))
         bar_label = "Von Neumann Entropy"
 
     elif type == 'psi plus':

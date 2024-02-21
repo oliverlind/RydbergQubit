@@ -222,9 +222,36 @@ class CombinedPlots(PlotSingle):
 
         plt.show()
 
+    def multiple_eigenenergies_vs_detuning(self, qsteps_list, initial_detunings, save_pdf=False):
+
+        fig, axs = plt.subplots(len(initial_detunings), 1, sharex=True,figsize=(8, 2.2))
+
+        initial_state = [1 if i % 2 == 0 else 0 for i in range(self.n)]
+
+        for i, int_detuning in enumerate(initial_detunings):
+            qstep = qsteps_list[i]
+            single_addressing_list = [qstep] + ['linear flat'] * (self.n-1)
+
+
+            singleplot = PlotSingle(n, self.t, self.dt, int_detuning, int_detuning, detuning_type=None,
+                                    single_addressing_list=single_addressing_list,
+                                    initial_state_list=initial_state, rabi_regime='constant')
+
+            eigenvalues, eigenvectors, expectation_energies, eigenstate_probs = singleplot.time_evolve(eigen_list=True,
+                                                                                                 eigenstate_fidelities=True,
+                                                                                                 expec_energy=True)
+
+            singleplot.eigenenergies_barchart(eigenvalues=eigenvalues, eigenstate_probs=eigenstate_probs, expectation_energies=expectation_energies, ax=axs[i])
+
+        plt.show()
+
+
+
     '''Energy_spread'''
 
-    def energy_spread(self, n_list, qsteps_list, save_pdf=False):
+    def energy_spread(self, n_list, qsteps_list,  save_pdf=False):
+
+        plt.figure(figsize=(4,6))
 
         for n in n_list:
 
@@ -243,13 +270,18 @@ class CombinedPlots(PlotSingle):
 
                 expectation_vals, std_vals = singleplot.time_evolve(expec_energy=True, std_energy_list=True)
 
-                energy_spread_percentage = data_analysis.energy_spread(expectation_vals, std_vals)
+                energy_spread_frac = data_analysis.energy_spread(expectation_vals, std_vals)
 
-                energy_spread_plot_list += [energy_spread_percentage[-1]]
+                energy_spread_plot_list += [energy_spread_frac[-1]] # add last term as energy and spread are constant after quench (H is constant)
 
-            plt.scatter(qsteps_list * self.dt, energy_spread_plot_list)
-            plt.plot(qsteps_list * self.dt, energy_spread_plot_list)
 
+            plt.scatter(qsteps_list * self.dt, energy_spread_plot_list, label=f'N={n}')
+            plt.plot(qsteps_list * self.dt, energy_spread_plot_list, marker='o')
+
+        plt.xlabel(r'$\Delta$$t_{quench}$ ($\mu$s)')
+        plt.ylabel(r'$\sigma_{E} / \langle E \rangle$')
+        plt.legend(loc="upper right")
+        plt.tight_layout()
         plt.show()
 
     '''Entanglement Entropy and Correlation'''
@@ -282,49 +314,106 @@ class CombinedPlots(PlotSingle):
 
         plt.show()
 
+    def area_law_test(self, initial_states, single_addressing_list, times_list=None):
+
+        fig, ax = plt.subplots(1, 1, figsize=(4, 4))
+
+        if times_list is not None:
+            steps = np.array(times_list) / self.dt
+            steps = [int(item) for item in steps]
+
+
+        else:
+            steps = [-1]
+
+        for initial_state in initial_states:
+
+            singleplot = PlotSingle(n, self.t, self.dt, self.δ_start, self.δ_end, detuning_type=None,
+                                    single_addressing_list=single_addressing_list,
+                                    initial_state_list=initial_state, rabi_regime='constant')
+
+            states = singleplot.time_evolve(states_list=True)
+
+            for step in steps:
+
+                vne_list = [0]
+                sites_list = np.arange(0, self.n+1, 1)
+
+                for n_a in range(1, self.n):
+
+                    rdm = self.reduced_density_matrix_from_left(self.n, n_a, states[step])
+                    vne = data_analysis.von_nuemann_entropy(rdm)
+
+                    vne_list += [vne]
+
+                vne_list += [0]
+
+                ax.scatter(sites_list, vne_list)
+                ax.plot(sites_list, vne_list)
+
+        plt.show()
+
+
+
+
+
+
+
+    def entanglement_speed(self, save_pdf=False):
+        pass
+
     def qmi_compare(self, n, atom_list, q_list, corr_type='QMI', save_pdf=False, save_df=False):
 
         data = pd.DataFrame()
         data['Time'] = self.times
 
 
-        fig, axs = plt.subplots(len(atom_list), 1, sharex='col', figsize=(8, 3))
+        fig, axs = plt.subplots(len(atom_list), 1, figsize=(8, 4))
+        plt.subplots_adjust(hspace=0)
+        t_diff_data = pd.DataFrame()
 
-        for k, atom in enumerate(atom_list):
 
-            initial_state = [1 if i % 2 == 0 else 0 for i in range(n)]
+        # for k, atom in enumerate(atom_list):
 
-            background = ['linear flat'] * n
-            single_addressing_lists = [background]
+        initial_state = [1 if i % 2 == 0 else 0 for i in range(n)]
 
-            for q in q_list:
-                single_quench = [q] + ['linear flat'] * (n - 1)
-                single_addressing_lists += [single_quench]
+        background = ['linear flat'] * n
+        single_addressing_lists = [background]
 
-            for i, single_addressing_list in enumerate(single_addressing_lists):
-                print(single_addressing_list)
+        for q in q_list:
+            single_quench = [q] + ['linear flat'] * (n - 1)
+            single_addressing_lists += [single_quench]
 
-                singleplot = PlotSingle(n, self.t, self.dt, self.δ_start, self.δ_end, detuning_type=None,
-                                        single_addressing_list=single_addressing_list,
-                                        initial_state_list=initial_state, rabi_regime='constant')
+        for i, single_addressing_list in enumerate(single_addressing_lists):
+            print(single_addressing_list)
 
-                states = singleplot.time_evolve(states_list=True)
 
-                if i > 0:
-                    speed = q_list[i - 1] * self.dt
-                    speed = r'$\Delta$$t_{q}$' + f'= {speed}' + '($\mu$s)'
+            singleplot = PlotSingle(n, self.t, self.dt, self.δ_start, self.δ_end, detuning_type=None,
+                                    single_addressing_list=single_addressing_list,
+                                    initial_state_list=initial_state, rabi_regime='constant')
 
-                else:
-                    speed = 'No quench'
+            states = singleplot.time_evolve(states_list=True)
+
+            # if i > 0:
+            #     speed = q_list[i - 1] * self.dt
+            #     speed = r'$\Delta$$t_{q}$' + f'= {speed}' + '($\mu$s)'
+            #
+            # else:
+            speed = ''
+
+            for k, atom in enumerate(atom_list):
 
                 if corr_type == 'QMI':
 
                     data[f'I(1,{atom}) t_q = {single_addressing_list[0]}'] = singleplot.quantum_mutual_information(1, atom,
                                                                                                               states=states,
-                                                                                                              ax=axs[k],
+                                                                                                              ax=axs,
                                                                                                               label=speed,
                                                                                                               data=True,
-                                                                                                              purity=True)
+                                                                                                              purity=False)
+
+                    axs.set_ylabel(f'I(1, {atom})')
+                    axs.legend()
 
                 elif corr_type == 'VNE':
                      data[f'VNE atom{atom} t_q = {single_addressing_list[0]}'] = singleplot.plot_entanglement_entropy_single_atom(atom, states=states, ax=axs[k], label=speed, data=True)
@@ -337,20 +426,34 @@ class CombinedPlots(PlotSingle):
                          #axs[k].axhline(y=criteria, color='blue', linestyle='--', linewidth=1, alpha=0.5)
 
                          print(criteria)
-                         start = data[data[f'VNE atom{atom} t_q = {single_addressing_list[0]}'] > criteria]
+                         start = data[data[f'VNE atom{atom} t_q = {single_addressing_list[0]}'] > 1.2*data[f'VNE atom{atom} t_q = linear flat']]
                          start.reset_index(drop=True, inplace=True)
-                         start = start['Time'][0]
-                         print(start)
+                         if not start.empty:
+                            start = start['Time'][0]
+                            print(start)
+                         else:
+                            start = 0
+
+                         t_diff_data[f'Atom {atom}'] = [start]
                          axs[k].axvline(x=start, color='red', linestyle='--', linewidth=1, alpha=0.5)
 
-                         axs[k].set_ylabel(r'$S_{vNe}$($\rho_{'+f'{atom}'+'}$)', rotation=0, labelpad=10, ha='right')
+                     axs[k].set_ylabel(r'$S_{EE}$($\rho_{'+f'{atom}'+'}$)', rotation=0, labelpad=10, ha='right')
 
 
 
 
+        t_diff_data = t_diff_data.T
+        t_diff_data = t_diff_data.iloc[::-1]
+        print(t_diff_data)
         axs[-1].set_xlabel(r'Time ($\mu$s)')
+        axs[-1].tick_params(top=False)
+        axs[-1].set_yticks([0, np.log(2)])
+        axs[-1].set_yticklabels(['0.00', r'$ln(2)$'])
+        axs[-1].yaxis.tick_right()
 
-        plt.subplots_adjust(hspace=0)
+        for i in range(0,5):
+            axs[i].set_xticks([])
+            axs[i].set_yticks([])
 
         # if corr_type == 'QMI':
         #     ax.set_ylabel(f'I(1, {atom})')
@@ -361,14 +464,16 @@ class CombinedPlots(PlotSingle):
         # legend.set_title(r'$\Delta$$t_{quench}$ ($\mu$s)')
 
         if save_df:
-            path = 'Output csv tables/qmi_data.csv'
+            path = 'Output CSV tables/qmi_data.csv'
+            path2 = f'2Plotting Data/Propagation Speed EE/1.5 separation data/7 Atom D_inital={self.δ_start},t_q={q_list[0]*0.001},dt=0.001.csv'
             data.to_csv(path, index=True)
+            t_diff_data.to_csv(path2, index=True)
 
-        print(data)
 
         if save_pdf:
-            plt.savefig(f'Quick Save Plots/output.pdf', format='pdf', bbox_inches='tight', dpi=700)
+            plt.savefig(f'2Plotting Data/Propagation Speed EE/1.5 separation data/Plots/7 Atom D_inital={self.δ_start},t_q={q_list[0]*0.001},dt=0.001.pdf', format='pdf', bbox_inches='tight', dpi=700)
 
+        #plt.tight_layout()
         plt.show()
 
     def rydberg_correlation_cbs(self, i=None, save_pdf=False):
@@ -495,7 +600,7 @@ class CombinedPlots(PlotSingle):
         print(np.std(data['I(1, 5)']))
 
         if save_df:
-            path = 'Output csv tables/qmi_data.csv'
+            path = 'Output CSV tables/qmi_data.csv'
             data.to_csv(path, index=True)
 
     def plot_data(self):
@@ -552,11 +657,52 @@ class CombinedPlots(PlotSingle):
 
         print(speed)
 
+    def multiple_entanglement_entropy(self, initial_states, single_addressing_list, atom_i=None):
+
+        fig, ax = plt.subplots(1, 1, sharex=True, figsize=(8, 2.2))
+
+        for initial_state in initial_states:
+
+            singleplot = PlotSingle(self.n, self.t, self.dt, self.δ_start, self.δ_end, detuning_type=None,
+                                   single_addressing_list=single_addressing_list,
+                                   initial_state_list=initial_state, rabi_regime='constant')
+
+            states, ee = singleplot.time_evolve(states_list=True, entanglement_entropy=True)
+
+            label = ploting_tools.state_label(initial_state)
+
+            self.plot_half_sys_entanglement_entropy(ax=ax, atom_i=atom_i, entanglement_entropy=ee, states=states, label=label)
+
+        plt.show()
+
+
+
+
+
+    ''' Investigating thermalization'''
+
+    def sum_rydbergs(self):
+        fig, ax = plt.subplots(1, 1, sharex=True, figsize=(8, 2.2))
+
+        density_matrices = self.time_evolve(density_matrix=True)
+
+        rydberg_sum_2 = data_analysis.rydberg_number_expectations(density_matrices)
+
+        ax.plot(self.times, rydberg_sum_2)
+        ax.set_ylabel('rydberg expectation')
+        ax.set_xlabel('time')
+
+
+
+        plt.show()
+
+
+
 
 if __name__ == "__main__":
-    t = 0.5
+    t = 0.015
     dt = 0.001
-    n = 5
+    n = 7
     δ_start = 30 * 2 * np.pi
     δ_end = 30 * 2 * np.pi
 
@@ -564,27 +710,44 @@ if __name__ == "__main__":
     two2 = ['quench', 'linear flat']
     two3 = ['linear', 'linear']
 
-    three = ['linear flat'] * 3
+    three = ['linear'] * 3
     three2 = ['quench'] + ['linear flat'] * 2
     three3 = ['quench'] * 3
 
     five = ['linear flat'] * 5
     five2 = ['quench'] * 5
-    five3 = [0] + ['linear flat'] * 4
+    five3 = [7] + ['linear flat'] * 4
+    five4 = [0] + ['linear flat'] * 3 + [0]
 
     seven = ['linear flat'] * 7
-    seven2 = ['quench'] * 7
-    seven3 = [0] + ['linear flat'] * 6
-    seven4 = ['short quench'] + ['linear flat'] * 6
+    seven2 = [0] * 7
+    seven3 = [1] + ['linear flat'] * 6
+    seven4 = ['linear flat'] * 3 + [1] + ['linear flat'] * 3
+
+    nine = ['quench']
+    nine2 = [0] + ['linear flat'] * 8
 
     plotter = CombinedPlots(n, t, dt, δ_start, δ_end, detuning_type=None,
-                            single_addressing_list=five3,
-                            initial_state_list=[1, 0, 1, 0, 1], rabi_regime='constant'
+                            single_addressing_list=seven,
+                            initial_state_list=[0, 0, 0, 0, 0, 0, 0], rabi_regime='constant'
                             )
 
-    plotter.qmi_compare(9, [9], [10], save_df=True, corr_type='VNE')
+    #plotter.area_law_test([[1, 0, 1, 0, 1, 0, 1], [0]*7],seven2, times_list=None)
 
-    # plotter.energy_spread([3, 5, 7], np.arange(1, 250, 20))
+    plotter.multiple_eigenenergies_vs_detuning([10, 8],[30 * 2 * np.pi, 24 * 2 * np.pi])
+
+    #plotter.multiple_entanglement_entropy([[1,0,0,1,1,0,1],[0,0,0,0,0,0,0]], single_addressing_list=seven2)
+
+    #plotter.sum_rydbergs()
+
+    #plotter.cb_entanglement_entropy(atom_i=None)
+
+    plotter.qmi_compare(7, [7, 6, 5, 4, 3, 2], [7], save_df=True, corr_type='VNE', save_pdf=True)
+
+
+
+
+    #plotter.energy_spread([3, 5, 7], np.arange(1, 200, 20))
 
     # plotter.propagation_speed(save_df=True)
 
@@ -592,7 +755,7 @@ if __name__ == "__main__":
 
     # plotter.correlation_averages(np.arange(1, 200, 20), [1, 0, 1, 0, 1, 0, 1], seven4)
 
-    # plotter.cb_entanglement_entropy(atom_i=1)
+
 
     # plotter.rydberg_correlation_cbs(i=1)
 

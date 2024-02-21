@@ -71,11 +71,16 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
 
         return v
 
-    def initial_state(self, state_list):
+    def initial_state(self, state_list, bell=False):
         state_list = list(reversed(state_list))
-        v = self.col_basis_vectors(2)[state_list[0]] #self.bel_psi_minus()
+        if not bell:
+            v = self.col_basis_vectors(2)[state_list[0]]
+            start = 1
+        else:
+            v = self.bel_psi_minus()
+            start=2
 
-        for i in state_list[1:]:
+        for i in state_list[start:]:
             u = self.col_basis_vectors(2)[i]
             v = np.kron(v, u)
 
@@ -444,6 +449,54 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
 
         return reduced_density_matrix
 
+    def reduced_density_matrix_from_left(self, n, n_A , ψ):
+
+        if n == 1:
+            sys.exit()
+
+        n_B = n - n_A
+
+        d_A = 2 ** n_A
+        d_B = 2 ** n_B
+
+        m_left_list = []
+        m_right_list = []
+
+        # Produce list of matrices on left side of sum
+        row_basis_vectors = self.row_basis_vectors(d_B)
+        for row_vector in row_basis_vectors:
+            bra_vectors = self.comp_basis_vector_to_qubit_states(row_vector)
+
+            m_left = np.eye(d_A)  # initialise left matrix
+
+            for bra in bra_vectors:
+                m_left = np.kron(m_left, bra)  # taking tensor product left to right
+            # m_left = np.eye(d_A)
+            # m_left = np.kron(m_left, row_vector)
+
+            m_left_list += [m_left]
+
+        # Produce list of matrices on right side of sum
+        col_basis_vectors = self.col_basis_vectors(d_B)
+        for col_vector in col_basis_vectors:
+            ket_vectors = self.comp_basis_vector_to_qubit_states(col_vector)
+
+            m_right = np.eye(d_A) # initialise right matrix
+
+            for ket in ket_vectors:
+                m_right = np.kron(m_right, ket)  # taking tensor product left to right
+
+            m_right_list += [m_right]
+
+        reduced_density_matrix = np.zeros((d_A, d_A))
+
+        for j in range(0, d_B):
+            m_left = m_left_list[j]
+            m_right = m_right_list[j]
+            reduced_density_matrix = reduced_density_matrix + np.dot(np.dot(m_left, ψ), np.dot(ψ.conj().T, m_right))
+
+        return reduced_density_matrix
+
     def rydberg_fidelity(self, rydberg_fidelity_list, ψ):
 
         for i in range(1, self.n + 1):
@@ -530,17 +583,15 @@ if __name__ == "__main__":
 
     evol = AdiabaticEvolution(n, t, dt, δ_start, δ_end, detuning_type='linear')
 
-    psi = evol.time_evolve(states_list=True)
+    #psi = evol.time_evolve(states_list=True)
 
-    psi = psi[-1]
-    print(psi)
+    psi = 1/(np.sqrt(3)) * np.array([[1], [0], [0], [0], [0], [0], [0], [1]])
+    psi = 1/(np.sqrt(2)) * np.array([[1], [0], [0], [1]])
 
-    #psi = np.array([[0], [0], [0], [0], [0], [1], [0], [0]])
+    rdm = evol.reduced_density_matrix_from_left(2, 2, psi)
 
+    print(rdm)
 
-    g = evol.rydberg_rydberg_density_corr_function(psi)
-
-    print(g)
 
 
 
