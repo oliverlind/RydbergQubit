@@ -509,6 +509,8 @@ class PlotSingle(AdiabaticEvolution):
 
             ax.plot(self.times, entanglement_entropy, color='blue', label='Half Chain')
 
+            ax.set_ylabel('Half Chain VNE')
+
         else:
             ax.plot(self.times, entanglement_entropy, label=label)
 
@@ -526,8 +528,6 @@ class PlotSingle(AdiabaticEvolution):
         plt.axhline(y=np.log(4), color='blue', linestyle='--', linewidth=1, alpha=0.5)
 
         plt.axhline(y=np.log(2), color='orange', linestyle='--', linewidth=1, alpha=0.5)
-
-        plt.ylabel('VNE')
 
         if show:
             plt.show()
@@ -650,19 +650,19 @@ if __name__ == "__main__":
     five4 = [[1, 25]] + ['linear flat'] * 4
 
     seven = ['linear'] * 7
-    seven2 = [10] * 7
+    seven2 = [0] * 7
     seven3 = [10] + ['linear flat'] * 6
 
 
     nine = ['linear'] * 9
 
     plotter = PlotSingle(n, t, dt, δ_start, δ_end, detuning_type=None,
-                         single_addressing_list=seven3,
+                         single_addressing_list=seven2,
                          initial_state_list=[1, 0, 1, 0, 1, 0, 1],
                          a=5.48
                          )
 
-    plotter.eigenenergies_barchart(show=True)
+    #plotter.eigenenergies_barchart(show=True)
     #plotter.eigenstate_fidelity_colorbar(show=True)
     plotter.colour_bar(show=True)
 

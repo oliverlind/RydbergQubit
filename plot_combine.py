@@ -14,6 +14,8 @@ from matplotlib.collections import LineCollection
 from matplotlib.collections import PathCollection
 from matplotlib.path import Path
 import matplotlib.cm as cm
+from matplotlib.animation import FuncAnimation
+
 
 import data_analysis
 import detuning_regimes
@@ -26,7 +28,11 @@ from config.config import plotcolors
 import ploting_tools
 from matplotlib.colors import Normalize
 from plot_single import PlotSingle
+from matplotlib.animation import FFMpegWriter
 
+
+
+mpl.rcParams['animation.ffmpeg_path'] = '/opt/homebrew/bin/ffmpeg'
 mpl.rcParams['font.size'] = 12
 mpl.rcParams['font.family'] = 'serif'
 mpl.rcParams["text.latex.preamble"] = r" \usepackage[T1]{fontenc} \usepackage[charter,cal=cmcal]{mathdesign}"
@@ -314,19 +320,23 @@ class CombinedPlots(PlotSingle):
 
         plt.show()
 
-    def area_law_test(self, initial_states, single_addressing_list, times_list=None):
+    def area_law_test_animation(self, initial_states, single_addressing_list, times_list=None, save=False):
 
-        fig, ax = plt.subplots(1, 1, figsize=(4, 4))
+        fig, ax = plt.subplots(1, 1, figsize=(6, 4))
+        ax.set_xlim(0, self.n)
+        ax.set_ylim(0, np.log(2**(self.n/2)))
+        ax.set_ylabel(r'$S_{EE}$')
+        ax.set_xlabel('System A size')
+        time_text = ax.text(0.8, 0.9, '', transform=ax.transAxes)
+
 
         if times_list is not None:
             steps = np.array(times_list) / self.dt
             steps = [int(item) for item in steps]
 
+        states_combined = [[] for _ in range(len(initial_states))]
 
-        else:
-            steps = [-1]
-
-        for initial_state in initial_states:
+        for i, initial_state in enumerate(initial_states):
 
             singleplot = PlotSingle(n, self.t, self.dt, self.δ_start, self.δ_end, detuning_type=None,
                                     single_addressing_list=single_addressing_list,
@@ -334,33 +344,188 @@ class CombinedPlots(PlotSingle):
 
             states = singleplot.time_evolve(states_list=True)
 
-            for step in steps:
+            states_combined[i] = states
 
-                vne_list = [0]
-                sites_list = np.arange(0, self.n+1, 1)
 
+        sites_list = np.arange(0, self.n + 1, 1)
+        vne_list, = ax.plot([], [], 'ro-', label='|r0r0r0r⟩')  # Initialize an empty plot
+        vne_list2, = ax.plot([], [], 'bo-', label=f'|{"0"*self.n}⟩')
+
+        if len(initial_states) > 1:
+            plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.15), ncol=2)
+            plt.subplots_adjust(top=0.9)
+        def init():
+            vne_list.set_data([], [])
+            return vne_list, vne_list2, time_text
+
+        def update(step):
+
+            for i, states in enumerate(states_combined):
+                vne_values = [0]  # Initialize vne_list with the starting value
                 for n_a in range(1, self.n):
-
-                    rdm = self.reduced_density_matrix_from_left(self.n, n_a, states[step])
+                    rdm = self.reduced_density_matrix_from_left(self.n, n_a, states[step][:][:])
                     vne = data_analysis.von_nuemann_entropy(rdm)
+                    vne_values.append(vne)
+                vne_values.append(0)  # Append the ending value
 
-                    vne_list += [vne]
+                if i == 0:
+                    vne_list.set_data(sites_list, vne_values)
+                else:
+                    vne_list2.set_data(sites_list, vne_values)
 
-                vne_list += [0]
+            time_text.set_text(f't = {round(step*self.dt, 2)}'+r'$\mu$s')
 
-                ax.scatter(sites_list, vne_list)
-                ax.plot(sites_list, vne_list)
+            return vne_list, vne_list2, time_text
+
+        ani = FuncAnimation(fig, update, frames=steps, init_func=init, blit=True, repeat=False)
 
         plt.show()
 
+        writer = FFMpegWriter(fps=20, metadata=dict(artist='Me'), bitrate=1800)
+
+        if save:
+            path = 'Output Videos/'
+            ani.save(path +'vne_animation.mp4', writer=writer)
 
 
 
+    def area_law_test(self):
 
-
-
-    def entanglement_speed(self, save_pdf=False):
         pass
+
+
+
+        # else:
+        #     steps = [-1]
+        #
+        # for initial_state in initial_states:
+        #
+        #     singleplot = PlotSingle(n, self.t, self.dt, self.δ_start, self.δ_end, detuning_type=None,
+        #                             single_addressing_list=single_addressing_list,
+        #                             initial_state_list=initial_state, rabi_regime='constant')
+        #
+        #     states = singleplot.time_evolve(states_list=True)
+        #
+        #
+        #
+        #     for step in steps:
+        #
+        #         vne_list = [0]
+        #         sites_list = np.arange(0, self.n+1, 1)
+        #
+        #         for n_a in range(1, self.n):
+        #
+        #             rdm = self.reduced_density_matrix_from_left(self.n, n_a, states[step])
+        #             vne = data_analysis.von_nuemann_entropy(rdm)
+        #
+        #             vne_list += [vne]
+        #
+        #         vne_list += [0]
+        #
+        #         ax.scatter(sites_list, vne_list)
+        #         ax.plot(sites_list, vne_list)
+        #
+        # plt.show()
+
+
+
+    def entanglement_propagation_barchart_animation(self, times_list, save=False):
+
+        steps = np.array(times_list) / self.dt
+        steps = [int(item) for item in steps]
+
+        fig, ax = plt.subplots(1, 1, figsize=(8, 4))
+        ax.set_ylim(0, np.log(2.5))
+        ax.set_ylabel(r'$S_{EE}$')
+        ax.set_xlabel('Atom site')
+
+        time_text = ax.text(0.8, 0.9, '', transform=ax.transAxes)
+
+
+        states = self.time_evolve(states_list=True)
+
+        vne_list = [0]*self.n
+
+        bars = ax.bar(range(1, self.n + 1), vne_list, align='center', width=0.9)
+
+        def init():
+            for bar in bars:
+                bar.set_height(0)
+            return vne_list, time_text
+
+        def update(step):
+            for j in range(1, self.n + 1):
+                rdm = self.reduced_density_matrix(states[step], j)
+                vne = da.von_nuemann_entropy(rdm)
+                vne_list[j - 1] = vne
+
+            for bar, new_height in zip(bars, vne_list):  # Example: replace np.random.rand(self.n) with actual VNE values
+                bar.set_height(new_height)
+
+            time_text.set_text(f't = {round(step*self.dt, 2)}'+r'$\mu$s')
+
+
+            return vne_list, time_text
+
+        ani = FuncAnimation(fig, update, frames=steps, init_func=init, blit=False, repeat=False)
+
+        plt.show()
+
+        writer = FFMpegWriter(fps=20, metadata=dict(artist='Me'), bitrate=1800)
+
+        if save:
+            path = 'Output Videos/'
+            ani.save(path + 'bar_vne_animation.mp4', writer=writer)
+
+    def rydberg_fidelity_barchart_animation(self, times_list, detunning=False, save=False):
+
+        steps = np.array(times_list) / self.dt
+        steps = [int(item) for item in steps]
+
+        fig, ax = plt.subplots(1, 1, figsize=(8, 4))
+        ax.set_ylim(0, 1)
+        ax.set_ylabel(r'Rydberg Fidelity')
+        ax.set_xlabel('Atom Site')
+        time_text = ax.text(0.8, 0.9, '', transform=ax.transAxes)
+        d_text = ax.text(0.4, 0.9, '', transform=ax.transAxes)
+
+        rydberg_fidelity_list = self.time_evolve(rydberg_fidelity=True)
+        rydberg_fidelity_list = np.array(rydberg_fidelity_list)
+        rydberg_fidelity_list =rydberg_fidelity_list.T
+        rydberg_fidelitys = [0]*self.n
+
+        bars = ax.bar(range(1, self.n + 1), rydberg_fidelitys, align='center', width=0.9)
+
+        def init():
+            for bar in bars:
+                bar.set_height(0)
+            return rydberg_fidelitys, time_text, d_text
+
+        def update(step):
+            rydberg_fidelitys = rydberg_fidelity_list[step]
+
+            for bar, new_height in zip(bars, rydberg_fidelitys):
+                bar.set_height(new_height)
+
+            time_text.set_text(f't = {round(step*self.dt, 2)}'+r'$\mu$s')
+
+            if detunning:
+                d_text.set_text(r'$\Delta$/2$\pi$' + f'= {round(self.detunning[0][step] / self.two_pi, 2)}' + '(MHz)')
+
+            return rydberg_fidelitys, time_text, d_text
+
+        ani = FuncAnimation(fig, update, frames=steps, init_func=init, blit=False, repeat=False)
+
+        plt.show()
+
+        writer = FFMpegWriter(fps=20, metadata=dict(artist='Me'), bitrate=1800)
+
+        if save:
+            path = 'Output Videos/'
+            ani.save(path + 'ryd_bar_vne_animation.mp4', writer=writer)
+
+
+
 
     def qmi_compare(self, n, atom_list, q_list, corr_type='QMI', save_pdf=False, save_df=False):
 
@@ -700,10 +865,10 @@ class CombinedPlots(PlotSingle):
 
 
 if __name__ == "__main__":
-    t = 0.015
-    dt = 0.001
-    n = 7
-    δ_start = 30 * 2 * np.pi
+    t = 5.01
+    dt = 0.01
+    n = 5
+    δ_start = -30 * 2 * np.pi
     δ_end = 30 * 2 * np.pi
 
     two = ['quench', 'quench']
@@ -714,10 +879,11 @@ if __name__ == "__main__":
     three2 = ['quench'] + ['linear flat'] * 2
     three3 = ['quench'] * 3
 
-    five = ['linear flat'] * 5
-    five2 = ['quench'] * 5
-    five3 = [7] + ['linear flat'] * 4
-    five4 = [0] + ['linear flat'] * 3 + [0]
+    five = ['linear'] * 5
+    five2 = [0] * 5
+    five3 = [1] + ['linear flat'] * 4
+    five4 = [1] + ['linear flat'] * 3 + [1]
+    five5 = ['linear flat'] * 2 + [1] + ['linear flat'] * 2
 
     seven = ['linear flat'] * 7
     seven2 = [0] * 7
@@ -728,21 +894,24 @@ if __name__ == "__main__":
     nine2 = [0] + ['linear flat'] * 8
 
     plotter = CombinedPlots(n, t, dt, δ_start, δ_end, detuning_type=None,
-                            single_addressing_list=seven,
-                            initial_state_list=[0, 0, 0, 0, 0, 0, 0], rabi_regime='constant'
+                            single_addressing_list=five2,
+                            initial_state_list=[0, 0, 0, 0, 0], rabi_regime='constant'
                             )
+    plotter.rydberg_fidelity_barchart_animation(np.arange(0,5, 0.01), detunning=True, save=True)
 
-    #plotter.area_law_test([[1, 0, 1, 0, 1, 0, 1], [0]*7],seven2, times_list=None)
+    #plotter.entanglement_propagation_barchart_animation(np.arange(0,6, 0.01), save=True)
 
-    plotter.multiple_eigenenergies_vs_detuning([10, 8],[30 * 2 * np.pi, 24 * 2 * np.pi])
+    #plotter.area_law_test_animation([[1, 0, 1, 0, 1, 0, 1]], single_addressing_list=seven3, times_list=np.arange(0,6, 0.01), save=True)
 
-    #plotter.multiple_entanglement_entropy([[1,0,0,1,1,0,1],[0,0,0,0,0,0,0]], single_addressing_list=seven2)
-
-    #plotter.sum_rydbergs()
-
-    #plotter.cb_entanglement_entropy(atom_i=None)
-
-    plotter.qmi_compare(7, [7, 6, 5, 4, 3, 2], [7], save_df=True, corr_type='VNE', save_pdf=True)
+    # plotter.multiple_eigenenergies_vs_detuning([10, 8],[30 * 2 * np.pi, 24 * 2 * np.pi])
+    #
+    # #plotter.multiple_entanglement_entropy([[1,0,0,1,1,0,1],[0,0,0,0,0,0,0]], single_addressing_list=seven2)
+    #
+    # #plotter.sum_rydbergs()
+    #
+    #plotter.cb_entanglement_entropy(atom_i=None, save_pdf=True)
+    #
+    # plotter.qmi_compare(7, [7, 6, 5, 4, 3, 2], [7], save_df=True, corr_type='VNE', save_pdf=True)
 
 
 
@@ -759,7 +928,7 @@ if __name__ == "__main__":
 
     # plotter.rydberg_correlation_cbs(i=1)
 
-    # plotter.colorbar_state_fidelity([[1, 0, 1, 0, 1, 0, 1]], save_pdf=True)
+    #plotter.colorbar_state_fidelity([[1, 0, 1, 0, 1, 0, 1]], save_pdf=True)
 
     # plotter.two_atom_eigenstates(save_pdf=True)
     #
