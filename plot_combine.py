@@ -482,12 +482,13 @@ class CombinedPlots(PlotSingle):
         steps = np.array(times_list) / self.dt
         steps = [int(item) for item in steps]
 
-        fig, ax = plt.subplots(1, 1, figsize=(8, 4))
+        fig, ax = plt.subplots(1, 1, figsize=(6, 4))
         ax.set_ylim(0, 1)
         ax.set_ylabel(r'Rydberg Fidelity')
         ax.set_xlabel('Atom Site')
-        time_text = ax.text(0.8, 0.9, '', transform=ax.transAxes)
-        d_text = ax.text(0.4, 0.9, '', transform=ax.transAxes)
+        time_text = ax.text(0.51, 1.05, '', transform=ax.transAxes)
+        d_text = ax.text(0.7, 1.05, '', transform=ax.transAxes)
+        plt.subplots_adjust(top=0.9)
 
         rydberg_fidelity_list = self.time_evolve(rydberg_fidelity=True)
         rydberg_fidelity_list = np.array(rydberg_fidelity_list)
@@ -510,7 +511,7 @@ class CombinedPlots(PlotSingle):
             time_text.set_text(f't = {round(step*self.dt, 2)}'+r'$\mu$s')
 
             if detunning:
-                d_text.set_text(r'$\Delta$/2$\pi$' + f'= {round(self.detunning[0][step] / self.two_pi, 2)}' + '(MHz)')
+                d_text.set_text(r'$\Delta$/2$\pi$' + f' = {round(self.detunning[0][step] / self.two_pi, 2)}' + '(MHz)')
 
             return rydberg_fidelitys, time_text, d_text
 
@@ -865,28 +866,28 @@ class CombinedPlots(PlotSingle):
 
 
 if __name__ == "__main__":
-    t = 5.01
+    t = 4.01
     dt = 0.01
-    n = 5
-    δ_start = -30 * 2 * np.pi
+    n = 7
+    δ_start = 30 * 2 * np.pi
     δ_end = 30 * 2 * np.pi
 
     two = ['quench', 'quench']
     two2 = ['quench', 'linear flat']
     two3 = ['linear', 'linear']
 
-    three = ['linear'] * 3
+    three = ['linear flat'] * 3
     three2 = ['quench'] + ['linear flat'] * 2
     three3 = ['quench'] * 3
 
-    five = ['linear'] * 5
+    five = ['linear flat'] * 5
     five2 = [0] * 5
     five3 = [1] + ['linear flat'] * 4
     five4 = [1] + ['linear flat'] * 3 + [1]
     five5 = ['linear flat'] * 2 + [1] + ['linear flat'] * 2
 
-    seven = ['linear flat'] * 7
-    seven2 = [0] * 7
+    seven = ['linear'] * 7
+    seven2 = [5] * 7
     seven3 = [1] + ['linear flat'] * 6
     seven4 = ['linear flat'] * 3 + [1] + ['linear flat'] * 3
 
@@ -894,10 +895,12 @@ if __name__ == "__main__":
     nine2 = [0] + ['linear flat'] * 8
 
     plotter = CombinedPlots(n, t, dt, δ_start, δ_end, detuning_type=None,
-                            single_addressing_list=five2,
-                            initial_state_list=[0, 0, 0, 0, 0], rabi_regime='constant'
+                            single_addressing_list=seven2,
+                            initial_state_list=[1, 0, 1, 0, 1, 0, 1], rabi_regime='constant'
                             )
-    plotter.rydberg_fidelity_barchart_animation(np.arange(0,5, 0.01), detunning=True, save=True)
+    #plotter.sum_rydbergs()
+
+    plotter.rydberg_fidelity_barchart_animation(np.arange(0,4.01, 0.01), detunning=True, save=True)
 
     #plotter.entanglement_propagation_barchart_animation(np.arange(0,6, 0.01), save=True)
 

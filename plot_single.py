@@ -140,34 +140,43 @@ class PlotSingle(AdiabaticEvolution):
             # fig.tight_layout()  # otherwise the right y-label is slightly clipped
             plt.show()
 
-    def detuning_shape(self, types, ax=None, show=False, save_pdf=False):
+    def detuning_shape(self, types, position=0.5, ax=None, show=False, save_pdf=False):
 
         if ax is None:
-            fig, ax = plt.subplots(figsize=(4, 2.2))
+            fig, ax = plt.subplots(figsize=(6, 4))
             ax.axhline(y=0, color='black', linestyle='--', linewidth=1, alpha=0.5)
             ax.set_xlabel('Time ($\mu$s)')
         else:
             ax = ax
 
-        for i, type in enumerate(types):
-            print(type)
+        for i, d_type in enumerate(types):
 
-            if type == 'quench':
+            if d_type == 'quench':
                 color = 'b'
                 d = detuning_regimes.linear_detuning_quench(self.δ_start, self.δ_end, self.steps)
                 ax.plot(self.times, d / self.two_pi, color=color)
-            elif type == 'linear flat':
+            elif d_type == 'linear flat':
                 if i == 1:
                     color = 'r'
                     d = detuning_regimes.linear_detuning_flat(self.δ_start, self.δ_end, self.steps)
                     ax.plot(self.times, d / self.two_pi, color=color)
                 else:
                     pass
+            elif d_type == 'linear':
+                color = 'r'
+                d = np.linspace(self.δ_start, self.δ_end, self.steps)
+                ax.plot(self.times, d / self.two_pi, color=color)
+
+            elif type(d_type) == int:
+                color = 'r'
+                d = detuning_regimes.quench_ramped(δ_start, δ_end, self.steps, d_type, position=position)
+                ax.plot(self.times, d / self.two_pi, color=color)
+
             else:
                 pass
 
         ax.set_ylim(- 40, max(self.δ_start, self.δ_end) / self.two_pi + 10)  # min(self.δ_start, self.δ_end)/self.two_pi
-        ax.set_ylabel(r'$\Delta$ (MHz)')
+        ax.set_ylabel(r'$\Delta$/$2\pi$ (MHz)')
 
         if save_pdf:
             plt.savefig(f'Quick Save Plots/output.pdf', format='pdf', bbox_inches='tight', dpi=700)
@@ -244,13 +253,16 @@ class PlotSingle(AdiabaticEvolution):
     '''Eigenenergies functions'''
 
     def eigenenergies_barchart(self, eigenvalues=None, eigenstate_probs=None,
-                               expectation_energies=None, before=False, ax=None, show=False):
+                               expectation_energies=None, before=False, ax=None, save_pdf=False, show=False):
 
         if ax is None:
             eigenvalues, eigenvectors, expectation_energies, eigenstate_probs = self.time_evolve(eigen_list=True,
                                                                                                  eigenstate_fidelities=True,
                                                                                                  expec_energy=True)
-            fig, ax = plt.subplots(1, 1, figsize=(8, 2.2))
+            fig, ax = plt.subplots(1, 1, figsize=(6, 2.2))
+
+        ax.set_xlabel('Energy Eigenvalue')
+        ax.set_ylabel(r'|⟨$\Psi_{\lambda}$|$\Psi(t>t_{quench})$⟩|$^{2}$')
 
 
         eigenstate_probs = np.array(eigenstate_probs)
@@ -265,12 +277,16 @@ class PlotSingle(AdiabaticEvolution):
             ax.bar(eigenvalues[0], eigenstate_probs[:, 0], width=4)
 
         else:
-            ax.bar(eigenvalues[-1], [0.6]*n, color='grey', alpha=0.2, width=4)
+            ax.bar(eigenvalues[-1], [1]*n, color='grey', alpha=0.2, width=4)
             ax.bar(eigenvalues[-1], eigenstate_probs[:, -1], width=4)
 
+        if save_pdf:
+            plt.savefig(f'Quick Save Plots/output.pdf', format='pdf', bbox_inches='tight', dpi=700)
 
         if show:
             plt.show()
+
+
 
     def eigenstate_fidelity_colorbar(self, show=False):
         eigenvalues, eigenvectors, expectation_energies, eigenstate_probs = self.time_evolve(expec_energy=True,
@@ -626,7 +642,7 @@ class PlotSingle(AdiabaticEvolution):
 
 
 if __name__ == "__main__":
-    t = 0.2
+    t = 0.1
     dt = 0.01
     n = 7
     δ_start = 30 * 2 * np.pi
@@ -650,7 +666,7 @@ if __name__ == "__main__":
     five4 = [[1, 25]] + ['linear flat'] * 4
 
     seven = ['linear'] * 7
-    seven2 = [0] * 7
+    seven2 = [5] * 7
     seven3 = [10] + ['linear flat'] * 6
 
 
@@ -658,11 +674,13 @@ if __name__ == "__main__":
 
     plotter = PlotSingle(n, t, dt, δ_start, δ_end, detuning_type=None,
                          single_addressing_list=seven2,
-                         initial_state_list=[1, 0, 1, 0, 1, 0, 1],
+                         initial_state_list=[1,0,1,0,1,0,1],
                          a=5.48
                          )
 
-    #plotter.eigenenergies_barchart(show=True)
+    #plotter.detuning_shape(types=seven2, show=True, save_pdf=True, position=0.125)
+
+    plotter.eigenenergies_barchart(show=True, save_pdf=True)
     #plotter.eigenstate_fidelity_colorbar(show=True)
     plotter.colour_bar(show=True)
 
@@ -685,7 +703,7 @@ if __name__ == "__main__":
     #plotter.eigenvalues_distance(show=True, save_pdf=True)
 
 
-    # plotter.detuning_shape(types=seven, show=True, save_pdf=True)
+
 
 
 
