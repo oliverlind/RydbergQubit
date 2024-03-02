@@ -50,10 +50,11 @@ class PlotSingle(AdiabaticEvolution):
                          rabi_regime=rabi_regime, a=a)
 
     '''ColourBar'''
-    def colour_bar(self, type='rydberg', data=None, title=None, show=False, ax=None, cb=True, cb_ax=None, end_ax=None):
+    def colour_bar(self, type='rydberg', data=None, title=None, show=False, ax=None, cb=True, cb_ax=None, end_ax=None, save_pdf=False):
 
         if ax is None:
-            fig, ax = plt.subplots(figsize=(10, 5))
+            fig, ax = plt.subplots(figsize=(6, 3))
+            ax.set_xlabel('Time ($\mu$s)')
 
         if data is None:
             if type == 'rydberg':
@@ -82,6 +83,36 @@ class PlotSingle(AdiabaticEvolution):
 
                 n = self.n - 1
 
+            elif type == 'correlation pairwise':
+                states = self.time_evolve(states_list=True)
+
+                g_pair_list = [[] for _ in range(self.steps)]
+
+                for i in range(0, self.steps):
+                    g_pair = self.rydberg_rydberg_density_corr_function(states[i], i='pair')
+                    g_pair_list[i] = g_pair
+
+                data = np.array(g_pair_list)
+                data = data.T
+
+                n = self.n - 1
+
+            elif type == 'concurrence':
+                states = self.time_evolve(states_list=True)
+
+                C_list = [[] for _ in range(self.steps)]
+
+                for i in range(0, self.steps):
+                    C = self.concurrence(states[i], type='pair')
+                    C_list[i] = C
+
+                data = np.array(C_list)
+                data = data.T
+
+                n = self.n - 1
+
+
+
             else:
                 sys.exit()
 
@@ -105,8 +136,14 @@ class PlotSingle(AdiabaticEvolution):
         if end_ax is not None:
             ploting_tools.end_colorbar_barchart(self.n, data, ax=end_ax)
 
+        if save_pdf:
+            plt.savefig(f'Quick Save Plots/cb.pdf', format='pdf', bbox_inches='tight', dpi=700)
+
+
         if show:
+            plt.tight_layout()
             plt.show()
+
 
         return data
 
@@ -143,7 +180,7 @@ class PlotSingle(AdiabaticEvolution):
     def detuning_shape(self, types, position=0.5, ax=None, show=False, save_pdf=False):
 
         if ax is None:
-            fig, ax = plt.subplots(figsize=(6, 4))
+            fig, ax = plt.subplots(figsize=(6, 3))
             ax.axhline(y=0, color='black', linestyle='--', linewidth=1, alpha=0.5)
             ax.set_xlabel('Time ($\mu$s)')
         else:
@@ -155,13 +192,20 @@ class PlotSingle(AdiabaticEvolution):
                 color = 'b'
                 d = detuning_regimes.linear_detuning_quench(self.δ_start, self.δ_end, self.steps)
                 ax.plot(self.times, d / self.two_pi, color=color)
+
+            elif type(d_type) == int:
+                color = 'r'
+                d = detuning_regimes.quench_ramped(δ_start, δ_end, self.steps, d_type, position=position)
+                ax.plot(self.times, d / self.two_pi, color=color, label='Atom 1')
+
             elif d_type == 'linear flat':
                 if i == 1:
-                    color = 'r'
+                    color = 'b'
                     d = detuning_regimes.linear_detuning_flat(self.δ_start, self.δ_end, self.steps)
-                    ax.plot(self.times, d / self.two_pi, color=color)
+                    ax.plot(self.times, d / self.two_pi, color=color, label='Atom 2-7')
                 else:
                     pass
+
             elif d_type == 'linear':
                 color = 'r'
                 d = np.linspace(self.δ_start, self.δ_end, self.steps)
@@ -177,6 +221,8 @@ class PlotSingle(AdiabaticEvolution):
 
         ax.set_ylim(- 40, max(self.δ_start, self.δ_end) / self.two_pi + 10)  # min(self.δ_start, self.δ_end)/self.two_pi
         ax.set_ylabel(r'$\Delta$/$2\pi$ (MHz)')
+        ax.legend(loc=(0.7,0.15))
+
 
         if save_pdf:
             plt.savefig(f'Quick Save Plots/output.pdf', format='pdf', bbox_inches='tight', dpi=700)
@@ -259,10 +305,10 @@ class PlotSingle(AdiabaticEvolution):
             eigenvalues, eigenvectors, expectation_energies, eigenstate_probs = self.time_evolve(eigen_list=True,
                                                                                                  eigenstate_fidelities=True,
                                                                                                  expec_energy=True)
-            fig, ax = plt.subplots(1, 1, figsize=(6, 2.2))
+            fig, ax = plt.subplots(1, 1, figsize=(11.5, 2.2))
 
-        ax.set_xlabel('Energy Eigenvalue')
-        ax.set_ylabel(r'|⟨$\Psi_{\lambda}$|$\Psi(t>t_{quench})$⟩|$^{2}$')
+        ax.set_xlabel('Energy Eigenvalue (MHz)')
+        ax.set_ylabel(r'|⟨$\Psi_{\lambda}$|$\Psi(t>t_{quench}$⟩|$^{2}$')
 
 
         eigenstate_probs = np.array(eigenstate_probs)
@@ -273,12 +319,14 @@ class PlotSingle(AdiabaticEvolution):
 
 
         if before:
-            ax.bar(eigenvalues[0], [1] * n, color='grey', alpha=0.2, width=4)
-            ax.bar(eigenvalues[0], eigenstate_probs[:, 0], width=4)
+            ax.bar(eigenvalues[0], [1] * n, color='grey', alpha=0.2, width=2)
+            ax.bar(eigenvalues[0], eigenstate_probs[:, 0], width=2)
 
         else:
-            ax.bar(eigenvalues[-1], [1]*n, color='grey', alpha=0.2, width=4)
-            ax.bar(eigenvalues[-1], eigenstate_probs[:, -1], width=4)
+            ax.bar(np.array(eigenvalues[-1])/self.two_pi, [1]*n, color='grey', alpha=0.2, width=0.1)
+            ax.bar(eigenvalues[-1]/self.two_pi, eigenstate_probs[:, -1], width=0.1)
+
+        ax.set_xlim(-10,10)
 
         if save_pdf:
             plt.savefig(f'Quick Save Plots/output.pdf', format='pdf', bbox_inches='tight', dpi=700)
@@ -638,15 +686,12 @@ class PlotSingle(AdiabaticEvolution):
 
 
 
-
-
-
 if __name__ == "__main__":
-    t = 0.1
-    dt = 0.01
+    t = 1
+    dt = 0.005
     n = 7
-    δ_start = 30 * 2 * np.pi
-    δ_end = 30 * 2 * np.pi
+    δ_start = 27 * 2 * np.pi
+    δ_end = 27 * 2 * np.pi
 
     two = ['quench', 'quench']
     two2 = ['quench', 'linear flat']
@@ -667,22 +712,25 @@ if __name__ == "__main__":
 
     seven = ['linear'] * 7
     seven2 = [5] * 7
-    seven3 = [10] + ['linear flat'] * 6
+    seven3 = [1] + ['linear flat'] * 6
 
 
     nine = ['linear'] * 9
 
+    Z2 = [1 if i % 2 == 0 else 0 for i in range(n)]
+    Zero = [0]*n
+
     plotter = PlotSingle(n, t, dt, δ_start, δ_end, detuning_type=None,
-                         single_addressing_list=seven2,
-                         initial_state_list=[1,0,1,0,1,0,1],
+                         single_addressing_list=seven3,
+                         initial_state_list=Z2,
                          a=5.48
                          )
 
-    #plotter.detuning_shape(types=seven2, show=True, save_pdf=True, position=0.125)
-
-    plotter.eigenenergies_barchart(show=True, save_pdf=True)
+    # plotter.detuning_shape(types=seven3, show=True, save_pdf=True, position=0.125)
+    #
+    #plotter.eigenenergies_barchart(show=True, save_pdf=True)
     #plotter.eigenstate_fidelity_colorbar(show=True)
-    plotter.colour_bar(show=True)
+    plotter.colour_bar(show=True, type='concurrence', save_pdf=True)
 
     plotter.thermalization_matrix_colour_maps(0)
 

@@ -507,9 +507,9 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
     def bell_state_fidelity(self, bell_fidelity_list, ψ, bell_type='psi minus'):
 
         if bell_type == 'psi plus':
-            bell_state = 0.5 * np.array([[1, 0, 0, 0],
-                                         [0, 0, 0, 0],
-                                         [0, 0, 0, 0],
+            bell_state = 0.5 * np.array([[0, 0, 0, 0],
+                                         [0, 1, 1, 0],
+                                         [0, 1, 1, 0],
                                          [0, 0, 0, 0]])
 
 
@@ -558,11 +558,26 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
 
                 g[r-1] = g[r-1]/(self.n-r)
 
+        elif i == 'pair':
+            for k in range(2, self.n+1):
+                j=k-1
+                g[k-2] = data_analysis.correlation_funtction(self.reduced_density_matrix_pair(psi, j, k), self.reduced_density_matrix(psi, j), self.reduced_density_matrix(psi, k))
+
         else:
             for i in range(2, self.n+1):
                 g[i-2] = data_analysis.correlation_funtction(self.reduced_density_matrix_pair(psi, 1, i), self.reduced_density_matrix(psi, 1), self.reduced_density_matrix(psi, i))
 
         return g
+
+    def concurrence(self, psi, type='pair'):
+
+        if type =='pair':
+            C = [0]*(self.n-1)
+            for k in range(2, self.n+1):
+                j=k-1
+                C[k-2] = data_analysis.concurrence(self.reduced_density_matrix_pair(psi,j,k))
+
+        return C
 
 
 

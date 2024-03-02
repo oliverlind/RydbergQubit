@@ -129,15 +129,15 @@ class CombinedPlots(PlotSingle):
         self.colour_bar(data=rydberg_fidelity_data, type=type, ax=axs[0, 0], cb_ax=axs[:, 1])
         self.state_fidelity(states_to_test, q_states=states, ax=axs[1, 0])
 
-        axs[1, 0].set_ylabel(r'⟨$Z_{2}$|$\Psi$⟩')
+        axs[1, 0].set_ylabel(r'⟨$0..0$|$\Psi$⟩')
+        axs[1, 0].set_xlabel(r'Time ($\mu$s)')
 
         plt.subplots_adjust(hspace=0)
 
         for ax in axs[:, 1]:
             ax.axis('off')
 
-        # Set x axis label
-        plt.xlabel('Time ($\mu$s)')
+
 
         if save_pdf:
             plt.savefig(f'Quick Save Plots/output.pdf', format='pdf', bbox_inches='tight', dpi=700)
@@ -847,16 +847,20 @@ class CombinedPlots(PlotSingle):
 
     ''' Investigating thermalization'''
 
-    def sum_rydbergs(self):
-        fig, ax = plt.subplots(1, 1, sharex=True, figsize=(8, 2.2))
+    def sum_rydbergs(self, save_pdf=False):
+        fig, ax = plt.subplots(1, 1, sharex=True, figsize=(8, 2.7))
 
         density_matrices = self.time_evolve(density_matrix=True)
 
         rydberg_sum_2 = data_analysis.rydberg_number_expectations(density_matrices)
 
         ax.plot(self.times, rydberg_sum_2)
-        ax.set_ylabel('rydberg expectation')
-        ax.set_xlabel('time')
+        ax.set_ylabel('⟨Number of Rydberg excitations⟩')
+        ax.set_xlabel(r'Time ($\mu$s)')
+
+        if save_pdf:
+            plt.savefig(f'Quick Save Plots/ryd_sum.pdf', format='pdf', bbox_inches='tight', dpi=700)
+
 
 
 
@@ -866,7 +870,7 @@ class CombinedPlots(PlotSingle):
 
 
 if __name__ == "__main__":
-    t = 4.01
+    t = 4
     dt = 0.01
     n = 7
     δ_start = 30 * 2 * np.pi
@@ -886,7 +890,7 @@ if __name__ == "__main__":
     five4 = [1] + ['linear flat'] * 3 + [1]
     five5 = ['linear flat'] * 2 + [1] + ['linear flat'] * 2
 
-    seven = ['linear'] * 7
+    seven = ['linear flat'] * 7
     seven2 = [5] * 7
     seven3 = [1] + ['linear flat'] * 6
     seven4 = ['linear flat'] * 3 + [1] + ['linear flat'] * 3
@@ -894,13 +898,16 @@ if __name__ == "__main__":
     nine = ['quench']
     nine2 = [0] + ['linear flat'] * 8
 
-    plotter = CombinedPlots(n, t, dt, δ_start, δ_end, detuning_type=None,
-                            single_addressing_list=seven2,
-                            initial_state_list=[1, 0, 1, 0, 1, 0, 1], rabi_regime='constant'
-                            )
-    #plotter.sum_rydbergs()
+    Z2 = [1 if i % 2 == 0 else 0 for i in range(n)]
+    Zero = [0] * n
 
-    plotter.rydberg_fidelity_barchart_animation(np.arange(0,4.01, 0.01), detunning=True, save=True)
+    plotter = CombinedPlots(n, t, dt, δ_start, δ_end, detuning_type=None,
+                            single_addressing_list=seven3,
+                            initial_state_list=Z2, rabi_regime='constant'
+                            )
+    #plotter.sum_rydbergs(save_pdf=True)
+
+    plotter.rydberg_fidelity_barchart_animation(np.arange(0,4.0, 0.01), detunning=True, save=True)
 
     #plotter.entanglement_propagation_barchart_animation(np.arange(0,6, 0.01), save=True)
 
@@ -931,7 +938,7 @@ if __name__ == "__main__":
 
     # plotter.rydberg_correlation_cbs(i=1)
 
-    #plotter.colorbar_state_fidelity([[1, 0, 1, 0, 1, 0, 1]], save_pdf=True)
+    plotter.colorbar_state_fidelity([Zero], save_pdf=True)
 
     # plotter.two_atom_eigenstates(save_pdf=True)
     #

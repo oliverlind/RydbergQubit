@@ -159,6 +159,35 @@ def correlation_length(n, g_r):
 
     return corr_length
 
+def concurrence(rho):
+
+    rho = rho.astype(np.complex128)
+
+    rho_sqrt = np.sqrt(rho)
+    rho_conj = np.conj(rho)
+
+    Y = np.array([[0,-1j],[1j,0]])
+    Y_prod = np.kron(Y,Y)
+
+    R = np.linalg.multi_dot([rho, Y_prod, rho_conj, Y_prod])
+
+    print(R)
+
+    eigenvalues = np.sqrt(np.linalg.eigvals(R))
+    eigenvalues = np.sort(eigenvalues)[::-1]
+
+    print(eigenvalues)
+
+    C = max(0,eigenvalues[0]-eigenvalues[1]-eigenvalues[2]-eigenvalues[3])
+
+    if C.imag > 0.01:
+        raise ValueError("Imaginary Concurrence")
+        sys.exit()
+
+    else:
+        return C.real
+
+
 def exponential_function(x, a, b):
     return a * np.exp(b * x)
 
@@ -235,8 +264,17 @@ def rydberg_number_expectations(density_matrices):
 if __name__ == "__main__":
 
 
-    n_qubits = 2
-    state_vector = np.array([0, 1, 0, 0]) #/ np.sqrt(2)  # Example state: (|00⟩ + |11⟩) / sqrt(2)
-    subsystem_A_indices = 1  # Qubits in subsystem A
 
-    print(thermalization_matrix(np.eye(8)))
+    n_qubits = 2
+    state_vector = np.array([[0], [1], [1], [0]])/ np.sqrt(2)  # Example state: (|00⟩ + |11⟩) / sqrt(2)
+    rho = np.dot(state_vector, state_vector.conj().T)
+    rho1= np.eye(2)/2
+    # rho = 0.5 * np.array([[1, 0, 0, 0],
+    #                      [0, 0, 0, 0],
+    #                      [0, 0, 0, 0],
+    #                      [0, 0, 0, 1]])
+
+    print(rho)
+
+    print(concurrence(rho))
+    print(correlation_funtction(rho,rho1,rho1))

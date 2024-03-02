@@ -72,6 +72,19 @@ def set_up_color_bar(n, data, times, ax, type='rydberg', color='viridis', colorb
         norm = mcolors.Normalize(vmin=-0.25, vmax=0.25)
         bar_label = r'label'
 
+    elif type == 'correlation pairwise':
+        labels = [f'g({i}, {i+1})' for i in range(1, n+1)]
+        color = 'PiYG'
+        norm = mcolors.Normalize(vmin=-0.25, vmax=0.25)
+        bar_label = r'label'
+
+    elif type == 'concurrence':
+        labels = [f'C({i}, {i+1})' for i in range(1, n+1)]
+        norm = mcolors.Normalize(vmin=0, vmax=1)
+        color = 'inferno'
+        bar_label = r'label'
+
+
     else:
         sys.exit()
 
