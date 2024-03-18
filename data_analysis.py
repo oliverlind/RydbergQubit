@@ -1,10 +1,12 @@
 import numpy as np
+import scipy.linalg
 from scipy.linalg import expm
 from scipy.linalg import logm
 from scipy.linalg import svd
 from scipy.optimize import curve_fit
 import pandas as pd
 from functools import reduce
+from scipy.stats import norm
 
 import vector_manipluation_tools as vm
 
@@ -129,16 +131,16 @@ def schmidt_coeffients_red(state, n, n_A):
 def correlation_funtction(rho_ij, rho_i, rho_j):
 
     n_i = np.array([[0, 0], [0, 1]])
-    n_ij = np.array([[0, 0, 0, 0],
-                     [0, 0, 0, 0],
-                     [0, 0, 0, 0],
+    n_ij = np.array([[1, 0, 0, 0],
+                     [0, -1, 0, 0],
+                     [0, 0, -1, 0],
                      [0, 0, 0, 1]])
 
     expec_n_i = expectation_value(rho_i, n_i)
     expec_n_j = expectation_value(rho_j, n_i)
     expec_n_ij = expectation_value(rho_ij, n_ij)
 
-    g_ij = expec_n_ij - (expec_n_i * expec_n_j)
+    g_ij = expec_n_ij #- (expec_n_i * expec_n_j)
 
     return g_ij
 
@@ -162,30 +164,46 @@ def correlation_length(n, g_r):
 def concurrence(rho):
 
     rho = rho.astype(np.complex128)
+    #
+    # rho_sqrt = np.sqrt(rho)
+    # rho_conj = np.conj(rho)
+    #
+    # Y = np.array([[0,-1j],[1j,0]])
+    # Y_prod = np.kron(Y,Y)
+    #
+    # R = np.linalg.multi_dot([rho, Y_prod, rho_conj, Y_prod])
+    #
+    # eigenvalues = np.sqrt(np.linalg.eigvals(R))
+    # eigenvalues = np.sort(eigenvalues)[::-1]
+    #
+    # C = max(0,eigenvalues[0]-eigenvalues[1]-eigenvalues[2]-eigenvalues[3])
 
-    rho_sqrt = np.sqrt(rho)
-    rho_conj = np.conj(rho)
+    # Pauli Y matrix
+    sigma_y = np.array([[0, -1j], [1j, 0]])
 
-    Y = np.array([[0,-1j],[1j,0]])
-    Y_prod = np.kron(Y,Y)
+    # Calculate the spin-flipped density matrix
+    rho_star = np.conjugate(rho)
+    spin_flipped_rho = np.kron(sigma_y, sigma_y).dot(rho_star).dot(np.kron(sigma_y, sigma_y))
 
-    R = np.linalg.multi_dot([rho, Y_prod, rho_conj, Y_prod])
+    # Calculate R matrix
+    sqrt_rho = scipy.linalg.sqrtm(rho)
+    R = scipy.linalg.sqrtm(sqrt_rho.dot(spin_flipped_rho).dot(sqrt_rho))
 
-    print(R)
 
-    eigenvalues = np.sqrt(np.linalg.eigvals(R))
-    eigenvalues = np.sort(eigenvalues)[::-1]
+    R = R.astype(np.complex128)
 
-    print(eigenvalues)
+    # Eigenvalues of R, sorted in decreasing order
+    eigenvalues = np.sort(np.real(np.linalg.eigvals(R)))[::-1]
 
-    C = max(0,eigenvalues[0]-eigenvalues[1]-eigenvalues[2]-eigenvalues[3])
+    # Calculate concurrence
+    C = max(0, eigenvalues[0] - eigenvalues[1] - eigenvalues[2] - eigenvalues[3])
 
     if C.imag > 0.01:
         raise ValueError("Imaginary Concurrence")
         sys.exit()
 
     else:
-        return C.real
+        return round(C.real,5)
 
 
 def exponential_function(x, a, b):
@@ -260,21 +278,62 @@ def rydberg_number_expectations(density_matrices):
 
     return ryd_num_expec
 
+def lb_bound(n, H, dt):
+
+    id = np.eye(2**(n-1))
+    n_i = np.array([[0, 0], [0, 1]])
+
+    n_1 = np.kron(id, n_i)
+    n_N = np.kron(n_i, id)
+
+
+    n_1_dt = np.dot(expm(1j * H * dt), np.dot(n_1, expm(-1j * H * dt)))
+
+    print(n_1_dt)
+
+    com = np.dot(n_1_dt, n_N)-np.dot(n_N, n_1_dt)
+
+    # Compute the singular values of com
+    singular_values = np.linalg.svd(com, compute_uv=False)
+
+    # The norm of the operator is the largest singular value
+    com_norm = np.max(singular_values)
+
+    return com_norm
+
+def gaussian_distribtion(x, mu, sigma):
+    print(x)
+    pdf_values = norm.pdf(x, mu, sigma)
+
+    return pdf_values
+
+
+
+
+
+
+
+
+
+
 
 if __name__ == "__main__":
 
+    y = gaussian_distribtion(98.1,96.7,2)
+    print(y)
 
 
-    n_qubits = 2
-    state_vector = np.array([[0], [1], [1], [0]])/ np.sqrt(2)  # Example state: (|00⟩ + |11⟩) / sqrt(2)
-    rho = np.dot(state_vector, state_vector.conj().T)
-    rho1= np.eye(2)/2
-    # rho = 0.5 * np.array([[1, 0, 0, 0],
-    #                      [0, 0, 0, 0],
-    #                      [0, 0, 0, 0],
-    #                      [0, 0, 0, 1]])
 
-    print(rho)
+    # n_qubits = 2
+    # state_vector = np.array([[1], [0], [0], [1]])/ np.sqrt(2)  # Example state: (|00⟩ + |11⟩) / sqrt(2)
+    # rho = np.dot(state_vector, state_vector.conj().T)
+    # rho1= np.eye(2)/2
+    # # rho = 0.5 * np.array([[1, 0, 0, 0],
+    # #                      [0, 0, 0, 0],
+    # #                      [0, 0, 0, 0],
+    # #                      [0, 0, 0, 1]])
+    #
+    # print(rho)
+    #
+    # print(concurrence(rho))
 
-    print(concurrence(rho))
-    print(correlation_funtction(rho,rho1,rho1))

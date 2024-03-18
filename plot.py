@@ -942,8 +942,6 @@ class Plot(AdiabaticEvolution):
                                                                                              eigenstate_fidelities=True)
         index = int(time / self.dt)
 
-        print(np.shape(eigenvalues))
-
         eigenvalue_df = pd.DataFrame(eigenvalues[index])
 
         eigenstate_probs = np.array(eigenstate_probs)
@@ -1192,10 +1190,10 @@ class Plot(AdiabaticEvolution):
 if __name__ == "__main__":
     start_time = time.time()
 
-    t = 7
-    dt = 0.01
-    n = 3
-    δ_start = -30 * 2 * np.pi
+    t = 0.015
+    dt = 0.001
+    n = 7
+    δ_start = 30 * 2 * np.pi
     δ_end = 30 * 2 * np.pi
 
     two = ['quench', 'quench']
@@ -1225,7 +1223,7 @@ if __name__ == "__main__":
     six = ['quench'] + 5 * ['linear flat']
     six2 = ['linear flat 2'] + ['linear flat'] * 4 + ['linear flat 2']
 
-    seven = ['quench'] + 6 * ['linear flat']
+    seven = [10] + 6 * ['linear flat']
     seven2 = ['quench'] + 5 * ['linear flat'] + ['quench']
     seven3 = ['flat zero'] + ['flat positive'] * 6
     seven4 = ['linear flat'] + ['flat start'] * 6
@@ -1236,14 +1234,14 @@ if __name__ == "__main__":
 
     evol = Plot(n, t, dt, δ_start, δ_end, detuning_type=None,
                 single_addressing_list=seven,
-                initial_state_list=[0, 0, 0]
+                initial_state_list=[1, 0, 1, 0, 1, 0, 1]
                 )
 
-    evol.entanglement_entropy_colorbar(show=True)
+    # evol.entanglement_entropy_colorbar(show=True)
+    #
+    # evol.eigenstate_fidelity_colorbar()
 
-    evol.eigenstate_fidelity_colorbar()
-
-    evol.eigenstate_table(time=0.09)
+    evol.eigenstate_table(time=0.013)
 
     evol.plot_colour_bar(show=True)
 

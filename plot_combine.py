@@ -81,17 +81,25 @@ class CombinedPlots(PlotSingle):
 
     def ordered_state_colourbars(self, a_list, initial_state_list, single_addressing_list, save_pdf=False):
 
-        fig, axs = plt.subplots(len(a_list), 3, figsize=(8, 4), sharex='col',
-                                gridspec_kw={'width_ratios': [6, 3, 1], 'height_ratios': [1, 1]})
+        fig, axs = plt.subplots(len(a_list)+1, 3, figsize=(8, 5), sharex='col',
+                                gridspec_kw={'width_ratios': [6, 2, 1], 'height_ratios': [0.5, 1, 1]})
 
-        for i in range(0, len(a_list)):
 
-            singleplot = PlotSingle(self.n, self.t, self.dt, self.δ_start, self.δ_end, a=a_list[i], detuning_type=None,
+        sweep = self.detunning[0]/self.two_pi
+        axs[0,0].plot(self.times, sweep)
+        axs[0,0].set_ylabel(r'$\Delta$/2$\pi$ (MHz)')
+        axs[0,0].set_ylim(-35,35)
+
+
+        for i in range(1, len(a_list)+1):
+            print(a_list[i-1])
+
+            singleplot = PlotSingle(self.n, self.t, self.dt, self.δ_start, self.δ_end, a=a_list[i-1], detuning_type=None,
                                     single_addressing_list=single_addressing_list,
                                     initial_state_list=initial_state_list, rabi_regime='pulse start')
 
-            if i == 0:
-                cb_ax = axs[:, 2]
+            if i == 1:
+                cb_ax = axs[1:, 2]
                 cb = True
             else:
                 cb_ax = None
@@ -102,11 +110,13 @@ class CombinedPlots(PlotSingle):
         axs[-1, 0].set_xlabel('Time ($\mu$s)')
         axs[-1, 1].set_xlabel(r'⟨$n_{i}$⟩')
 
-        axs[0, 0].set_ylabel(r'$Z_{2}$ ($a$ = 5.48$\mu$m)')
-        axs[1, 0].set_ylabel(r'$Z_{3}$ ($a$ = 3.16$\mu$m)')
+        axs[1, 0].set_ylabel(r'$Z_{2}$ ($a$ = 5.48$\mu$m)'+'\n'+ ''+ '\n'+'Atom site')
+        axs[2, 0].set_ylabel(r'$Z_{3}$ ($a$ = 3.16$\mu$m)'+'\n'+ ''+ '\n'+'Atom site')
 
         for ax in axs[:, 2]:
             ax.axis('off')
+
+        axs[0,1].axis('off')
 
         if save_pdf:
             plt.savefig(f'Quick Save Plots/output.pdf', format='pdf', bbox_inches='tight', dpi=700)
@@ -119,28 +129,37 @@ class CombinedPlots(PlotSingle):
 
         if type == 'rydberg':
             rydberg_fidelity_data, states = self.time_evolve(rydberg_fidelity=True, states_list=True)
-
         else:
             sys.exit()
 
-        fig, axs = plt.subplots(2, 2, sharex=True, figsize=(8, 3.5),
-                                gridspec_kw={'width_ratios': [9, 1], 'height_ratios': [1.7, 1]})
+        fig, axs = plt.subplots(3, 2, sharex=True, figsize=(8, 4.2),
+                                gridspec_kw={'width_ratios': [13, 1], 'height_ratios': [0.9, 1.7, 0.9]})
 
-        self.colour_bar(data=rydberg_fidelity_data, type=type, ax=axs[0, 0], cb_ax=axs[:, 1])
-        self.state_fidelity(states_to_test, q_states=states, ax=axs[1, 0])
+        sweep = self.detunning[0] / self.two_pi
+        quench = self.t*4.5/7 - 0.01
+        axs[0, 0].plot(self.times, sweep)
+        axs[0, 0].set_ylabel(r'$\Delta$/2$\pi$ (MHz)  ')
+        axs[0, 0].set_ylim(-39, 39)
+        axs[0, 0].axvspan(xmin=0, xmax=quench, color='green', alpha=0.1)
+        axs[0, 0].axvspan(xmin=quench, xmax=self.t, color='red', alpha=0.1)
+        axs[0, 0].text(0.2, 19, 'Sweep', color='green')
+        axs[0, 0].text(6.1, 19, 'Quench', color='red')
+        axs[0, 0].axhline(y=0, color='black', linestyle='--', linewidth=1, alpha=0.2)
 
-        axs[1, 0].set_ylabel(r'⟨$0..0$|$\Psi$⟩')
-        axs[1, 0].set_xlabel(r'Time ($\mu$s)')
+        self.colour_bar(data=rydberg_fidelity_data, type=type, ax=axs[1, 0], cb_ax=axs[:, 1])
+        self.state_fidelity(states_to_test, q_states=states, ax=axs[2, 0])
+
+        axs[2, 0].set_ylabel(r'⟨$Z_{2}$|$\Psi$⟩')
+        axs[2, 0].set_xlabel(r'Time ($\mu$s)')
+        axs[2, 0].set_ylim(0, 1.1)
 
         plt.subplots_adjust(hspace=0)
 
         for ax in axs[:, 1]:
             ax.axis('off')
 
-
-
         if save_pdf:
-            plt.savefig(f'Quick Save Plots/output.pdf', format='pdf', bbox_inches='tight', dpi=700)
+            plt.savefig(f'Quick Save Plots/output.pdf', format='pdf', bbox_inches='tight', dpi=600)
 
         plt.show()
 
@@ -511,7 +530,7 @@ class CombinedPlots(PlotSingle):
             time_text.set_text(f't = {round(step*self.dt, 2)}'+r'$\mu$s')
 
             if detunning:
-                d_text.set_text(r'$\Delta$/2$\pi$' + f' = {round(self.detunning[0][step] / self.two_pi, 2)}' + '(MHz)')
+                d_text.set_text(r'$\Delta_{1}$/2$\pi$' + f' = {round(self.detunning[0][step] / self.two_pi, 2)}' + '(MHz)')
 
             return rydberg_fidelitys, time_text, d_text
 
@@ -617,7 +636,7 @@ class CombinedPlots(PlotSingle):
         axs[-1].set_yticklabels(['0.00', r'$ln(2)$'])
         axs[-1].yaxis.tick_right()
 
-        for i in range(0,5):
+        for i in range(0,self.n-2):
             axs[i].set_xticks([])
             axs[i].set_yticks([])
 
@@ -637,7 +656,7 @@ class CombinedPlots(PlotSingle):
 
 
         if save_pdf:
-            plt.savefig(f'2Plotting Data/Propagation Speed EE/1.5 separation data/Plots/7 Atom D_inital={self.δ_start},t_q={q_list[0]*0.001},dt=0.001.pdf', format='pdf', bbox_inches='tight', dpi=700)
+            plt.savefig(f'Plotting Data/Propagation Speed EE/output.pdf', format='pdf', bbox_inches='tight', dpi=700)
 
         #plt.tight_layout()
         plt.show()
@@ -870,11 +889,11 @@ class CombinedPlots(PlotSingle):
 
 
 if __name__ == "__main__":
-    t = 4
+    t = 7
     dt = 0.01
     n = 7
-    δ_start = 30 * 2 * np.pi
-    δ_end = 30 * 2 * np.pi
+    δ_start = -24 * 2 * np.pi
+    δ_end = 24 * 2 * np.pi
 
     two = ['quench', 'quench']
     two2 = ['quench', 'linear flat']
@@ -884,44 +903,50 @@ if __name__ == "__main__":
     three2 = ['quench'] + ['linear flat'] * 2
     three3 = ['quench'] * 3
 
-    five = ['linear flat'] * 5
+    five = ['quench flat'] * 5
     five2 = [0] * 5
     five3 = [1] + ['linear flat'] * 4
     five4 = [1] + ['linear flat'] * 3 + [1]
     five5 = ['linear flat'] * 2 + [1] + ['linear flat'] * 2
 
-    seven = ['linear flat'] * 7
-    seven2 = [5] * 7
+    seven = ['quench flat'] * 7
+    seven2 = ['quench'] * 7
     seven3 = [1] + ['linear flat'] * 6
     seven4 = ['linear flat'] * 3 + [1] + ['linear flat'] * 3
 
     nine = ['quench']
-    nine2 = [0] + ['linear flat'] * 8
+    nine2 = ['linear flat'] * 4 + [1] + ['linear flat'] * 4
+    nine3 = [1] + ['linear flat'] * 8
 
     Z2 = [1 if i % 2 == 0 else 0 for i in range(n)]
     Zero = [0] * n
 
     plotter = CombinedPlots(n, t, dt, δ_start, δ_end, detuning_type=None,
-                            single_addressing_list=seven3,
-                            initial_state_list=Z2, rabi_regime='constant'
+                            single_addressing_list=seven,
+                            initial_state_list=Zero, rabi_regime='constant'
                             )
+
+    plotter.colorbar_state_fidelity([Z2], save_pdf=True)
+
+    plotter.ordered_state_colourbars([5.48, 3.16], Zero, seven, save_pdf=True)
+
     #plotter.sum_rydbergs(save_pdf=True)
 
-    plotter.rydberg_fidelity_barchart_animation(np.arange(0,4.0, 0.01), detunning=True, save=True)
+    #plotter.rydberg_fidelity_barchart_animation(np.arange(0,1.0, 0.01), detunning=True, save=True)
 
     #plotter.entanglement_propagation_barchart_animation(np.arange(0,6, 0.01), save=True)
 
-    #plotter.area_law_test_animation([[1, 0, 1, 0, 1, 0, 1]], single_addressing_list=seven3, times_list=np.arange(0,6, 0.01), save=True)
+    plotter.area_law_test_animation([Z2], single_addressing_list=nine3, times_list=np.arange(0,1, 0.01), save=True)
 
     # plotter.multiple_eigenenergies_vs_detuning([10, 8],[30 * 2 * np.pi, 24 * 2 * np.pi])
     #
-    # #plotter.multiple_entanglement_entropy([[1,0,0,1,1,0,1],[0,0,0,0,0,0,0]], single_addressing_list=seven2)
+    #plotter.multiple_entanglement_entropy([[1,0,0,1,1,0,1],[0,0,0,0,0,0,0]], single_addressing_list=seven2)
     #
     # #plotter.sum_rydbergs()
     #
     #plotter.cb_entanglement_entropy(atom_i=None, save_pdf=True)
     #
-    # plotter.qmi_compare(7, [7, 6, 5, 4, 3, 2], [7], save_df=True, corr_type='VNE', save_pdf=True)
+    #plotter.qmi_compare(9, [9, 8, 7, 6, 5, 4, 3, 2], [1], corr_type='VNE', save_pdf=True)
 
 
 
@@ -938,7 +963,7 @@ if __name__ == "__main__":
 
     # plotter.rydberg_correlation_cbs(i=1)
 
-    plotter.colorbar_state_fidelity([Zero], save_pdf=True)
+
 
     # plotter.two_atom_eigenstates(save_pdf=True)
     #
@@ -952,4 +977,4 @@ if __name__ == "__main__":
     #
     # #plotter.eigenvalue_lineplot(show=True)
 
-    # plotter.ordered_state_colourbars([5.48, 3.16], [0, 0, 0, 0, 0, 0, 0], seven, save_pdf=True)
+

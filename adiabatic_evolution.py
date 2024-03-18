@@ -82,7 +82,7 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
 
         for i in state_list[start:]:
             u = self.col_basis_vectors(2)[i]
-            v = np.kron(v, u)
+            v = np.kron(v, u) # Order Switched
 
         return v
 
@@ -213,6 +213,8 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
             if expec_energy and eigenstate_fidelities:
                 if states_list:
                     return eigenvalues, eigenvectors, expectation_energies, eigenstate_probs, states
+                elif std_energy_list:
+                    return eigenvalues, eigenvectors, expectation_energies, eigenstate_probs, std_energies
                 else:
                     return eigenvalues, eigenvectors, expectation_energies, eigenstate_probs
             elif expec_energy:
@@ -569,13 +571,39 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
 
         return g
 
-    def concurrence(self, psi, type='pair'):
+    def concurrence(self, psi, c_type='pair'):
 
-        if type =='pair':
+        if c_type =='pair':
             C = [0]*(self.n-1)
             for k in range(2, self.n+1):
                 j=k-1
+                print(j)
                 C[k-2] = data_analysis.concurrence(self.reduced_density_matrix_pair(psi,j,k))
+
+        elif type(c_type) == int:
+            C = [0] * (self.n - 1)
+            for k in range(1, self.n + 1):
+                if k > c_type:
+                    C[k - 2] = data_analysis.concurrence(self.reduced_density_matrix_pair(psi, c_type, k))
+                elif k < c_type:
+                    C[k - 1] = data_analysis.concurrence(self.reduced_density_matrix_pair(psi, k, c_type))
+                else:
+                    pass
+
+        elif c_type == 'both sides':
+            C = [0] * int((self.n-1)/2)
+
+            for k in range(1, int((self.n+1)/2)):
+                j = self.n+1-k
+                C[k - 1] = data_analysis.concurrence(self.reduced_density_matrix_pair(psi, k, j))
+
+
+            print(C)
+
+        else:
+            sys.exit()
+
+
 
         return C
 
@@ -600,12 +628,17 @@ if __name__ == "__main__":
 
     #psi = evol.time_evolve(states_list=True)
 
-    psi = 1/(np.sqrt(3)) * np.array([[1], [0], [0], [0], [0], [0], [0], [1]])
-    psi = 1/(np.sqrt(2)) * np.array([[1], [0], [0], [1]])
+    psi = 1/(np.sqrt(2)) * np.array([[0.9], [np.sqrt(0.195)], [0], [0], [0], [0], [0], [0.9]])
+    #psi = 1/(np.sqrt(2)) * np.array([[1], [0], [0], [1]])
 
-    rdm = evol.reduced_density_matrix_from_left(2, 2, psi)
+    rdm = evol.reduced_density_matrix_pair(psi,1,2)
+
+    C = data_analysis.concurrence(rdm)
+
+    print(evol.initial_state([0,0,1]))
 
     print(rdm)
+    print(C)
 
 
 

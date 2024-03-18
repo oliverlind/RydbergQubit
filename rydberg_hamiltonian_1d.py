@@ -9,7 +9,7 @@ import data_analysis
 
 
 class RydbergHamiltonian1D:
-    def __init__(self, n, a=5.48, C_6= 862690*2 * np.pi, Rabi=4*2 * np.pi):
+    def __init__(self, n, a=5.48, C_6= 862690*2 * np.pi, Rabi= 4*2 * np.pi):
         '''
 
         :param n: Number of atoms
@@ -124,11 +124,11 @@ class RydbergHamiltonian1D:
 
 if __name__ == "__main__":
 
-    h_m = RydbergHamiltonian1D(3).hamiltonian_matrix([0])
+    h_m = RydbergHamiltonian1D(1).hamiltonian_matrix([10])
 
     print(h_m)
 
-    print(data_analysis.thermalization_matrix(h_m))
+    #print(data_analysis.thermalization_matrix(h_m))
 
 
 

@@ -4,6 +4,7 @@ from scipy.fft import fft, fftfreq
 import numpy as np
 import time
 from scipy.linalg import expm
+from scipy.optimize import curve_fit
 
 import matplotlib as mpl
 from matplotlib import pyplot as plt
@@ -53,7 +54,7 @@ class PlotSingle(AdiabaticEvolution):
     def colour_bar(self, type='rydberg', data=None, title=None, show=False, ax=None, cb=True, cb_ax=None, end_ax=None, save_pdf=False):
 
         if ax is None:
-            fig, ax = plt.subplots(figsize=(6, 3))
+            fig, ax = plt.subplots(figsize=(8, 3))
             ax.set_xlabel('Time ($\mu$s)')
 
         if data is None:
@@ -83,6 +84,29 @@ class PlotSingle(AdiabaticEvolution):
 
                 n = self.n - 1
 
+            elif type == 'vne':
+                states = self.time_evolve(states_list=True)
+
+                vne_list = [[] for _ in range(self.steps)]
+
+
+                for i in range(0, self.steps):
+                    vne_list_step = []
+                    for j in range(1, self.n+1):
+                        rdm = self.reduced_density_matrix(states[i], j)
+                        vne = da.von_nuemann_entropy(rdm)
+                        vne_list_step += [vne]
+
+                    vne_list[i] = vne_list_step
+
+                data = np.array(vne_list)
+                data = data.T
+
+                n = self.n
+
+
+
+
             elif type == 'correlation pairwise':
                 states = self.time_evolve(states_list=True)
 
@@ -103,13 +127,75 @@ class PlotSingle(AdiabaticEvolution):
                 C_list = [[] for _ in range(self.steps)]
 
                 for i in range(0, self.steps):
-                    C = self.concurrence(states[i], type='pair')
+                    C = self.concurrence(states[i], c_type='pair')
                     C_list[i] = C
 
                 data = np.array(C_list)
                 data = data.T
 
                 n = self.n - 1
+
+            elif type == 'concurrence 2':
+                states = self.time_evolve(states_list=True)
+
+                C_list = [[] for _ in range(self.steps)]
+
+                for i in range(0, self.steps):
+                    C = self.concurrence(states[i], c_type=2)
+                    C_list[i] = C
+
+                data = np.array(C_list)
+                data = data.T
+
+                n = self.n - 1
+
+            elif type == 'concurrence 3':
+                states = self.time_evolve(states_list=True)
+
+                C_list = [[] for _ in range(self.steps)]
+
+                for i in range(0, self.steps):
+                    C = self.concurrence(states[i], c_type='both sides')
+                    C_list[i] = C
+
+                data = np.array(C_list)
+                data = data.T
+
+                n = int((self.n-1)/2)
+
+            elif type == 'phi plus':
+
+                bell_fidelity_data = self.time_evolve(bell_fidelity_types=[type])
+                data = bell_fidelity_data['phi plus']
+
+                n = self.n - 1
+
+            elif type == 'pairwise purity':
+
+                states = self.time_evolve(states_list=True)
+
+                purity_list = [[] for _ in range(self.steps)]
+
+                for i in range(0, self.steps):
+                    purity_step = []
+
+                    # Calculate pairwise purity for each pair
+                    for j in range(1, self.n):
+                        k = j + 1
+                        rho = self.reduced_density_matrix_pair(states[i], j, k)
+                        purity = np.trace(np.dot(rho, rho))
+                        purity = np.real(purity)
+
+                        purity_step += [purity]
+
+                    purity_list[i] = purity_step
+
+                data = np.array(purity_list)
+                data = data.T
+
+                print(data)
+
+                n = self.n-1
 
 
 
@@ -131,7 +217,7 @@ class PlotSingle(AdiabaticEvolution):
                 sys.exit()
 
 
-        ploting_tools.set_up_color_bar(n, data, self.times, ax=ax, type=type, colorbar=cb, cb_ax=cb_ax)
+        ploting_tools.set_up_color_bar(n, data, self.times, ax=ax, type=type, colorbar=cb, cb_ax=cb_ax, ctype=2)
 
         if end_ax is not None:
             ploting_tools.end_colorbar_barchart(self.n, data, ax=end_ax)
@@ -180,7 +266,7 @@ class PlotSingle(AdiabaticEvolution):
     def detuning_shape(self, types, position=0.5, ax=None, show=False, save_pdf=False):
 
         if ax is None:
-            fig, ax = plt.subplots(figsize=(6, 3))
+            fig, ax = plt.subplots(figsize=(4, 2.5))
             ax.axhline(y=0, color='black', linestyle='--', linewidth=1, alpha=0.5)
             ax.set_xlabel('Time ($\mu$s)')
         else:
@@ -202,7 +288,7 @@ class PlotSingle(AdiabaticEvolution):
                 if i == 1:
                     color = 'b'
                     d = detuning_regimes.linear_detuning_flat(self.δ_start, self.δ_end, self.steps)
-                    ax.plot(self.times, d / self.two_pi, color=color, label='Atom 2-7')
+                    ax.plot(self.times, d / self.two_pi, color=color, label='Atom 2-9')
                 else:
                     pass
 
@@ -211,9 +297,14 @@ class PlotSingle(AdiabaticEvolution):
                 d = np.linspace(self.δ_start, self.δ_end, self.steps)
                 ax.plot(self.times, d / self.two_pi, color=color)
 
-            elif type(d_type) == int:
+            elif d_type == 'linear':
                 color = 'r'
-                d = detuning_regimes.quench_ramped(δ_start, δ_end, self.steps, d_type, position=position)
+                d = np.linspace(self.δ_start, self.δ_end, self.steps)
+                ax.plot(self.times, d / self.two_pi, color=color)
+
+            elif d_type == 'quench flat':
+                color = 'b'
+                d = detuning_regimes.quench_flat(self.δ_start, self.δ_end, self.steps, position=position)
                 ax.plot(self.times, d / self.two_pi, color=color)
 
             else:
@@ -221,7 +312,7 @@ class PlotSingle(AdiabaticEvolution):
 
         ax.set_ylim(- 40, max(self.δ_start, self.δ_end) / self.two_pi + 10)  # min(self.δ_start, self.δ_end)/self.two_pi
         ax.set_ylabel(r'$\Delta$/$2\pi$ (MHz)')
-        ax.legend(loc=(0.7,0.15))
+        #ax.legend(loc=(0.5,0.15))
 
 
         if save_pdf:
@@ -299,16 +390,18 @@ class PlotSingle(AdiabaticEvolution):
     '''Eigenenergies functions'''
 
     def eigenenergies_barchart(self, eigenvalues=None, eigenstate_probs=None,
-                               expectation_energies=None, before=False, ax=None, save_pdf=False, show=False):
+                               expectation_energies=None, before=False, ax=None, save_pdf=False, show=False, table=False):
 
         if ax is None:
-            eigenvalues, eigenvectors, expectation_energies, eigenstate_probs = self.time_evolve(eigen_list=True,
+            eigenvalues, eigenvectors, expectation_energies, eigenstate_probs, std_energy_list = self.time_evolve(eigen_list=True,
                                                                                                  eigenstate_fidelities=True,
-                                                                                                 expec_energy=True)
-            fig, ax = plt.subplots(1, 1, figsize=(11.5, 2.2))
+                                                                                                 expec_energy=True,
+                                                                                                 std_energy_list=True
+                                                                                                 )
+            fig, ax = plt.subplots(2, 1, figsize=(8, 3))
 
-        ax.set_xlabel('Energy Eigenvalue (MHz)')
-        ax.set_ylabel(r'|⟨$\Psi_{\lambda}$|$\Psi(t>t_{quench}$⟩|$^{2}$')
+        ax[1].set_xlabel(r'Energy Eigenvalue/$\hbar$ (MHz)')
+        ax[1].set_ylabel(r'|⟨$\Psi_{\lambda}$|$\Psi(t>t_{quench}$⟩|$^{2}$')
 
 
         eigenstate_probs = np.array(eigenstate_probs)
@@ -323,17 +416,99 @@ class PlotSingle(AdiabaticEvolution):
             ax.bar(eigenvalues[0], eigenstate_probs[:, 0], width=2)
 
         else:
-            ax.bar(np.array(eigenvalues[-1])/self.two_pi, [1]*n, color='grey', alpha=0.2, width=0.1)
-            ax.bar(eigenvalues[-1]/self.two_pi, eigenstate_probs[:, -1], width=0.1)
 
-        ax.set_xlim(-10,10)
+            ax[0].bar(np.array(eigenvalues[-1])/self.two_pi, [1]*n, color='grey', alpha=0.2, width=0.5)
+            ax[0].bar(eigenvalues[-1]/self.two_pi, eigenstate_probs[:, -1], width=0.5)
+            # ax.bar(expectation_energies[-1]/self.two_pi, 1, color='r', width=0.2)
+            # ax.bar((expectation_energies[-1] + std_energy_list[-1])/ self.two_pi, 1, color='g', width=0.2)
+            # ax.bar((expectation_energies[-1] - std_energy_list[-1])/ self.two_pi, 1, color='g', width=0.2)
+            ax[1].set_xlim(-12, 12)
+            ax[1].bar(np.array(eigenvalues[-1]) / self.two_pi, [0.6] * n, color='grey', alpha=0.2, width=0.2)
+            ax[1].bar(eigenvalues[-1] / self.two_pi, eigenstate_probs[:, -1], width=0.2)
+
+        if table:
+            print('yes')
+
+            eigenvalue_df = pd.DataFrame(eigenvalues[-1])
+            probs_df = pd.DataFrame(eigenstate_probs[:, -1])
+
+            eigenvectors = eigenvectors[-1]
+
+            # comp_basis_probs = np.multiply(eigenvectors, eigenvectors)
+
+            eigenstate_df = pd.DataFrame(eigenvectors)
+
+            df = pd.concat([eigenvalue_df.T/self.two_pi, probs_df.T, eigenstate_df**2], axis=0)
+
+            binary_strings = ploting_tools.ascending_binary_strings(self.n)
+
+            df.index = ['Energy Eigenvalue', 'Probability'] + binary_strings
+            path = 'Output CSV tables/data2.csv'
+
+            df.to_csv(path, index=True)
 
         if save_pdf:
-            plt.savefig(f'Quick Save Plots/output.pdf', format='pdf', bbox_inches='tight', dpi=700)
+            plt.savefig(f'Quick Save Plots/eigenenergies.pdf', format='pdf', bbox_inches='tight', dpi=700)
 
         if show:
             plt.show()
 
+    def gaussian_model_eigenstates(self, end_ind, total_time, eigenvalues=None, eigenstate_probs=None,
+                               expectation_energies=None, before=False, ax=None, save_pdf=False, show=False, table=False):
+
+        if ax is None:
+            eigenvalues, eigenvectors, expectation_energies, eigenstate_probs, std_energy_list = self.time_evolve(eigen_list=True,
+                                                                                                 eigenstate_fidelities=True,
+                                                                                                 expec_energy=True,
+                                                                                                 std_energy_list=True
+                                                                                                 )
+            fig, ax = plt.subplots(1, 1, figsize=(6, 4))
+
+
+        total_time = np.arange(0,total_time,self.dt)
+        eigenstate_probs = np.array(eigenstate_probs)
+        eigenvectors = eigenvectors[-1][:, 0:end_ind]
+        eigenvalues = eigenvalues[-1][0:end_ind]
+        eigenvalues =np.array(eigenvalues)/self.two_pi
+
+
+        prob_coeffients = data_analysis.gaussian_distribtion(eigenvalues, -96.7, 2.0)
+        # prob_coeffients = eigenstate_probs[0:end_ind, 1]
+        # print(prob_coeffients)
+        x = np.linspace(eigenvalues[0]-1, eigenvalues[-1]+1,1000)
+        ax.scatter(eigenvalues, eigenstate_probs[0:end_ind, -1], color='r')
+        mu = expectation_energies[-1]#np.sum(eigenvalues*eigenstate_probs[0:end_ind, -1])
+        print(mu)
+
+        ax.plot(x, data_analysis.gaussian_distribtion(x, mu, 1.85))
+
+        plt.show()
+
+
+        states_list = [[] for _ in range(len(total_time))]
+
+        for j, time in enumerate(total_time):
+
+            psi = np.zeros(self.dimension)
+            psi = psi.reshape(-1,1)
+
+            for i in range(0, end_ind):
+                e_v = eigenvectors[:,i].reshape(-1,1)
+                psi = psi + (np.sqrt(prob_coeffients[i])*np.exp(-1j*self.two_pi*eigenvalues[i]*time)*e_v)
+
+
+            states_list[j] =  psi
+
+
+        rydberg_fidelity_list = [[] for _ in range(self.n)]
+
+        for state in states_list:
+            self.rydberg_fidelity(rydberg_fidelity_list,state)
+
+
+        ploting_tools.set_up_color_bar(self.n, rydberg_fidelity_list, total_time, ax=ax, type='rydberg', colorbar=True)
+
+        plt.show()
 
 
     def eigenstate_fidelity_colorbar(self, show=False):
@@ -684,14 +859,42 @@ class PlotSingle(AdiabaticEvolution):
 
         plt.show()
 
+    def lb_bound(self):
+
+        hms = self.time_evolve(hms=True)
+
+        bound = []
+        model = []
+
+        def exp_func(x, C, v):
+            return C * np.exp(v*x-(self.n-1))
+
+        for i, time in enumerate(self.times):
+            bound += [data_analysis.lb_bound(self.n, hms[i], time)]
+
+        fig, ax = plt.subplots(figsize=(4, 3))
+
+        params, covariance = curve_fit(exp_func, self.times, bound)
+
+        print(params)
+
+        C, v = params
+
+
+        ax.plot(self.times, bound)
+        ax.plot(self.times, exp_func(self.times, C, v))
+
+
+
+        plt.show()
 
 
 if __name__ == "__main__":
-    t = 1
-    dt = 0.005
+    t = 7
+    dt = 0.01
     n = 7
-    δ_start = 27 * 2 * np.pi
-    δ_end = 27 * 2 * np.pi
+    δ_start = -24 * 2 * np.pi
+    δ_end = 24 * 2 * np.pi
 
     two = ['quench', 'quench']
     two2 = ['quench', 'linear flat']
@@ -700,39 +903,50 @@ if __name__ == "__main__":
     three = ['quench'] * 3
     three2 = ['quench'] + ['linear flat'] * 2
     three3 = ['linear flat'] * 3
-    three4 = [1] + ['linear flat'] * 2
+    three4 = [0] + ['linear flat'] * 2
 
-    four = ['quench'] * 4
+    four = ['linear'] * 6
 
     five = ['linear'] * 5
     five1 = ['linear flat'] * 5
     five2 = [5] * 5
-    five3 = [1] + ['linear flat'] * 4
+    five3 = [0] + ['linear flat'] * 4
     five4 = [[1, 25]] + ['linear flat'] * 4
 
-    seven = ['linear'] * 7
-    seven2 = [5] * 7
+    seven = ['quench flat'] * 7
+    seven2 = [1] * 7
     seven3 = [1] + ['linear flat'] * 6
+    seven4 = ['linear flat'] * 3 + [1] + ['linear flat'] * 3
 
 
     nine = ['linear'] * 9
+    nine2 = ['linear flat'] * 4 + [1] + ['linear flat'] * 4
+    nine3 = ['linear flat'] * 8 + [1]
 
     Z2 = [1 if i % 2 == 0 else 0 for i in range(n)]
     Zero = [0]*n
 
     plotter = PlotSingle(n, t, dt, δ_start, δ_end, detuning_type=None,
-                         single_addressing_list=seven3,
+                         single_addressing_list=seven,
                          initial_state_list=Z2,
                          a=5.48
                          )
 
-    # plotter.detuning_shape(types=seven3, show=True, save_pdf=True, position=0.125)
-    #
-    #plotter.eigenenergies_barchart(show=True, save_pdf=True)
-    #plotter.eigenstate_fidelity_colorbar(show=True)
-    plotter.colour_bar(show=True, type='concurrence', save_pdf=True)
+    #plotter.lb_bound()
 
-    plotter.thermalization_matrix_colour_maps(0)
+    #plotter.detuning_shape(types=nine3, show=True, save_pdf=True, position=0.05)
+
+    #plotter.gaussian_model_eigenstates(8, 6)
+    # #
+    # plotter.eigenenergies_barchart(show=True, save_pdf=True, table=True)
+    # print(Z2)
+    #plotter.colour_bar(show=True, type='pairwise purity', save_pdf=True)
+
+    #plotter.colour_bar(show=True, type='vne', save_pdf=True)
+
+    # plotter.colour_bar(show=True, save_pdf=True)
+    #
+    # plotter.thermalization_matrix_colour_maps(0)
 
     plotter.plot_half_sys_entanglement_entropy(atom_i=None, show=True)
 

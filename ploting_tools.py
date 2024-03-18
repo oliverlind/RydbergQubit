@@ -20,7 +20,7 @@ mpl.rcParams["text.latex.preamble"] = r" \usepackage[T1]{fontenc} \usepackage[ch
 mpl.rcParams["text.usetex"] = True
 
 
-def set_up_color_bar(n, data, times, ax, type='rydberg', color='viridis', colorbar=True, cb_ax=None):
+def set_up_color_bar(n, data, times, ax, type='rydberg', color='viridis', colorbar=True, cb_ax=None, ctype=1):
     # Labels for the bars
     if type == 'rydberg':
         labels = [f'{i + 1}' for i in range(n)]
@@ -30,6 +30,7 @@ def set_up_color_bar(n, data, times, ax, type='rydberg', color='viridis', colorb
 
     elif type == 'vne':
         labels = [f'Atom {i + 1}' for i in range(n)]
+        color = 'inferno'
         norm = mcolors.Normalize(vmin=0, vmax=np.log(2))
         bar_label = "Von Neumann Entropy"
 
@@ -37,28 +38,28 @@ def set_up_color_bar(n, data, times, ax, type='rydberg', color='viridis', colorb
         n = n - 1
         labels = [f'Atom {i + 1}, {i + 2}' for i in range(n)]
         norm = mcolors.Normalize(vmin=0, vmax=1)
-        bar_label = f'|{"$Ψ^{+}$"}⟩ Probability'
+        bar_label = r'|$\Psi^{+}$⟩Probability'
 
     elif type == 'psi minus':
         n = n - 1
         labels = [f'Atom {i + 1}, {i + 2}' for i in range(n)]
 
         norm = mcolors.Normalize(vmin=0, vmax=1)
-        bar_label = f'|{"$Ψ^{-}$"}⟩ Probability'
+        bar_label = r'|$\Psi^{-}$⟩Probability'
 
     elif type == 'phi plus':
         n = n - 1
         labels = [f'Atom {i + 1}, {i + 2}' for i in range(n)]
-
+        color = 'viridis'
         norm = mcolors.Normalize(vmin=0, vmax=1)
-        bar_label = f'|{"$Φ^{+}$"}⟩ Probability'
+        bar_label = r'|$\Phi^{+}$⟩Probability'
 
     elif type == 'phi minus':
         n = n - 1
         labels = [f'Atom {i + 1}, {i + 2}' for i in range(n)]
-
+        color = 'viridis'
         norm = mcolors.Normalize(vmin=0, vmax=1)
-        bar_label = f'|{"$Φ^{-}$"}⟩ Probability'
+        bar_label = r'|$\Phi^{-}$⟩ Probability'
 
     elif type == 'eigen energies':
         labels = [f'E{i}' for i in range(n)]
@@ -75,14 +76,33 @@ def set_up_color_bar(n, data, times, ax, type='rydberg', color='viridis', colorb
     elif type == 'correlation pairwise':
         labels = [f'g({i}, {i+1})' for i in range(1, n+1)]
         color = 'PiYG'
-        norm = mcolors.Normalize(vmin=-0.25, vmax=0.25)
+        norm = mcolors.Normalize(vmin=0, vmax=1)
         bar_label = r'label'
 
     elif type == 'concurrence':
         labels = [f'C({i}, {i+1})' for i in range(1, n+1)]
         norm = mcolors.Normalize(vmin=0, vmax=1)
         color = 'inferno'
-        bar_label = r'label'
+        bar_label = r'Concurrence'
+
+    elif type == 'concurrence 2':
+        labels = [f'C({ctype}, {i+1})' for i in range(0, n+1)]
+        labels.remove(f'C({ctype}, {ctype})')
+        norm = mcolors.Normalize(vmin=0, vmax=1)
+        color = 'inferno'
+        bar_label = r'Concurrence'
+
+    elif type == 'concurrence 3':
+        labels = [f'C({i})' for i in reversed(range(1, n+1))]
+        norm = mcolors.Normalize(vmin=0, vmax=1)
+        color = 'inferno'
+        bar_label = r'Concurrence'
+
+    elif type == 'pairwise purity':
+        labels = [f'P({i}, {i+1})' for i in range(1, n+1)]
+        norm = mcolors.Normalize(vmin=0, vmax=1)
+        color = 'inferno'
+        bar_label = r'Purity'
 
 
     else:

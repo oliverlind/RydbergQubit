@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 
-pos=0.05
+pos=4/7
 
 def global_detuning(t, dt, δ_start, δ_end, d_type='linear', position=pos):
     steps = int(t / dt)
@@ -64,9 +64,15 @@ def global_detuning(t, dt, δ_start, δ_end, d_type='linear', position=pos):
         detuning = np.array([detuning])
         return detuning
 
+    elif d_type == 'quench flat':
+        detuning = quench_flat(δ_start, δ_end, steps, position=position)
+        detuning = np.array([detuning])
+        return detuning
+
     elif type(d_type) == int:
         detuning = quench_ramped(δ_start, δ_end, steps, d_type, position=position)
         detuning = np.array([detuning])
+        print(detuning)
         return detuning
 
     elif type(d_type) == list:
@@ -160,6 +166,23 @@ def quench_short(δ_start, δ_end, steps, quench_steps, duration, position=0.5, 
 
     return detuning
 
+def quench_flat(δ_start, δ_end, steps, position=0.5, show=False):
+    sweep_steps = math.floor(steps * position)
+    flat_steps = math.floor(0.5/7*steps)
+
+    sweep_up = np.linspace(δ_start, δ_end, sweep_steps)
+    flat = np.linspace(δ_end, δ_end, flat_steps)
+    flat_bottom = np.linspace(0, 0, steps - sweep_steps - flat_steps)
+
+    detuning = np.hstack((sweep_up, flat, flat_bottom))
+
+    if show:
+        x = np.arange(0, steps)
+        plt.plot(x, detuning)
+        plt.show()
+
+    return detuning
+
 
 
 def flat_zero(steps):
@@ -239,7 +262,7 @@ if __name__ == "__main__":
     t=5
     dt=0.01
     steps= int(t/dt)
-    start =200
+    start =-200
     end= 200
 
-    quench_short(start,end,steps,0,20, position=0, show=True)
+    quench_flat(start,end,steps, show=True)
