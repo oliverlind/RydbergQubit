@@ -26,7 +26,7 @@ def set_up_color_bar(n, data, times, ax, type='rydberg', color='viridis', colorb
         labels = [f'{i + 1}' for i in range(n)]
         norm = mcolors.Normalize(vmin=0, vmax=1)
         bar_label = "Rydberg Probability"
-        ax.set_ylabel('Atom')
+        ax.set_ylabel('Atom Site')
 
     elif type == 'vne':
         labels = [f'Atom {i + 1}' for i in range(n)]
@@ -100,9 +100,15 @@ def set_up_color_bar(n, data, times, ax, type='rydberg', color='viridis', colorb
 
     elif type == 'pairwise purity':
         labels = [f'P({i}, {i+1})' for i in range(1, n+1)]
-        norm = mcolors.Normalize(vmin=0, vmax=1)
+        norm = mcolors.Normalize(vmin=0.25, vmax=1)
         color = 'inferno'
         bar_label = r'Purity'
+
+    elif type == 'two atom blockade':
+        labels = [f'' for i in range(n)]
+        norm = mcolors.Normalize(vmin=0, vmax=1)
+        bar_label = "Rydberg Probability"
+        ax.set_ylabel('')
 
 
     else:
@@ -270,6 +276,7 @@ def plot_state_fidelities(q_states, states_to_test, times, steps, ax, colors_num
     for i in range(0, num_of_test_states):
 
         state_to_test = states_to_test[i]
+
         label = state_label(state_to_test)
 
         state_fidelities[i] = da.get_state_fidelities(q_states, state_to_test)

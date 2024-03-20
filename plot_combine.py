@@ -15,6 +15,7 @@ from matplotlib.collections import PathCollection
 from matplotlib.path import Path
 import matplotlib.cm as cm
 from matplotlib.animation import FuncAnimation
+import matplotlib.gridspec as gridspec
 
 
 import data_analysis
@@ -132,26 +133,36 @@ class CombinedPlots(PlotSingle):
         else:
             sys.exit()
 
-        fig, axs = plt.subplots(3, 2, sharex=True, figsize=(8, 4.2),
-                                gridspec_kw={'width_ratios': [13, 1], 'height_ratios': [0.9, 1.7, 0.9]})
+        fig, axs = plt.subplots(2, 2, sharex=True, figsize=(8, 3.5),
+                                gridspec_kw={'width_ratios': [17, 1], 'height_ratios': [0.9, 1.7]})
 
+        # Sweep
         sweep = self.detunning[0] / self.two_pi
-        quench = self.t*4.5/7 - 0.01
-        axs[0, 0].plot(self.times, sweep)
-        axs[0, 0].set_ylabel(r'$\Delta$/2$\pi$ (MHz)  ')
-        axs[0, 0].set_ylim(-39, 39)
+        sweep2 = self.detunning[1] / self.two_pi
+        quench = 0.3
+
+        axs[0, 0].set_yticks([0, 24])
+        axs[0, 0].plot(self.times, sweep, color='b')
+        axs[0, 0].plot(self.times, sweep2, color='g')
+        axs[0, 0].set_ylabel(r'$\Delta_{i}$/2$\pi$ (MHz)  ')
+        axs[0, 0].set_ylim(-10, 38)
         axs[0, 0].axvspan(xmin=0, xmax=quench, color='green', alpha=0.1)
         axs[0, 0].axvspan(xmin=quench, xmax=self.t, color='red', alpha=0.1)
-        axs[0, 0].text(0.2, 19, 'Sweep', color='green')
-        axs[0, 0].text(6.1, 19, 'Quench', color='red')
+        axs[0, 0].text(2.55, 4, 'Atom 1', color='b')
+        axs[0, 0].text(2.55, 28, 'Atom 2-7', color='g')
+        axs[0, 0].text(0.35, 28, 'Quench', color='red')
         axs[0, 0].axhline(y=0, color='black', linestyle='--', linewidth=1, alpha=0.2)
+        axs[0,0].tick_params(top=False)
+
 
         self.colour_bar(data=rydberg_fidelity_data, type=type, ax=axs[1, 0], cb_ax=axs[:, 1])
-        self.state_fidelity(states_to_test, q_states=states, ax=axs[2, 0])
 
-        axs[2, 0].set_ylabel(r'⟨$Z_{2}$|$\Psi$⟩')
-        axs[2, 0].set_xlabel(r'Time ($\mu$s)')
-        axs[2, 0].set_ylim(0, 1.1)
+        # State Fidelities
+        #self.state_fidelity(states_to_test, q_states=states, ax=axs[2, 0])
+
+        # axs[2, 0].set_ylabel(r'⟨$Z_{2}$|$\Psi$⟩')
+        axs[1, 0].set_xlabel(r'Time ($\mu$s)')
+        # axs[2, 0].set_ylim(0, 1.1)
 
         plt.subplots_adjust(hspace=0)
 
@@ -553,7 +564,7 @@ class CombinedPlots(PlotSingle):
         data['Time'] = self.times
 
 
-        fig, axs = plt.subplots(len(atom_list), 1, figsize=(8, 4))
+        fig, axs = plt.subplots(len(atom_list), 1, figsize=(4, 3.5))
         plt.subplots_adjust(hspace=0)
         t_diff_data = pd.DataFrame()
 
@@ -611,16 +622,26 @@ class CombinedPlots(PlotSingle):
                          #axs[k].axhline(y=criteria, color='blue', linestyle='--', linewidth=1, alpha=0.5)
 
                          print(criteria)
-                         start = data[data[f'VNE atom{atom} t_q = {single_addressing_list[0]}'] > 1.2*data[f'VNE atom{atom} t_q = linear flat']]
+                         start = data[data[f'VNE atom{atom} t_q = {single_addressing_list[0]}'] > criteria]
+                         start2 = data[data[f'VNE atom{atom} t_q = {single_addressing_list[0]}'] > 1.1*data[f'VNE atom{atom} t_q = linear flat']]
                          start.reset_index(drop=True, inplace=True)
+                         start2.reset_index(drop=True, inplace=True)
+
                          if not start.empty:
                             start = start['Time'][0]
                             print(start)
                          else:
                             start = 0
 
-                         t_diff_data[f'Atom {atom}'] = [start]
+                         if not start2.empty:
+                            start2 = start2['Time'][0]
+                            print(start2)
+                         else:
+                            start2 = 0
+
+                         t_diff_data[f'Atom {atom}'] = [start, start2]
                          axs[k].axvline(x=start, color='red', linestyle='--', linewidth=1, alpha=0.5)
+                         axs[k].axvline(x=start2, color='green', linestyle='--', linewidth=1, alpha=0.5)
 
                      axs[k].set_ylabel(r'$S_{EE}$($\rho_{'+f'{atom}'+'}$)', rotation=0, labelpad=10, ha='right')
 
@@ -636,7 +657,7 @@ class CombinedPlots(PlotSingle):
         axs[-1].set_yticklabels(['0.00', r'$ln(2)$'])
         axs[-1].yaxis.tick_right()
 
-        for i in range(0,self.n-2):
+        for i in range(0,self.n-1):
             axs[i].set_xticks([])
             axs[i].set_yticks([])
 
@@ -885,15 +906,79 @@ class CombinedPlots(PlotSingle):
 
         plt.show()
 
+    ''' Detuning variation'''
 
+    def gs_vs_detuning(self, detunings, state, rabi_list=[4*2 * np.pi]):
+
+
+        fig, ax = plt.subplots(1, 1, sharex=True, figsize=(8, 2))
+
+        #gs = gridspec.GridSpec(2, 2, width_ratios=[0.05, 2.15, 1], height_ratios=[1, 1], hspace=0.3)
+        #ax1 = fig.add_subplot(gs[0, 0])
+        #ax2 = fig.add_subplot(gs[1, 0])
+        #ax3 = fig.add_subplot(gs[:, 1])
+
+        single_addressing_list = ['linear'] * self.n
+        intial_gs_fidelity_list = [0]*len(detunings)
+
+        for rabi in rabi_list:
+
+            for i, detuning in enumerate(detunings):
+                print(detuning/self.two_pi)
+
+                singleplot = PlotSingle(self.n, self.t, self.dt, detuning, detuning, detuning_type=None,
+                                       single_addressing_list=single_addressing_list,
+                                       initial_state_list=state, rabi_regime='constant', Rabi=rabi)
+
+                #eigenstate_probs = singleplot.time_evolve(eigenstate_fidelities=True)
+
+                eigenvalues, eigenvectors, eigenstate_probs = singleplot.time_evolve(
+                    eigen_list=True,
+                    eigenstate_fidelities=True)
+
+
+                intial_gs_fidelity_list[i] = eigenstate_probs[0][0]
+
+            # Plot
+            ax.scatter(detunings / self.two_pi, intial_gs_fidelity_list)
+            ax.plot(detunings/self.two_pi, intial_gs_fidelity_list)
+
+        ax..set_xlabel(r'$\Delta$/2$\pi$ (MHz)')
+
+
+        plt.show()
+
+    def remove_background_colourbar(self, detuning, single_addressing_list, int_state):
+
+        fig, ax = plt.subplots(1, 1, sharex=True, figsize=(6, 3))
+
+        singleplot = PlotSingle(self.n, self.t, self.dt, detuning, detuning, detuning_type=None,
+                                single_addressing_list=single_addressing_list,
+                                initial_state_list=int_state, rabi_regime='constant', Rabi=8 * 2 * np.pi)
+
+        singleplot2 = PlotSingle(self.n, self.t, self.dt, detuning, detuning, detuning_type=None,
+                                 single_addressing_list=['linear'] * self.n,
+                                 initial_state_list=int_state, rabi_regime='constant', Rabi=8 * 2 * np.pi)
+
+
+        quench_data = singleplot.colour_bar(type='pairwise purity')
+        print(quench_data)
+        background_data = singleplot2.colour_bar(type='pairwise purity')
+        print(background_data)
+
+        data = 1 + quench_data - background_data
+
+        ploting_tools.set_up_color_bar(self.n, data, self.times, ax=ax, type='pairwise purity')
+
+        plt.show()
 
 
 if __name__ == "__main__":
-    t = 7
+    t = 0.01
     dt = 0.01
     n = 7
-    δ_start = -24 * 2 * np.pi
-    δ_end = 24 * 2 * np.pi
+    δ_start = 31.9 * 2 * np.pi
+    δ_end = 31.9 * 2 * np.pi
 
     two = ['quench', 'quench']
     two2 = ['quench', 'linear flat']
@@ -911,20 +996,28 @@ if __name__ == "__main__":
 
     seven = ['quench flat'] * 7
     seven2 = ['quench'] * 7
-    seven3 = [1] + ['linear flat'] * 6
+    seven3 = ['quench'] + ['linear flat'] * 6
     seven4 = ['linear flat'] * 3 + [1] + ['linear flat'] * 3
 
-    nine = ['quench']
+    nine = ['linear']
     nine2 = ['linear flat'] * 4 + [1] + ['linear flat'] * 4
-    nine3 = [1] + ['linear flat'] * 8
+    nine3 = ['quench'] + ['linear flat'] * 8
 
     Z2 = [1 if i % 2 == 0 else 0 for i in range(n)]
     Zero = [0] * n
 
     plotter = CombinedPlots(n, t, dt, δ_start, δ_end, detuning_type=None,
-                            single_addressing_list=seven,
-                            initial_state_list=Zero, rabi_regime='constant'
+                            single_addressing_list=nine,
+                            initial_state_list=Zero, rabi_regime='constant',
                             )
+    #plotter.remove_background_colourbar(31.9*2*np.pi, nine3, Z2)
+
+    #np.array([10, 12, 15, 21, 24, 27, 30, 31.9, 34, 37, 40, 45, 50, 55, 60])
+    plotter.gs_vs_detuning(np.arange(-5,90,2.5)*2*np.pi, Z2, rabi_list=[0, 4*2 * np.pi])
+
+    plotter.qmi_compare(9, [9, 8, 7, 6, 5, 4, 3, 2, 1], [1], corr_type='VNE', save_pdf=True)
+
+    plotter.blockade_plots()
 
     plotter.colorbar_state_fidelity([Z2], save_pdf=True)
 
@@ -946,7 +1039,7 @@ if __name__ == "__main__":
     #
     #plotter.cb_entanglement_entropy(atom_i=None, save_pdf=True)
     #
-    #plotter.qmi_compare(9, [9, 8, 7, 6, 5, 4, 3, 2], [1], corr_type='VNE', save_pdf=True)
+
 
 
 

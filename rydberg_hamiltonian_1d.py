@@ -21,7 +21,7 @@ class RydbergHamiltonian1D:
         self.a = a
         self.C_6 = C_6
         self.Rabi = Rabi
-        self.r_b = (C_6 / Rabi) ** (1 / 6)
+        self.r_b = 1#(C_6 / Rabi) ** (1 / 6)
         self.id = np.identity(2)
         self.σx = np.array([[0, 1], [1, 0]])
         self.ni_op = np.array([[0, 0], [0, 1]])
@@ -76,7 +76,7 @@ class RydbergHamiltonian1D:
 
         return m
 
-    def vdw(self, first_atom_move=0, NN=False):
+    def vdw(self, first_atom_move=0, NN=True):
 
         m_vdw = self.zeros
 

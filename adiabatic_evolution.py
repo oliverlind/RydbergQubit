@@ -19,8 +19,8 @@ import rabi_regimes
 
 class AdiabaticEvolution(RydbergHamiltonian1D):
     def __init__(self, n, t, dt, δ_start, δ_end, a=5.48, rabi_osc=False, no_int=False, detuning_type='linear',
-                 single_addressing_list=None, initial_state_list=None, rabi_regime="constant"):
-        super().__init__(n, a=a)
+                 single_addressing_list=None, initial_state_list=None, rabi_regime="constant", Rabi= 4*2 * np.pi):
+        super().__init__(n, a=a, Rabi=Rabi)
         self.t = t
         self.dt = dt
         self.steps = int(t / dt)
@@ -253,6 +253,9 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
 
         elif std_energy_list:
             return std_energies
+
+        elif eigenstate_fidelities:
+            return eigenstate_probs
 
         else:
             return ψ

@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 
-pos=4/7
+pos=0.8
 
 def global_detuning(t, dt, δ_start, δ_end, d_type='linear', position=pos):
     steps = int(t / dt)

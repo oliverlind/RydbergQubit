@@ -15,6 +15,8 @@ from matplotlib.collections import LineCollection
 from matplotlib.collections import PathCollection
 from matplotlib.path import Path
 import matplotlib.cm as cm
+import matplotlib.patches as patches
+import matplotlib.gridspec as gridspec
 
 import data_analysis
 import detuning_regimes
@@ -27,6 +29,7 @@ from config.config import plotcolors
 import ploting_tools
 from matplotlib.colors import Normalize
 import pandas as pd
+import vector_manipluation_tools as vm
 
 mpl.rcParams['font.size'] = 12
 mpl.rcParams['font.family'] = 'serif'
@@ -45,10 +48,10 @@ mpl.rcParams['axes.linewidth'] = 1.0
 
 class PlotSingle(AdiabaticEvolution):
     def __init__(self, n, t, dt, δ_start, δ_end, a=5.48, detuning_type=None, single_addressing_list=None,
-                 initial_state_list=None, rabi_regime='constant'):
+                 initial_state_list=None, rabi_regime='constant', Rabi= 4*2 * np.pi):
         super().__init__(n, t, dt, δ_start=δ_start, δ_end=δ_end, detuning_type=detuning_type,
                          single_addressing_list=single_addressing_list, initial_state_list=initial_state_list,
-                         rabi_regime=rabi_regime, a=a)
+                         rabi_regime=rabi_regime, a=a, Rabi=Rabi)
 
     '''ColourBar'''
     def colour_bar(self, type='rydberg', data=None, title=None, show=False, ax=None, cb=True, cb_ax=None, end_ax=None, save_pdf=False):
@@ -193,7 +196,7 @@ class PlotSingle(AdiabaticEvolution):
                 data = np.array(purity_list)
                 data = data.T
 
-                print(data)
+
 
                 n = self.n-1
 
@@ -390,18 +393,22 @@ class PlotSingle(AdiabaticEvolution):
     '''Eigenenergies functions'''
 
     def eigenenergies_barchart(self, eigenvalues=None, eigenstate_probs=None,
-                               expectation_energies=None, before=False, ax=None, save_pdf=False, show=False, table=False):
+                               expectation_energies=None, before=False, ax=None, save_pdf=False, show=False, table=False, zoomed=False):
 
         if ax is None:
             eigenvalues, eigenvectors, expectation_energies, eigenstate_probs, std_energy_list = self.time_evolve(eigen_list=True,
                                                                                                  eigenstate_fidelities=True,
                                                                                                  expec_energy=True,
-                                                                                                 std_energy_list=True
-                                                                                                 )
-            fig, ax = plt.subplots(2, 1, figsize=(8, 3))
+                                                                                                     std_energy_list=True)
+            if zoomed:
+                fig = plt.figure(figsize=(8, 3.5))
 
-        ax[1].set_xlabel(r'Energy Eigenvalue/$\hbar$ (MHz)')
-        ax[1].set_ylabel(r'|⟨$\Psi_{\lambda}$|$\Psi(t>t_{quench}$⟩|$^{2}$')
+            else:
+                fig, ax = plt.subplots(figsize=(8, 2))
+
+
+        # ax1.set_xlabel(r'Energy Eigenvalue/$\hbar$ (MHz)')
+        # ax[1].set_ylabel(r'|⟨$\Psi_{\lambda}$|$\Psi(t>t_{quench}$⟩|$^{2}$')
 
 
         eigenstate_probs = np.array(eigenstate_probs)
@@ -415,19 +422,44 @@ class PlotSingle(AdiabaticEvolution):
             ax.bar(eigenvalues[0], [1] * n, color='grey', alpha=0.2, width=2)
             ax.bar(eigenvalues[0], eigenstate_probs[:, 0], width=2)
 
-        else:
+        elif zoomed:
 
-            ax[0].bar(np.array(eigenvalues[-1])/self.two_pi, [1]*n, color='grey', alpha=0.2, width=0.5)
-            ax[0].bar(eigenvalues[-1]/self.two_pi, eigenstate_probs[:, -1], width=0.5)
+            gs = gridspec.GridSpec(2, 3, width_ratios=[0.05, 2.15, 1], height_ratios=[1, 1], hspace=0.3)
+            ax1 = fig.add_subplot(gs[0, :])
+            ax2 = fig.add_subplot(gs[1, 1])
+            ax3 = fig.add_subplot(gs[1, 0])
+            ax4 = fig.add_subplot(gs[1, 2])
+            ax3.axis('off')
+            ax4.axis('off')
+            ax2.set_xlabel(r'Energy Eigenvalue/$\hbar$ (MHz)')
+            ax1.set_ylabel(r'|⟨$\Psi_{\lambda}$|$\Psi$⟩|$^{2}$')
+            ax2.set_ylabel(r'|⟨$\Psi_{\lambda}$|$\Psi$⟩|$^{2}$')
+
+            #r'|⟨$\Psi_{\lambda}$|$\Psi(t>t_{quench}$⟩|$^{2}$'
+
+            #rect = patches.Rectangle((-10, 0), 20, , linewidth=1, edgecolor='orange', facecolor='orange', alpha=0.05)
+
+            ax1.axvspan(xmin=-10,xmax=10, color='orange', alpha=0.15)
+            ax1.bar(np.array(eigenvalues[-1])/self.two_pi, [1]*n, color='grey', alpha=0.2, width=1)
+            ax1.bar(eigenvalues[-1]/self.two_pi, eigenstate_probs[:, -1], width=1)
             # ax.bar(expectation_energies[-1]/self.two_pi, 1, color='r', width=0.2)
             # ax.bar((expectation_energies[-1] + std_energy_list[-1])/ self.two_pi, 1, color='g', width=0.2)
             # ax.bar((expectation_energies[-1] - std_energy_list[-1])/ self.two_pi, 1, color='g', width=0.2)
-            ax[1].set_xlim(-12, 12)
-            ax[1].bar(np.array(eigenvalues[-1]) / self.two_pi, [0.6] * n, color='grey', alpha=0.2, width=0.2)
-            ax[1].bar(eigenvalues[-1] / self.two_pi, eigenstate_probs[:, -1], width=0.2)
+
+            ax2.set_xlim(-12,12)
+            ax2.axvspan(xmin=-10, xmax=10, color='orange', alpha=0.15)
+            ax2.bar(np.array(eigenvalues[-1]) / self.two_pi, [0.6] * n, color='grey', alpha=0.2, width=0.25)
+            ax2.bar(eigenvalues[-1] / self.two_pi, eigenstate_probs[:, -1], width=0.25)
+
+            ax4.text(0.0, 0.5, r'|$\Psi$⟩ = |$\Psi(t>t_{quench})$⟩', fontsize=14)
+
+        else:
+            ax.bar(np.array(eigenvalues[-1]) / self.two_pi, [1] * n, color='grey', alpha=0.2, width=1)
+            ax.bar(eigenvalues[-1] / self.two_pi, eigenstate_probs[:, -1], width=1)
+
+
 
         if table:
-            print('yes')
 
             eigenvalue_df = pd.DataFrame(eigenvalues[-1])
             probs_df = pd.DataFrame(eigenstate_probs[:, -1])
@@ -888,13 +920,61 @@ class PlotSingle(AdiabaticEvolution):
 
         plt.show()
 
+    def two_atom_blockade(self, states_to_test_list, save_pdf=False):
+
+        fig, axs = plt.subplots(nrows=2, ncols=2, figsize=(4,3.5), sharex=True, gridspec_kw={'width_ratios': [100, 1], 'height_ratios': [1, 1.5]})
+
+        rfs, states = self.time_evolve(rydberg_fidelity=True, states_list=True)
+
+        ploting_tools.set_up_color_bar(2, rfs, self.times, ax=axs[0, 0], type='two atom blockade', colorbar=False)
+
+        for state_to_test in states_to_test_list:
+            fidelity_list = [0]*len(states)
+            print(state_to_test)
+
+            if state_to_test[0] == 'psi plus':
+                v_state_to_test = (1 / np.sqrt(2)) * (vm.initial_state([1, 0]) + vm.initial_state([0, 1]))
+            elif state_to_test[0] == 'psi minus':
+                v_state_to_test = (1 / np.sqrt(2)) * (vm.initial_state([1, 0]) - vm.initial_state([0, 1]))
+
+            else:
+                v_state_to_test = vm.initial_state(state_to_test)
+
+            for i, state in enumerate(states):
+
+                fidelity_list[i] = da.state_prob(v_state_to_test, state)
+
+
+            for ax in axs[:, 1]:
+                ax.axis('off')
+
+            # State fidelities
+            axs[1, 0].plot(self.times, fidelity_list)
+
+            d_array = self.detunning[0]/self.two_pi
+            pos = np.argmin(np.abs(d_array-31.85))
+
+            #axs[1, 0].axvspan(xmin=0, xmax=self.times[pos], color='green', alpha=0.05)
+            #axs[1, 0].axvspan(xmin=self.times[pos], xmax=40, color='red', alpha=0.05)
+
+
+        if save_pdf:
+            plt.savefig(f'Quick Save Plots/twoatomblockade.pdf', format='pdf', bbox_inches='tight', dpi=700)
+
+
+
+        plt.show()
+
+
+
+
 
 if __name__ == "__main__":
-    t = 7
+    t = 0.05
     dt = 0.01
     n = 7
     δ_start = -24 * 2 * np.pi
-    δ_end = 24 * 2 * np.pi
+    δ_end = -24 * 2 * np.pi
 
     two = ['quench', 'quench']
     two2 = ['quench', 'linear flat']
@@ -913,32 +993,38 @@ if __name__ == "__main__":
     five3 = [0] + ['linear flat'] * 4
     five4 = [[1, 25]] + ['linear flat'] * 4
 
-    seven = ['quench flat'] * 7
+    seven = ['quench'] * 7
     seven2 = [1] * 7
     seven3 = [1] + ['linear flat'] * 6
     seven4 = ['linear flat'] * 3 + [1] + ['linear flat'] * 3
 
 
-    nine = ['linear'] * 9
+    nine = ['quench'] * 9
     nine2 = ['linear flat'] * 4 + [1] + ['linear flat'] * 4
-    nine3 = ['linear flat'] * 8 + [1]
+    nine3 = [0] + ['linear flat'] * 8
 
     Z2 = [1 if i % 2 == 0 else 0 for i in range(n)]
     Zero = [0]*n
 
     plotter = PlotSingle(n, t, dt, δ_start, δ_end, detuning_type=None,
                          single_addressing_list=seven,
-                         initial_state_list=Z2,
-                         a=5.48
+                         initial_state_list=Zero,
+                         a=5.48,
+                         Rabi=4 * 2 * np.pi
                          )
 
+    plotter.eigenenergies_barchart(show=True, save_pdf=True, table=True, zoomed=True)
+
+    #plotter.two_atom_blockade([[0,0],[1,1], ['psi plus']])
+
+    plotter.colour_bar(show=True, type='pairwise purity', save_pdf=True)
     #plotter.lb_bound()
 
     #plotter.detuning_shape(types=nine3, show=True, save_pdf=True, position=0.05)
 
     #plotter.gaussian_model_eigenstates(8, 6)
     # #
-    # plotter.eigenenergies_barchart(show=True, save_pdf=True, table=True)
+
     # print(Z2)
     #plotter.colour_bar(show=True, type='pairwise purity', save_pdf=True)
 
