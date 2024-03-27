@@ -57,7 +57,7 @@ class PlotSingle(AdiabaticEvolution):
     def colour_bar(self, type='rydberg', data=None, title=None, show=False, ax=None, cb=True, cb_ax=None, end_ax=None, save_pdf=False):
 
         if ax is None:
-            fig, ax = plt.subplots(figsize=(8, 3))
+            fig, ax = plt.subplots(figsize=(8, 2.5))
             ax.set_xlabel('Time ($\mu$s)')
 
         if data is None:
@@ -126,6 +126,8 @@ class PlotSingle(AdiabaticEvolution):
 
             elif type == 'concurrence':
                 states = self.time_evolve(states_list=True)
+                #ax.set_title(r'$\Delta_{int}$/2$\pi$ = $V_{i,i+1}$ =' + f' 31.9 (MHz)', fontsize=12)
+                #ax.axvline(x=0.3, color='r', linestyle='--', linewidth=1, alpha=0.4)
 
                 C_list = [[] for _ in range(self.steps)]
 
@@ -393,7 +395,8 @@ class PlotSingle(AdiabaticEvolution):
     '''Eigenenergies functions'''
 
     def eigenenergies_barchart(self, eigenvalues=None, eigenstate_probs=None,
-                               expectation_energies=None, before=False, ax=None, save_pdf=False, show=False, table=False, zoomed=False):
+                               expectation_energies=None, before=False, ax=None, save_pdf=False, show=False, table=False,
+                               zoomed=False, inset=False):
 
         if ax is None:
             eigenvalues, eigenvectors, expectation_energies, eigenstate_probs, std_energy_list = self.time_evolve(eigen_list=True,
@@ -403,8 +406,23 @@ class PlotSingle(AdiabaticEvolution):
             if zoomed:
                 fig = plt.figure(figsize=(8, 3.5))
 
+            elif inset:
+                fig, ax = plt.subplots(figsize=(8, 1.5))
+                inset_ax = inset_axes(ax, width="45%", height="50%", loc='upper right')
+
+
             else:
                 fig, ax = plt.subplots(figsize=(8, 2))
+
+        else:
+            eigenvalues, eigenvectors, expectation_energies, eigenstate_probs, std_energy_list = self.time_evolve(
+                eigen_list=True,
+                eigenstate_fidelities=True,
+                expec_energy=True,
+                std_energy_list=True)
+
+            if inset:
+                inset_ax = inset_axes(ax, width="45%", height="50%", loc='upper right')
 
 
         # ax1.set_xlabel(r'Energy Eigenvalue/$\hbar$ (MHz)')
@@ -448,14 +466,33 @@ class PlotSingle(AdiabaticEvolution):
 
             ax2.set_xlim(-12,12)
             ax2.axvspan(xmin=-10, xmax=10, color='orange', alpha=0.15)
-            ax2.bar(np.array(eigenvalues[-1]) / self.two_pi, [0.6] * n, color='grey', alpha=0.2, width=0.25)
+            ax2.bar(np.array(eigenvalues[-1]) / self.two_pi, [0.55] * n, color='grey', alpha=0.2, width=0.25)
             ax2.bar(eigenvalues[-1] / self.two_pi, eigenstate_probs[:, -1], width=0.25)
 
             ax4.text(0.0, 0.5, r'|$\Psi$⟩ = |$\Psi(t>t_{quench})$⟩', fontsize=14)
 
-        else:
+        elif inset:
+
+            ax.axvspan(xmin=-10, xmax=10, color='orange', alpha=0.15)
             ax.bar(np.array(eigenvalues[-1]) / self.two_pi, [1] * n, color='grey', alpha=0.2, width=1)
             ax.bar(eigenvalues[-1] / self.two_pi, eigenstate_probs[:, -1], width=1)
+            ax.set_ylabel(r'|⟨$\Psi_{\lambda}$|$\Psi(t)$⟩|$^{2}$')
+            ax.set_xlabel(r'Energy Eigenvalue/$\hbar$ (MHz)')
+            ax.tick_params(top=False)
+            ax.tick_params(right=False)
+            ax.set_xlim(-20, 225)
+
+            inset_ax.set_xlim(-12, 12)
+            inset_ax.set_yticks([0,0.2])
+            #inset_ax.set_ylim(0, 0.24)
+            inset_ax.axvspan(xmin=-10, xmax=10, color='orange', alpha=0.15)
+            inset_ax.bar(np.array(eigenvalues[-1]) / self.two_pi, [0.3] * n, color='grey', alpha=0.2, width=0.25)
+            inset_ax.bar(eigenvalues[-1] / self.two_pi, eigenstate_probs[:, -1], width=0.25)
+            inset_ax.tick_params(top=False)
+
+        else:
+            ax.bar(np.array(eigenvalues[-1]) / self.two_pi, [0.6] * n, color='grey', alpha=0.2, width=0.75)
+            ax.bar(eigenvalues[-1] / self.two_pi, eigenstate_probs[:, -1], width=0.75)
 
 
 
@@ -574,12 +611,13 @@ class PlotSingle(AdiabaticEvolution):
                                                           show=False, cb=True, cb_label=r'|$\Psi^{+}$⟩ Fidelity',
                                                           cb_ax=None):
 
-        if ax is None:
+        if eigenvalues is None:
             eigenvalues, eigenvectors, expectation_energies, eigenstate_probs = self.time_evolve(eigen_list=True,
                                                                                                  eigenstate_fidelities=True,
                                                                                                  expec_energy=True)
-            fig, ax = plt.subplots(figsize=(4, 4))
-            ax.set_xlabel(r'Time ($\mu$s)')
+            if ax is None:
+                fig, ax = plt.subplots(figsize=(4, 2.5))
+                ax.set_xlabel(r'Time ($\mu$s)')
 
         ploting_tools.plot_eigenenergies_fidelities_line(self.n, self.times, eigenvalues, eigenstate_probs,
                                                          expectation_energies, ax, range(0, self.dimension), cb=cb,
@@ -624,9 +662,9 @@ class PlotSingle(AdiabaticEvolution):
             plt.show()
 
     def eigenvalues_distance(self, save_pdf=False, show=False):
-        fig, ax = plt.subplots(figsize=(8, 3.5))
+        fig, ax = plt.subplots(figsize=(6, 3))
 
-        ax.set_xlabel(r'$a$ ($\mu$m)', fontsize=12)
+        ax.set_xlabel(r'$R$ ($\mu$m)', fontsize=12)
         ax.set_ylabel(r'$E$ (MHz)')
 
         xmin = 4
@@ -664,11 +702,14 @@ class PlotSingle(AdiabaticEvolution):
 
         print(self.r_b)
 
-        plt.text(self.r_b + 0.35, 10, r'$R_{B}$', ha='center', va='center', rotation=-90, fontsize=12)
+        plt.text(self.r_b + 0.25, 10, r'$R_{B}$', ha='center', va='center', rotation=-90, fontsize=12)
+        plt.text(4.1, 13, 'Rydberg Blockade', color=pale_blue, fontsize=12)
 
         # plt.text(5.25, 315, r'$|rr⟩$', ha='center', va='center', fontsize=18)  # Displaying 1/2
 
         plt.axvspan(xmin=xmin, xmax=self.r_b, color=pale_blue, alpha=0.2)
+        plt.tick_params(top=False)
+        plt.tick_params(right=False)
 
         plt.subplots_adjust(right=0.8)
         plt.legend(loc='upper right', fontsize=12)
@@ -784,6 +825,8 @@ class PlotSingle(AdiabaticEvolution):
 
         else:
             ax.plot(self.times, entanglement_entropy, label=label)
+            ax.set_ylabel('Half Chain EE')
+            ax.set_xlabel(r'Time after quench ($\mu$s)')
 
         if atom_i is not None:
             vne_list = []
@@ -794,11 +837,11 @@ class PlotSingle(AdiabaticEvolution):
 
             ax.plot(self.times, vne_list, color='orange', label='Atom 1')
 
-        ax.legend(loc='upper left')
+        ax.legend(loc='lower right', bbox_to_anchor=(1, 0.1))
 
-        plt.axhline(y=np.log(4), color='blue', linestyle='--', linewidth=1, alpha=0.5)
+        # ax.axhline(y=np.log(16), color='grey', linestyle='--', linewidth=1, alpha=0.5)
 
-        plt.axhline(y=np.log(2), color='orange', linestyle='--', linewidth=1, alpha=0.5)
+        #plt.axhline(y=np.log(2), color='orange', linestyle='--', linewidth=1, alpha=0.5)
 
         if show:
             plt.show()
@@ -898,15 +941,15 @@ class PlotSingle(AdiabaticEvolution):
         bound = []
         model = []
 
-        def exp_func(x, C, v):
-            return C * np.exp(v*x-(self.n-1))
+        def exp_func(t, C, v):
+            return C * np.exp(v*t-(self.n-1))
 
         for i, time in enumerate(self.times):
             bound += [data_analysis.lb_bound(self.n, hms[i], time)]
 
         fig, ax = plt.subplots(figsize=(4, 3))
 
-        params, covariance = curve_fit(exp_func, self.times, bound)
+        params, covariance = curve_fit(exp_func, self.times[:30], bound[:30])
 
         print(params)
 
@@ -914,7 +957,8 @@ class PlotSingle(AdiabaticEvolution):
 
 
         ax.plot(self.times, bound)
-        ax.plot(self.times, exp_func(self.times, C, v))
+        ax.plot(self.times[:40], exp_func(self.times[:40], C, v))
+        ax.set_ylim(0,0.7)
 
 
 
@@ -970,11 +1014,11 @@ class PlotSingle(AdiabaticEvolution):
 
 
 if __name__ == "__main__":
-    t = 0.05
-    dt = 0.01
-    n = 7
+    t = 0.1
+    dt = 0.001
+    n = 2
     δ_start = -24 * 2 * np.pi
-    δ_end = -24 * 2 * np.pi
+    δ_end = 24 * 2 * np.pi
 
     two = ['quench', 'quench']
     two2 = ['quench', 'linear flat']
@@ -993,32 +1037,46 @@ if __name__ == "__main__":
     five3 = [0] + ['linear flat'] * 4
     five4 = [[1, 25]] + ['linear flat'] * 4
 
+    six = ['linear']
+
     seven = ['quench'] * 7
     seven2 = [1] * 7
     seven3 = [1] + ['linear flat'] * 6
     seven4 = ['linear flat'] * 3 + [1] + ['linear flat'] * 3
 
 
-    nine = ['quench'] * 9
+    nine = ['linear'] * 9
     nine2 = ['linear flat'] * 4 + [1] + ['linear flat'] * 4
-    nine3 = [0] + ['linear flat'] * 8
+    nine3 = ['quench'] + ['linear flat'] * 8
 
     Z2 = [1 if i % 2 == 0 else 0 for i in range(n)]
     Zero = [0]*n
 
     plotter = PlotSingle(n, t, dt, δ_start, δ_end, detuning_type=None,
-                         single_addressing_list=seven,
+                         single_addressing_list=two3,
                          initial_state_list=Zero,
                          a=5.48,
                          Rabi=4 * 2 * np.pi
                          )
+    plotter.eigenenergies_lineplot_with_eigenstate_fidelities(show=True)
 
-    plotter.eigenenergies_barchart(show=True, save_pdf=True, table=True, zoomed=True)
+    #plotter.lb_bound()
+    #plotter.eigenvalues_distance(show=True)
+
+    plotter.colour_bar(show=True, save_pdf=True, cb=False)
+
+    plotter.colour_bar(show=True, type='concurrence', save_pdf=True, cb=False)
+
+    plotter.lb_bound()
+
+    #plotter.colour_bar(show=True, save_pdf=True)
+
+    plotter.eigenenergies_barchart(show=True, save_pdf=True, table=True, inset=True)
 
     #plotter.two_atom_blockade([[0,0],[1,1], ['psi plus']])
 
-    plotter.colour_bar(show=True, type='pairwise purity', save_pdf=True)
-    #plotter.lb_bound()
+
+
 
     #plotter.detuning_shape(types=nine3, show=True, save_pdf=True, position=0.05)
 
@@ -1037,8 +1095,6 @@ if __name__ == "__main__":
     plotter.plot_half_sys_entanglement_entropy(atom_i=None, show=True)
 
     plotter.plot_entanglement_entropy_single_atom(3, show=True)
-
-    #plotter.eigenenergies_lineplot_with_eigenstate_fidelities(show=True)
 
     plotter.energy_std()
 

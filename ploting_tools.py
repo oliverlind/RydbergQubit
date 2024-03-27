@@ -83,7 +83,7 @@ def set_up_color_bar(n, data, times, ax, type='rydberg', color='viridis', colorb
         labels = [f'C({i}, {i+1})' for i in range(1, n+1)]
         norm = mcolors.Normalize(vmin=0, vmax=1)
         color = 'inferno'
-        bar_label = r'Concurrence'
+        bar_label = r'C(i, j)'
 
     elif type == 'concurrence 2':
         labels = [f'C({ctype}, {i+1})' for i in range(0, n+1)]
@@ -99,10 +99,10 @@ def set_up_color_bar(n, data, times, ax, type='rydberg', color='viridis', colorb
         bar_label = r'Concurrence'
 
     elif type == 'pairwise purity':
-        labels = [f'P({i}, {i+1})' for i in range(1, n+1)]
+        labels = [r'$\gamma$'+f'({i}, {i+1})' for i in range(1, n+1)]
         norm = mcolors.Normalize(vmin=0.25, vmax=1)
         color = 'inferno'
-        bar_label = r'Purity'
+        bar_label = r'$\gamma(i, j)$'
 
     elif type == 'two atom blockade':
         labels = [f'' for i in range(n)]

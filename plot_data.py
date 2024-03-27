@@ -52,39 +52,68 @@ def propagation_speed(data_list):
     # Show plot
     plt.show()
 
-def propagation_speed2(data_list, threshold_type='Time 1.1'):
-    fig, ax = plt.subplots()
+def propagation_speed2(data_list, threshold_type='Time 3sd', save_pdf=False):
+    fig, axs = plt.subplots(1,2, sharey=True, figsize=(8,2.5))
 
-    for data in data_list:
+    markers = ['o','s','^','d','*']
+    x_errors_asymmetric = [[0.005]*8, [0.005]*8]
+
+
+    for i, data in enumerate(data_list):
         l = np.array(data['Site'])
         t_diff = np.array(data[threshold_type])
         t_diff2 = np.array(data['Time 1.1'])
 
         # Perform linear regression
-        slope, intercept, r_value, p_value, std_err = linregress(t_diff, l)
+        slope, intercept, r_value, p_value, std_err = linregress(t_diff[1:], l[1:])
 
         x_intercept = -intercept/slope
 
-        print(slope)
+        #print(slope)
         print(x_intercept)
 
         # Create scatter plot
-        ax.scatter(t_diff[1:], l[1:], label='Data')
-        ax.plot(t_diff[1:], l[1:], label='Data')
 
-        # ax.scatter(t_diff2[:], l[:], label='Data')
-        # ax.plot(t_diff2[:], l[:], label='Data')
+        axs[1].scatter(t_diff[1:], l[1:], marker=markers[i], label='Data', s=20)
+        axs[1].plot(t_diff[1:], l[1:])
+
+        axs[0].scatter(t_diff2[1:], l[1:], marker=markers[i], s=20)
+        axs[0].plot(t_diff2[1:], l[1:])
+
+    axs[0].set_title('Threshold 1', fontsize=12)
+    axs[1].set_title('Threshold 2', fontsize=12)
+    axs[0].grid(True)
+    axs[1].grid(True)
+
+    fig.subplots_adjust(right=0.8)
+    axs[1].legend(loc='upper left', bbox_to_anchor=(1.1, 1), borderaxespad=0., title="Legend")
+
 
         # Plot the line of best fit
         #ax.plot(t_diff, slope * t_diff + intercept, color='red', label='Line of Best Fit')
 
-    ax.set_xlim(left=0)
-    ax.set_ylim(bottom=0)
+    for ax in axs:
+        ax.set_ylim(bottom=0)
+        ax.tick_params(top=False)
+        ax.set_yticks(np.arange(0,9,1))
+        ax.set_xticks(np.arange(0, 0.6, 0.1))
+        ax.tick_params(axis='both', which='major', length=3)
+        ax.set_xlabel('t*')
+
+    axs[0].set_xlim(0, 0.5)
+    axs[1].set_xlim(0, 0.5)
+    axs[0].set_ylabel('L')
+
+    plt.subplots_adjust(wspace=0.15)
+
 
     # Add labels and legend
-    plt.ylabel('Sites travelled')
-    plt.xlabel('t*')
+
+    # plt.xlabel('t*')
     #plt.legend()
+
+    if save_pdf:
+        plt.savefig(f'Quick Save Plots/EE_velocity_plot.pdf', format='pdf', bbox_inches='tight', dpi=700)
 
     # Show plot
     plt.show()
@@ -101,17 +130,19 @@ if __name__ == "__main__":
     #          ]
 
     paths = [
-        #'Plotting Data/Propagation Speed EE/9 Atom/D=24.xlsx',
+        'Plotting Data/Propagation Speed EE/9 Atom/D=24.xlsx',
         'Plotting Data/Propagation Speed EE/9 Atom/D=27.xlsx',
-        #'Plotting Data/Propagation Speed EE/9 Atom/D=30.xlsx',
-        'Plotting Data/Propagation Speed EE/9 Atom/D=31.9.xlsx'
+        'Plotting Data/Propagation Speed EE/9 Atom/D=30.xlsx',
+        'Plotting Data/Propagation Speed EE/9 Atom/D=31.9.xlsx',
+        'Plotting Data/Propagation Speed EE/9 Atom/D=34.xlsx'
     ]
 
     data_list = []
+    legend_list = []
 
     for path in reversed(paths):
         df = pd.read_excel(path)
         data_list += [df]
 
-    propagation_speed2(data_list)
+    propagation_speed2(data_list, legend_list, save_pdf=True)
 

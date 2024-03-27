@@ -21,7 +21,6 @@ class RydbergHamiltonian1D:
         self.a = a
         self.C_6 = C_6
         self.Rabi = Rabi
-        self.r_b = 1#(C_6 / Rabi) ** (1 / 6)
         self.id = np.identity(2)
         self.σx = np.array([[0, 1], [1, 0]])
         self.ni_op = np.array([[0, 0], [0, 1]])
@@ -30,6 +29,11 @@ class RydbergHamiltonian1D:
         self.h = Planck * 1e6
         self.h_bar = self.h / (2 * np.pi)
         self.two_pi = 2 * np.pi
+
+        if self.Rabi == 0:
+            self.r_b = 0
+        else:
+            self.r_b = (C_6 / Rabi) ** (1 / 6)
 
     def tensor_prod_id(self, i, matrix):
         m0 = [1]
@@ -76,7 +80,7 @@ class RydbergHamiltonian1D:
 
         return m
 
-    def vdw(self, first_atom_move=0, NN=True):
+    def vdw(self, first_atom_move=0, NN=False):
 
         m_vdw = self.zeros
 
@@ -124,9 +128,9 @@ class RydbergHamiltonian1D:
 
 if __name__ == "__main__":
 
-    h_m = RydbergHamiltonian1D(1).hamiltonian_matrix([10])
+    h_m = RydbergHamiltonian1D(2).hamiltonian_matrix([0])
 
-    print(h_m)
+    print(h_m/(2*np.pi))
 
     #print(data_analysis.thermalization_matrix(h_m))
 

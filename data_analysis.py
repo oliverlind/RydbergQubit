@@ -289,7 +289,6 @@ def lb_bound(n, H, dt):
 
     n_1_dt = np.dot(expm(1j * H * dt), np.dot(n_1, expm(-1j * H * dt)))
 
-    print(n_1_dt)
 
     com = np.dot(n_1_dt, n_N)-np.dot(n_N, n_1_dt)
 
