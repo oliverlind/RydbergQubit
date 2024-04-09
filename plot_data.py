@@ -5,7 +5,7 @@ import matplotlib as mpl
 from matplotlib import pyplot as plt
 from scipy.stats import linregress
 
-mpl.rcParams['font.size'] = 12
+mpl.rcParams['font.size'] = 11
 mpl.rcParams['font.family'] = 'serif'
 mpl.rcParams["text.latex.preamble"] = r" \usepackage[T1]{fontenc} \usepackage[charter,cal=cmcal]{mathdesign}"
 mpl.rcParams["text.usetex"] = True
@@ -52,10 +52,10 @@ def propagation_speed(data_list):
     # Show plot
     plt.show()
 
-def propagation_speed2(data_list, threshold_type='Time 3sd', save_pdf=False):
-    fig, axs = plt.subplots(1,2, sharey=True, figsize=(8,2.5))
+def propagation_speed2(data_list, legend_list, threshold_type='Time 3sd', save_pdf=False):
+    fig, axs = plt.subplots(1,2, sharey=True, figsize=(8,2))
 
-    markers = ['o','s','^','d','*']
+    markers = ['o','s','^','d','*','v']
     x_errors_asymmetric = [[0.005]*8, [0.005]*8]
 
 
@@ -74,19 +74,19 @@ def propagation_speed2(data_list, threshold_type='Time 3sd', save_pdf=False):
 
         # Create scatter plot
 
-        axs[1].scatter(t_diff[1:], l[1:], marker=markers[i], label='Data', s=20)
+        axs[1].scatter(t_diff[1:], l[1:], marker=markers[i], label=legend_list[i], s=20)
         axs[1].plot(t_diff[1:], l[1:])
 
         axs[0].scatter(t_diff2[1:], l[1:], marker=markers[i], s=20)
         axs[0].plot(t_diff2[1:], l[1:])
 
-    axs[0].set_title('Threshold 1', fontsize=12)
-    axs[1].set_title('Threshold 2', fontsize=12)
+    axs[0].set_title(r'$S_{EE}(\rho_{quench})$ > 1.1 x $S_{EE}(\rho_{const}$)', pad=10, fontsize=11)
+    axs[1].set_title(r'$S_{EE}(\rho_{quench})$ >  $ \langle S_{EE}(\rho_{const}) \rangle_{t<0.6 \mu s}$ + 3$\sigma_{const}$', pad=10, fontsize=11)
     axs[0].grid(True)
     axs[1].grid(True)
 
     fig.subplots_adjust(right=0.8)
-    axs[1].legend(loc='upper left', bbox_to_anchor=(1.1, 1), borderaxespad=0., title="Legend")
+    axs[1].legend(loc='upper left', bbox_to_anchor=(1.08, 1.03), borderaxespad=0., title=r'$\Delta_{t=0}$/2$\pi$ (MHz)')
 
 
         # Plot the line of best fit
@@ -96,13 +96,13 @@ def propagation_speed2(data_list, threshold_type='Time 3sd', save_pdf=False):
         ax.set_ylim(bottom=0)
         ax.tick_params(top=False)
         ax.set_yticks(np.arange(0,9,1))
-        ax.set_xticks(np.arange(0, 0.6, 0.1))
+        ax.set_xticks(np.arange(0, 0.61, 0.1))
         ax.tick_params(axis='both', which='major', length=3)
-        ax.set_xlabel('t*')
+        ax.set_xlabel(r'$t$* ($\mu$s)')
 
     axs[0].set_xlim(0, 0.5)
-    axs[1].set_xlim(0, 0.5)
-    axs[0].set_ylabel('L')
+    axs[1].set_xlim(0, 0.60)
+    axs[0].set_ylabel('Sites travelled')
 
     plt.subplots_adjust(wspace=0.15)
 
@@ -130,6 +130,7 @@ if __name__ == "__main__":
     #          ]
 
     paths = [
+        'Plotting Data/Propagation Speed EE/9 Atom/D=21.xlsx',
         'Plotting Data/Propagation Speed EE/9 Atom/D=24.xlsx',
         'Plotting Data/Propagation Speed EE/9 Atom/D=27.xlsx',
         'Plotting Data/Propagation Speed EE/9 Atom/D=30.xlsx',
@@ -138,7 +139,7 @@ if __name__ == "__main__":
     ]
 
     data_list = []
-    legend_list = []
+    legend_list = ['34.0', r'31.9 ($V_{NN}$)','30.0','27.0', '24.0','21.0']
 
     for path in reversed(paths):
         df = pd.read_excel(path)

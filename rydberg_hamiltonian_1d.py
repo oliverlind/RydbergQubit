@@ -9,7 +9,7 @@ import data_analysis
 
 
 class RydbergHamiltonian1D:
-    def __init__(self, n, a=5.48, C_6= 862690*2 * np.pi, Rabi= 4*2 * np.pi):
+    def __init__(self, n, a=5.48, C_6= 862690*2 * np.pi, Rabi= 4*2 * np.pi, NN=False):
         '''
 
         :param n: Number of atoms
@@ -29,6 +29,7 @@ class RydbergHamiltonian1D:
         self.h = Planck * 1e6
         self.h_bar = self.h / (2 * np.pi)
         self.two_pi = 2 * np.pi
+        self.NN = NN
 
         if self.Rabi == 0:
             self.r_b = 0
@@ -80,7 +81,7 @@ class RydbergHamiltonian1D:
 
         return m
 
-    def vdw(self, first_atom_move=0, NN=False):
+    def vdw(self, first_atom_move=0):
 
         m_vdw = self.zeros
 
@@ -93,7 +94,7 @@ class RydbergHamiltonian1D:
                     else:
                         r = self.a * (abs(i - k))
                         
-                    if NN:
+                    if self.NN:
                         if i-k == 1:
                             v = self.C_6 / r ** 6
     
@@ -128,9 +129,18 @@ class RydbergHamiltonian1D:
 
 if __name__ == "__main__":
 
-    h_m = RydbergHamiltonian1D(2).hamiltonian_matrix([0])
+    h_m = RydbergHamiltonian1D(3).hamiltonian_matrix([0])
+    h_m = h_m / (2 * np.pi)
 
-    print(h_m/(2*np.pi))
+    A = [[0,1,1,0],
+         ]
+
+    eigenvalues, eigenvector = np.linalg.eigh(h_m)
+
+    print(h_m)
+
+    print(eigenvalues)
+    print(eigenvector)
 
     #print(data_analysis.thermalization_matrix(h_m))
 

@@ -4,6 +4,7 @@ from scipy.fft import fft, fftfreq, rfft, rfftfreq
 import numpy as np
 import time
 from scipy.linalg import expm
+import math
 
 import matplotlib as mpl
 from matplotlib import pyplot as plt
@@ -36,7 +37,7 @@ from matplotlib.animation import FFMpegWriter
 
 
 mpl.rcParams['animation.ffmpeg_path'] = '/opt/homebrew/bin/ffmpeg'
-mpl.rcParams['font.size'] = 12
+mpl.rcParams['font.size'] = 11
 mpl.rcParams['font.family'] = 'serif'
 mpl.rcParams["text.latex.preamble"] = r" \usepackage[T1]{fontenc} \usepackage[charter,cal=cmcal]{mathdesign}"
 mpl.rcParams["text.usetex"] = True
@@ -128,7 +129,7 @@ class CombinedPlots(PlotSingle):
 
     def colorbars_vs_detunings(self, detunings,single_addressing_list, initial_state, cm_type='rydberg', save_pdf=False):
 
-        fig, axs = plt.subplots(2, 3, figsize=(8, 4), sharex='col',
+        fig, axs = plt.subplots(2, 3, figsize=(8, 3.5), sharex='col',
                                 gridspec_kw={'width_ratios': [5, 5, 1], 'height_ratios': [9/8, 1]})
 
         for i, detuning in enumerate(detunings):
@@ -137,18 +138,20 @@ class CombinedPlots(PlotSingle):
             singleplot = PlotSingle(self.n, self.t, self.dt, detuning, detuning, detuning_type=None,
                                     single_addressing_list=single_addressing_list,
                                     initial_state_list=initial_state, rabi_regime='constant')
-
+            #
             if i == 0:
-                cb_ax = axs[0, 2]
+                cb_ax = axs[:, 2]
                 cb = True
-
-            elif i == 3:
-                cb_ax = axs[1, 2]
-                cb = True
-
+            #
+            # # elif i == 3:
+            # #     cb_ax = axs[1, 2]
+            # #     cb = True
+            #
             else:
                 cb_ax = None
                 cb = False
+
+
 
             if i == 0:
                 ax = axs[0, 0]
@@ -161,26 +164,28 @@ class CombinedPlots(PlotSingle):
 
             if i == 2:
                 ax = axs[1, 0]
-                cm_type = 'concurrence'
+                # cm_type = 'concurrence'
 
             if i == 3:
                 ax = axs[1, 1]
-                cm_type = 'concurrence'
+                # cm_type = 'concurrence'
 
             singleplot.colour_bar(ax=ax, cb=cb, cb_ax=cb_ax, type=cm_type)
+            ax.tick_params(length=3)
 
             # if i == 2:
             #     ax.set_title(r'$\Delta_{int}$/2$\pi$ = $V_{i,i+1}$ =' + f' 31.9 (MHz)', fontsize=12)
             # else:
             #ax.set_title(r'$\Delta_{int}$/2$\pi$ ='+f' {round(detuning/self.two_pi,1)} (MHz)', fontsize=12)
 
-            ax.axvline(x=0.05, color='r', linestyle='--', linewidth=1, alpha=0.4)
+            ax.axvline(x=0.3, color='r', linestyle='--', linewidth=1, alpha=0.6)
             #ax.get_yticklabels()[0].set_color('red')
 
             #ax.text(0.0005, 7, r'$\Delta$/2$\pi$ ='+f'{round(detuning/self.two_pi,1)}(MHz)', color='r')
 
         for ax in axs[:, 2]:
             ax.axis('off')
+
 
         axs[0, 1].set_ylabel('')
         axs[0, 1].set_yticklabels([])
@@ -190,10 +195,12 @@ class CombinedPlots(PlotSingle):
 
         axs[1, 0].set_xlabel(r'Time ($\mu$s)')
         axs[1, 1].set_xlabel(r'Time ($\mu$s)')
-        plt.subplots_adjust(hspace=0.1)
+        plt.subplots_adjust(hspace=0.3)
 
-        axs[0, 0].set_title(r'$\Delta_{int}$/2$\pi$ =' + f' 24 (MHz)', fontsize=12)
-        axs[0,1].set_title(r'$\Delta_{int}$/2$\pi$ = $V_{i,i+1}$ =' + f' 31.9 (MHz)', fontsize=12)
+        axs[0, 0].set_title(r'$\Delta_{t=0}$/2$\pi$ =' + f' 27.0 (MHz)', fontsize=12)
+        axs[0, 1].set_title(r'$\Delta_{t=0}$/2$\pi$ =' + f' 30.0 (MHz)', fontsize=12)
+        axs[1, 0].set_title(r'$\Delta_{t=0}$/2$\pi$ = $V_{NN}$/2$\pi$ =' + f' 31.9 (MHz)', fontsize=12)
+        axs[1, 1].set_title(r'$\Delta_{t=0}$/2$\pi$ =' + f' 34.0 (MHz)', fontsize=12)
 
 
 
@@ -212,36 +219,49 @@ class CombinedPlots(PlotSingle):
         else:
             sys.exit()
 
-        fig, axs = plt.subplots(3, 2, sharex=True, figsize=(8, 3.5),
-                                gridspec_kw={'width_ratios': [17, 1], 'height_ratios': [0.9, 1.7, 0.9]})
+        fig, axs = plt.subplots(2, 2, sharex=True, figsize=(8, 2.65),
+                                gridspec_kw={'width_ratios': [17, 1], 'height_ratios': [1, 1.7]})
 
         # Sweep
         sweep = self.detunning[0] / self.two_pi
-        #sweep2 = self.detunning[1] / self.two_pi
-        quench = 0.125*self.t
+        print(np.shape(sweep))
+        print(np.shape(self.times))
+        sweep2 = self.detunning[1] / self.two_pi
+        quench = 0.1*self.t
 
-        axs[0, 0].set_yticks([-24, 0])
+        axs[0, 0].set_yticks([24, 0])
         axs[0, 0].plot(self.times, sweep, color='b')
-        #axs[0, 0].plot(self.times, sweep2, color='g')
-        axs[0, 0].set_ylabel(r'$\Delta$/2$\pi$ (MHz)  ')
-        axs[0, 0].set_ylim(-30, 5)
+        axs[0, 0].plot(self.times, sweep2, color='g')
+        axs[0, 0].set_ylabel(r'$\Delta_{i}$/2$\pi$ (MHz)', fontsize=10.5)
+
+
+        axs[0, 0].set_ylim(-5, 37)
         # #axs[0, 0].axvspan(xmin=0, xmax=quench, color='green', alpha=0.1)
         axs[0, 0].axvspan(xmin=quench, xmax=self.t, color='red', alpha=0.1)
-        # axs[0, 0].text(2.55, 4, 'Atom 1', color='b')
-        # axs[0, 0].text(2.55, 28, 'Atom 2-7', color='g')
-        axs[0, 0].text(0.55, -22, 'Quench', color='red')
+        axs[0, 0].text(2.55, 4, 'Atom 1', color='b')
+        axs[0, 0].text(2.55, 28, 'Atom 2-9', color='g')
+        axs[0, 0].text(quench + 0.03, 28, 'Quench', color='red')
         axs[0, 0].axhline(y=0, color='black', linestyle='--', linewidth=1, alpha=0.2)
         axs[0,0].tick_params(top=False)
 
+        axs[0,0].set_title(r'$\Delta_{t=0}$/2$\pi$ =' + f' 24.0 (MHz)', fontsize=12, pad=7)
+
+        for ax in axs[:,0]:
+            ax.tick_params(length=3)
+
+
 
         self.colour_bar(data=rydberg_fidelity_data, type=type, ax=axs[1, 0], cb_ax=axs[:, 1])
+        axs[1, 0].axvline(x=quench, color='red', linestyle='--')
+        axs[1,0].get_yticklabels()[0].set_color('red')
 
         # State Fidelities
-        self.state_fidelity(states_to_test, q_states=states, ax=axs[2, 0])
-
-        axs[2, 0].set_ylabel(r'⟨Zero|$\Psi$⟩')
-        axs[2, 0].set_xlabel(r'Time ($\mu$s)')
-        axs[2, 0].set_ylim(0, 1.1)
+        #self.state_fidelity(states_to_test, q_states=states, ax=axs[2, 0])
+        #
+        # axs[2, 0].set_ylabel(r'|⟨$Zeros$|$\Psi$⟩|$^2$')
+        # axs[2, 0].set_xlabel(r'Time ($\mu$s)')
+        # axs[2, 0].set_ylim(0, 1.1)
+        # plt.xlim(0, 4.0)
 
         plt.subplots_adjust(hspace=0)
 
@@ -573,6 +593,9 @@ class CombinedPlots(PlotSingle):
         axs[0].text(0.2, 1.32, '(b.i)', color='r', fontsize=16)
         axs[1].text(0.2, 1.32, '(b.ii)', color='r', fontsize=16)
 
+        axs[0].text(2.1, 0.33, 'Area Law', color='tab:blue', fontsize=11)
+        axs[1].text(1.65, 0.33, 'Volume Law', color='tab:blue', fontsize=11)
+
         steps = np.array(times_list) / self.dt
         steps = [int(item) for item in steps]
 
@@ -804,7 +827,7 @@ class CombinedPlots(PlotSingle):
         axs[-1].set_yticklabels(['0.00', r'$ln(2)$'])
         axs[-1].yaxis.tick_right()
 
-        for i in range(0,self.n-1):
+        for i in range(0, self.n-1):
             axs[i].set_xticks([])
             axs[i].set_yticks([])
 
@@ -1080,8 +1103,9 @@ class CombinedPlots(PlotSingle):
 
         if inset:
 
-            inset_ax = inset_axes(ax, width="30%", height="30%", loc='upper right')
+            inset_ax = inset_axes(ax, width="25%", height="25%", loc='upper right')
             inset_ax.tick_params(top=False)
+            inset_ax.tick_params(right=False)
             inset_ax.tick_params(axis='both', labelsize=10)
             inset_ax.axvline(x=31.9, color='r', linestyle='--', linewidth=1, alpha=0.3)
 
@@ -1096,7 +1120,7 @@ class CombinedPlots(PlotSingle):
 
                 singleplot = PlotSingle(self.n, self.t, self.dt, detuning, detuning, detuning_type=None,
                                        single_addressing_list=single_addressing_list,
-                                       initial_state_list=state, rabi_regime='constant', Rabi=rabi)
+                                       initial_state_list=state, rabi_regime='constant', Rabi=rabi, a=5.48)
 
                 #eigenstate_probs = singleplot.time_evolve(eigenstate_fidelities=True)
 
@@ -1117,15 +1141,14 @@ class CombinedPlots(PlotSingle):
 
                 inset_ax.set_xlim(20,45)
                 inset_ax.set_ylim(0.95, 1.005)
+                inset_ax.set_xticks([20,45])
 
         ax.axvline(x=31.9, color='r', linestyle='--', linewidth=1, alpha=0.3)
         ax.set_ylim(0,1.1)
         ax.set_xlabel(r'$\Delta$/2$\pi$ (MHz)')
-        ax.set_ylabel(r'⟨$Z_{2}$|$\Psi_{0}$⟩')
+        ax.set_ylabel(r'|⟨$Z_{2}$|$\Psi_{0}$⟩|$^{2}$')
         ax.tick_params(right=False)
         ax.tick_params(top=False)
-
-
 
 
         if save_pdf:
@@ -1158,17 +1181,20 @@ class CombinedPlots(PlotSingle):
 
         plt.show()
 
-    def two_atom_sweeps(self):
+    def two_atom_sweep(self):
+        pass
 
-        fig, axs = plt.subplots(1, 3, sharey=True, figsize=(6, 2.5))
+    def two_atom_sweeps_eigenenergies(self, save_pdf=False):
+
+        fig, axs = plt.subplots(1, 3, sharey=True, figsize=(8, 1.5), gridspec_kw={'width_ratios': [5, 5, 1]})
 
         detuning = 24 * 2 * np.pi
 
-        singleplot = PlotSingle(2, 1.00, self.dt, -detuning, detuning, detuning_type=None,
+        singleplot = PlotSingle(2, 1.00, 0.01, -detuning, detuning, detuning_type=None,
                                 single_addressing_list=['linear']*2,
                                 initial_state_list=[0,0], rabi_regime='constant', Rabi=4 * 2 * np.pi)
 
-        singleplot2 = PlotSingle(2, 0.2, self.dt, -detuning, detuning, detuning_type=None,
+        singleplot2 = PlotSingle(2, 0.1, 0.0005, -detuning, detuning, detuning_type=None,
                                  single_addressing_list=['linear'] * 2,
                                  initial_state_list=[0,0], rabi_regime='constant', Rabi=4 * 2 * np.pi)
 
@@ -1176,17 +1202,98 @@ class CombinedPlots(PlotSingle):
         singleplot.eigenenergies_lineplot_with_eigenstate_fidelities(ax=axs[0], cb=False)
         singleplot2.eigenenergies_lineplot_with_eigenstate_fidelities(ax=axs[1], cb=True, cb_ax=axs[2])
 
+        # axs[0].set_title(r'$t_{sweep}$ = 1.00 $\mu$s', pad=10)
+        # axs[1].set_title(r'$t_{sweep}$ = 0.10 $\mu$s', pad=10)
+
+        axs[0].tick_params(top=False)
+        #axs[0].tick_params(right=False)
+        #axs[1].tick_params(right=False)
+
+        axs[0].set_ylabel(r'$E$/$h$ (MHz)')
+        axs[0].set_xlabel(r'$\Delta$/2$\pi$ (MHz)')
+        axs[1].set_xlabel(r'$\Delta$/2$\pi$ (MHz)')
+
+        axs[0].text(-23, 30,'Adiabatic', color='#000080')
+        axs[1].text(-23, 30, 'Diabatic', color='#000080')
+        axs[0].text(6, 30, r'$t_{swp}$' + '=' + '1.00 $\mu$s')
+        axs[1].text(6, 30, r'$t_{swp}$' + '=' +  r'0.10 $\mu$s')
+
         axs[2].axis('off')
 
+        if save_pdf:
+            plt.savefig(f'Quick Save Plots/two_atom_sweep.pdf', format='pdf', bbox_inches='tight', dpi=700)
+
+        plt.show()
+
+    def NN_compare(self, detunings, initial_state, single_addressing_list, save_pdf):
+
+        fig, axs = plt.subplots(len(detunings), 1, sharex=True, figsize=(8,3.7))
+
+
+        for i, detuning in enumerate(detunings):
+            print(detuning)
+
+            singleplot = PlotSingle(self.n, self.t, self.dt, detuning, detuning, detuning_type=None,
+                                    single_addressing_list=single_addressing_list,
+                                    initial_state_list=initial_state, rabi_regime='constant')
+
+            singleplotNN = PlotSingle(self.n, self.t, self.dt, detuning, detuning, detuning_type=None,
+                                    single_addressing_list=single_addressing_list,
+                                    initial_state_list=initial_state, rabi_regime='constant', NN=True)
+
+            data = singleplot.time_evolve(rydberg_fidelity=True)[-1]
+
+            NN_data = singleplotNN.time_evolve(rydberg_fidelity=True)[-1]
+
+            axs[i].plot(self.times, NN_data, label=r'Local NN', color='coral')
+            axs[i].plot(self.times, data, label=r'$1/R^{6}$', color='#000080')
+
+
+            axs[i].axhline(y=1, linestyle='--', color='grey')
+            axs[i].axvline(x=np.argmin(data) * self.dt, linestyle='--', color='forestgreen', alpha=0.4)
+            #axs[i].axvline(x=np.argmin(NN_data) * self.dt, linestyle='--', color='limegreen')
+
+
+            axs[i].set_ylim(0, 1.2)
+            ax2 = axs[i].twinx()
+            ax2.set_yticks([])
+            ax2.set_ylabel(r'$\Delta_{t=0}$/2$\pi$'+f' = {round(detuning/self.two_pi,1)}'+' (MHz)', rotation=0, labelpad=5, ha='left', va='center',  fontsize=12)
+
+            if i == 4:
+                ax2.set_ylabel(r'$\Delta_{t=0}$/2$\pi$' + f' = {round(detuning / self.two_pi, 1)}' + ' (MHz)',
+                               rotation=0, labelpad=5, ha='left', va='center', fontsize=12, color='red')
+
+        for i, ax in enumerate(axs):
+            ax.set_yticks([])
+            ax.tick_params(length=2)
+
+        axs[-1].set_yticks([0,1])
+        axs[-1].set_ylabel(r'⟨$n_{9}$⟩')
+        axs[-1].set_xlabel('Time after quench ($\mu$s)')
+        axs[-1].set_xlim(0,1.2)
+        #axs[0].legend(loc='upper center', bbox_to_anchor=(0.5, 1.8), ncol=2)
+        axs[0].legend(loc='upper left', ncol=2)
+
+
+
+        plt.subplots_adjust(hspace=0)
+        #plt.subplots_adjust(left=0.8)
+
+        if save_pdf:
+            plt.savefig(f'Quick Save Plots/NN_compare.pdf', format='pdf', bbox_inches='tight', dpi=700)
+
+
+
+        plt.tight_layout()
         plt.show()
 
 
 if __name__ == "__main__":
-    t = 0.01
+    t = 0.9
     dt = 0.01
     n = 7
-    δ_start = -24 * 2 * np.pi
-    δ_end = -24 * 2 * np.pi
+    δ_start = 31.85 * 2 * np.pi
+    δ_end = 31.85 * 2 * np.pi
 
     two = ['quench', 'quench']
     two2 = ['quench', 'linear flat']
@@ -1215,22 +1322,44 @@ if __name__ == "__main__":
     Z2 = [1 if i % 2 == 0 else 0 for i in range(n)]
     Zero = [0] * n
     Ones = [1] * n
+    Z3 = [1, 0, 0, 1, 0, 0, 1]
 
     plotter = CombinedPlots(n, t, dt, δ_start, δ_end, detuning_type=None,
                             single_addressing_list=nine3,
                             initial_state_list=Z2, rabi_regime='constant',
                             )
 
-    plotter.two_atom_sweeps()
+    plotter.two_atom_sweeps_eigenenergies(save_pdf=True)
 
-    plotter.gs_vs_detuning(np.arange(-5,110,2.5)*2*np.pi, Z2, rabi_list=[0, 4*2 * np.pi], save_pdf=True, inset=True)
+    plotter.area_law_test([Z2, Zero], seven2, np.array([-24, 24]) * 2 * np.pi, [0.4, 0.8], save_pdf=True)
 
-    #plotter.colorbars_vs_detunings(np.array([24, 31.85, 24, 31.85]) * 2 * np.pi, nine4, Z2, cm_type='concurrence',
-                                   #save_pdf=True)
+    #plotter.multiple_entanglement_entropy([Z2, Zero], seven2, np.array([-24, 24]) * 2 * np.pi, save_pdf=True)
 
-    plotter.area_law_test([Z2, Zero],seven2, np.array([-24, 24])*2*np.pi,[0.4, 0.8], save_pdf=True)
+    plotter.NN_compare(np.array([21, 24, 27, 30, 31.9, 34, 37]) * 2 * np.pi, Z2, nine3, save_pdf=True)
 
-    plotter.multiple_entanglement_entropy([Z2,Zero], seven2, np.array([-24, 24])*2*np.pi, save_pdf=True)
+    #plotter.colorbar_state_fidelity([Zero], save_pdf=True)
+    plotter.colorbars_vs_detunings(np.array([27, 30, 31.85, 34]) * 2 * np.pi, nine3, Z2, cm_type='rydberg',
+                                    save_pdf=True)
+
+    plotter.qmi_compare(9, [9, 8, 7, 6, 5, 4, 3, 2, 1], [1], corr_type='VNE', save_pdf=True)
+
+
+
+    plotter.gs_vs_detuning(np.arange(-5, 110, 2.5) * 2 * np.pi, Z2, rabi_list=[0, 4 * 2 * np.pi], save_pdf=True,
+                           inset=True)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     #plotter.eigenspectrums(np.array([24,-24])*2*np.pi, [Z2, Zero], seven2, save_pdf=True)
 
@@ -1241,11 +1370,11 @@ if __name__ == "__main__":
     #np.array([10, 12, 15, 21, 24, 27, 30, 31.9, 34, 37, 40, 45, 50, 55, 60])
 
 
-    #plotter.qmi_compare(9, [9, 8, 7, 6, 5, 4, 3, 2, 1], [1], corr_type='VNE', save_pdf=True)
+
 
     #plotter.blockade_plots()
 
-    plotter.colorbar_state_fidelity([Zero], save_pdf=True)
+
 
     plotter.ordered_state_colourbars([5.48, 3.16], Zero, seven, save_pdf=True)
 

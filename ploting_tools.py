@@ -135,7 +135,7 @@ def set_up_color_bar(n, data, times, ax, type='rydberg', color='viridis', colorb
     if colorbar:
         if cb_ax is not None:
             cb_ax = cb_ax
-            frac = 0.7
+            frac = 1 #0.7
 
         else:
             cb_ax = ax
@@ -144,8 +144,9 @@ def set_up_color_bar(n, data, times, ax, type='rydberg', color='viridis', colorb
         # Add a colorbar to show the mapping of values to colors
         sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
         sm.set_array([])  # fake up the array
-        cbar = plt.colorbar(sm, ax=cb_ax, orientation='vertical', shrink=0.9, fraction=frac)
-        cbar.set_label(bar_label)
+        cbar = plt.colorbar(sm, ax=cb_ax, orientation='vertical', shrink=1.15, fraction=frac)
+        cbar.set_label(bar_label, labelpad=10)
+        cbar.set_ticks([0,0.5,1])
 
 
 def end_colorbar_barchart(n, data, ax):
@@ -331,8 +332,6 @@ def plot_eigenenergies_fidelities_line(n, times, eigenvalues, eigen_probs, expec
         points = np.array([times, eigenvalues[:, i]]).T.reshape(-1, 1, 2)
         segments = np.concatenate([points[:-1], points[1:]], axis=1)
 
-        print(segments)
-
         # Create a continuous norm to map from data points to colors
         norm = plt.Normalize(0, 1)
         lc = LineCollection(segments, cmap='cmo.amp', norm=norm)
@@ -344,7 +343,8 @@ def plot_eigenenergies_fidelities_line(n, times, eigenvalues, eigen_probs, expec
 
 
     ax.set_xlim(0, times[-1])
-    ax.set_ylim(min(eigenvalues[:, 0]) - 10, max(eigenvalues[:, energy_range[-1]] + 10))
+    ax.set_ylim(-25,40)
+    #ax.set_ylim(min(eigenvalues[:, 0]) - 10, max(eigenvalues[:, energy_range[-1]] + 10))
 
 
 
@@ -358,6 +358,7 @@ def plot_eigenenergies_fidelities_line(n, times, eigenvalues, eigen_probs, expec
             frac = 0.1
 
         plt.colorbar(line, ax=cb_ax, label=cb_label, orientation='vertical', shrink=0.9, fraction=frac)
+
 
 
 

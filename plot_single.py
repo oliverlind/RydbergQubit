@@ -31,7 +31,7 @@ from matplotlib.colors import Normalize
 import pandas as pd
 import vector_manipluation_tools as vm
 
-mpl.rcParams['font.size'] = 12
+mpl.rcParams['font.size'] = 10
 mpl.rcParams['font.family'] = 'serif'
 mpl.rcParams["text.latex.preamble"] = r" \usepackage[T1]{fontenc} \usepackage[charter,cal=cmcal]{mathdesign}"
 mpl.rcParams["text.usetex"] = True
@@ -48,10 +48,10 @@ mpl.rcParams['axes.linewidth'] = 1.0
 
 class PlotSingle(AdiabaticEvolution):
     def __init__(self, n, t, dt, δ_start, δ_end, a=5.48, detuning_type=None, single_addressing_list=None,
-                 initial_state_list=None, rabi_regime='constant', Rabi= 4*2 * np.pi):
+                 initial_state_list=None, rabi_regime='constant', Rabi= 4*2 * np.pi, NN=False):
         super().__init__(n, t, dt, δ_start=δ_start, δ_end=δ_end, detuning_type=detuning_type,
                          single_addressing_list=single_addressing_list, initial_state_list=initial_state_list,
-                         rabi_regime=rabi_regime, a=a, Rabi=Rabi)
+                         rabi_regime=rabi_regime, a=a, Rabi=Rabi, NN=NN)
 
     '''ColourBar'''
     def colour_bar(self, type='rydberg', data=None, title=None, show=False, ax=None, cb=True, cb_ax=None, end_ax=None, save_pdf=False):
@@ -271,7 +271,7 @@ class PlotSingle(AdiabaticEvolution):
     def detuning_shape(self, types, position=0.5, ax=None, show=False, save_pdf=False):
 
         if ax is None:
-            fig, ax = plt.subplots(figsize=(4, 2.5))
+            fig, ax = plt.subplots(figsize=(8, 0.8))
             ax.axhline(y=0, color='black', linestyle='--', linewidth=1, alpha=0.5)
             ax.set_xlabel('Time ($\mu$s)')
         else:
@@ -301,11 +301,13 @@ class PlotSingle(AdiabaticEvolution):
                 color = 'r'
                 d = np.linspace(self.δ_start, self.δ_end, self.steps)
                 ax.plot(self.times, d / self.two_pi, color=color)
+                ax.tick_params(length=3)
+                ax.set_yticks([-24,24])
+                #ax.set_yticklabels[]
+                ax.set_xticks([0,0.1])
+                ax.set_xticklabels(['0', r'$t_{swp}$'])
+                ax.set_xlabel('')
 
-            elif d_type == 'linear':
-                color = 'r'
-                d = np.linspace(self.δ_start, self.δ_end, self.steps)
-                ax.plot(self.times, d / self.two_pi, color=color)
 
             elif d_type == 'quench flat':
                 color = 'b'
@@ -316,12 +318,12 @@ class PlotSingle(AdiabaticEvolution):
                 pass
 
         ax.set_ylim(- 40, max(self.δ_start, self.δ_end) / self.two_pi + 10)  # min(self.δ_start, self.δ_end)/self.two_pi
-        ax.set_ylabel(r'$\Delta$/$2\pi$ (MHz)')
+        ax.set_ylabel(r'$\Delta$/$2\pi$ (MHz)', fontsize=11)
         #ax.legend(loc=(0.5,0.15))
 
 
         if save_pdf:
-            plt.savefig(f'Quick Save Plots/output.pdf', format='pdf', bbox_inches='tight', dpi=700)
+            plt.savefig(f'Quick Save Plots/detuning shape.pdf', format='pdf', bbox_inches='tight', dpi=700)
 
         if show:
             plt.tight_layout()
@@ -619,9 +621,21 @@ class PlotSingle(AdiabaticEvolution):
                 fig, ax = plt.subplots(figsize=(4, 2.5))
                 ax.set_xlabel(r'Time ($\mu$s)')
 
+        eigenvalues = np.array(eigenvalues)/self.two_pi
+
+        print(self.detunning[0]//self.two_pi)
+
+        ax.plot(self.detunning[0]//self.two_pi, [0]*self.steps, color='white')
+
+        ax2 = ax.twiny()
+
+
+
         ploting_tools.plot_eigenenergies_fidelities_line(self.n, self.times, eigenvalues, eigenstate_probs,
-                                                         expectation_energies, ax, range(0, self.dimension), cb=cb,
-                                                         cb_label=r'⟨$\Psi_{\lambda}$|$\Psi$⟩', cb_ax=cb_ax)
+                                                         expectation_energies, ax2, range(0, self.dimension), cb=cb,
+                                                         cb_label=r'|⟨$\Psi_{\lambda}$|$\Psi$($t$)⟩|$^{2}$', cb_ax=cb_ax)
+
+        ax2.set_xticks([])
 
         if show:
             plt.show()
@@ -662,58 +676,100 @@ class PlotSingle(AdiabaticEvolution):
             plt.show()
 
     def eigenvalues_distance(self, save_pdf=False, show=False):
-        fig, ax = plt.subplots(figsize=(6, 3))
+        fig, ax = plt.subplots(1,1, figsize=(5, 2))
+
 
         ax.set_xlabel(r'$R$ ($\mu$m)', fontsize=12)
-        ax.set_ylabel(r'$E$ (MHz)')
+        ax.set_ylabel(r'$E/h$ (MHz)')
 
         xmin = 4
-        xmax = 13
+        xmax = 11
 
         a_list = np.linspace(xmin, xmax, 1000)
 
         eigenvalues_list = []
 
-        for a in a_list:
+        states = [self.initial_state([1,1]), self.initial_state([1,1], bell=True)]
+        print(states)
+
+        E_state_list = [[] for _ in range(len(a_list))]
+
+        for j, a in enumerate(a_list):
             h_m = RydbergHamiltonian1D(2, a=a).hamiltonian_matrix([0])
+
+            E_states = []
+
+            for state in states:
+                E_state = np.dot(state.conj().T, np.dot(h_m/self.two_pi, state))
+                E_state = E_state[0][0]
+                E_states += [E_state]
+
+            E_state_list[j] = E_states
 
             eigenvalues, eigenvector = np.linalg.eigh(h_m)
 
             eigenvalues_list += [eigenvalues]
 
+        E_state_list = np.array((E_state_list)).T
+        print(np.shape(E_state_list))
+
         labels = ['|00⟩', r'|$\Psi^{-}$⟩', r'|$\Psi^{+}$⟩', '|rr⟩']
+
+        colors = ['#00008B', '#0000CD', '#4169E1', '#87CEFA']
 
         eigenvalues_list = np.array(eigenvalues_list)
 
+        ax.axvspan(xmin=xmin, xmax=self.r_b, color='r', alpha=0.05)
+
         for i in reversed(range(0, 4)):
-            ax.plot(a_list, eigenvalues_list[:, i] / self.two_pi, label=labels[i], linewidth=2, zorder=1)
+            ax.plot(a_list, eigenvalues_list[:, i]/ self.two_pi, color=colors[0], alpha=0.8)
 
-        ax.set_xlim(min(a_list), max(a_list))
+        for i in range(0,1):
+            ax.plot(a_list, E_state_list[i], color='#32FF32', linewidth=2, label=labels[-1])
 
-        ax.spines['right'].set_position(('data', max(a_list)))
+        ax2 = ax.twinx()
+
+        ax2.set_yticks([-4, 0, 4])
+        ax2.set_yticklabels([r'-$\Omega$', ' 0', r' $\Omega$'])
+
+
 
         pale_blue = (0.7, 0.8, 1.0)
 
-        plt.axhline(y=self.Rabi / self.two_pi, color='black', linestyle='--', linewidth=1, alpha=0.1)
-        plt.axhline(y=-self.Rabi / self.two_pi, color='black', linestyle='--', linewidth=1, alpha=0.1)
-        plt.axhspan(ymin=-self.Rabi / self.two_pi, ymax=self.Rabi / self.two_pi, color='grey', alpha=0.1)
 
-        plt.axvline(x=self.r_b, color=pale_blue, linestyle='--', linewidth=2, alpha=0.8)
+
 
         print(self.r_b)
 
-        plt.text(self.r_b + 0.25, 10, r'$R_{B}$', ha='center', va='center', rotation=-90, fontsize=12)
-        plt.text(4.1, 13, 'Rydberg Blockade', color=pale_blue, fontsize=12)
+        ax.text(self.r_b + 0.12, 16.5, r'$R_{B}$', color='r', fontsize=11)
+        ax.text(4.2, 16.5, "Blockade", color='r', fontsize=11)
+        #plt.text(4.1, 13, 'Rydberg Blockade', color=pale_blue, fontsize=12)
 
         # plt.text(5.25, 315, r'$|rr⟩$', ha='center', va='center', fontsize=18)  # Displaying 1/2
 
-        plt.axvspan(xmin=xmin, xmax=self.r_b, color=pale_blue, alpha=0.2)
-        plt.tick_params(top=False)
-        plt.tick_params(right=False)
 
-        plt.subplots_adjust(right=0.8)
-        plt.legend(loc='upper right', fontsize=12)
-        plt.ylim(-5, 15)
+
+        ax.axhline(y=self.Rabi / self.two_pi, color='black', linestyle='--', linewidth=1, alpha=0.1)
+        ax.axhline(y=-self.Rabi / self.two_pi, color='black', linestyle='--', linewidth=1, alpha=0.1)
+        ax.axhspan(ymin=-self.Rabi / self.two_pi, ymax=self.Rabi / self.two_pi, color='grey', alpha=0.1)
+        ax.axvline(x=self.r_b, color='r', linestyle='--', linewidth=1, alpha=0.8)
+
+        ax.set_xlim(min(a_list), max(a_list))
+        ax.spines['right'].set_position(('data', max(a_list)))
+        ax.tick_params(top=False)
+        ax2.tick_params(length=3)
+        # ax.tick_params(right=False)
+        ax.tick_params(length=3)
+        #ax.set_yticks([-5,0,5,10,15,20,25])
+
+        #plt.subplots_adjust(right=0.8)
+        #plt.legend(loc='upper right', fontsize=12)
+        ax.set_ylim(-7.01, 20.01)
+        ax2.set_ylim(-7.01, 20.01)
+        ax.legend(loc='upper right')
+
+        #ax1.set_title('(b) ', pad=10)
+        #ax1.set_xlim(6, 10)
 
         # plt.arrow(13, -25+23.7, 0, -22.7, head_width=0.1, head_length=2, ec='black', fc='black', linewidth=2, zorder=2)
 
@@ -745,7 +801,7 @@ class PlotSingle(AdiabaticEvolution):
         # plt.draw()
 
         if save_pdf:
-            plt.savefig(f'Quick Save Plots/output.pdf', format='pdf', bbox_inches='tight', dpi=700)
+            plt.savefig(f'Quick Save Plots/blockadedistance.pdf', format='pdf', bbox_inches='tight', dpi=700)
 
         if show:
             plt.tight_layout()
@@ -966,13 +1022,23 @@ class PlotSingle(AdiabaticEvolution):
 
     def two_atom_blockade(self, states_to_test_list, save_pdf=False):
 
-        fig, axs = plt.subplots(nrows=2, ncols=2, figsize=(4,3.5), sharex=True, gridspec_kw={'width_ratios': [100, 1], 'height_ratios': [1, 1.5]})
+        fig, axs = plt.subplots(nrows=2, ncols=2, figsize=(8, 1.5), sharex=True, gridspec_kw={'width_ratios': [50, 1], 'height_ratios': [1, 1]})
 
         rfs, states = self.time_evolve(rydberg_fidelity=True, states_list=True)
 
-        ploting_tools.set_up_color_bar(2, rfs, self.times, ax=axs[0, 0], type='two atom blockade', colorbar=False)
+        d_array = self.detunning[0] / self.two_pi
 
-        for state_to_test in states_to_test_list:
+        #axs[0,0].plot(self.times, d_array)
+
+        self.colour_bar(ax=axs[0,0], cb_ax=axs[:,1])
+
+        #ploting_tools.set_up_color_bar(2, rfs, self.times, ax=axs[0, 0], type='two atom blockade', colorbar=False)
+        #gs = gridspec.GridSpec(3, 2)
+
+
+        #ax3 = fig.add_subplot(gs[2,:])
+
+        for i, state_to_test in enumerate(states_to_test_list):
             fidelity_list = [0]*len(states)
             print(state_to_test)
 
@@ -993,13 +1059,42 @@ class PlotSingle(AdiabaticEvolution):
                 ax.axis('off')
 
             # State fidelities
-            axs[1, 0].plot(self.times, fidelity_list)
 
-            d_array = self.detunning[0]/self.two_pi
+            axs[1,0].plot(self.times, fidelity_list, color='r')
+
             pos = np.argmin(np.abs(d_array-31.85))
 
             #axs[1, 0].axvspan(xmin=0, xmax=self.times[pos], color='green', alpha=0.05)
             #axs[1, 0].axvspan(xmin=self.times[pos], xmax=40, color='red', alpha=0.05)
+
+        # axs[0, 0].set_ylabel(r'$\Delta$/2$\pi$ (MHz)')
+        # axs[0, 0].set_ylim(-30, 30)
+        # axs[0, 0].axhline(y=0, color='black', linestyle='--', linewidth=1, alpha=0.2)
+        # axs[0, 0].tick_params(right=False)
+        # axs[0, 0].set_yticks([-24,24])
+        #
+        axs[0, 0].set_ylabel('Atom')
+        #axs[0, 0].set_yticks([])
+
+        axs[1, 0].set_xlabel(r'Time ($\mu$s)')
+        axs[1, 0].set_ylim(0, 1.2)
+        axs[1, 0].axhline(y=1, color='black', linestyle='--', linewidth=1, alpha=0.2)
+        axs[1, 0].set_ylabel(r'|⟨$\Psi^{+}$|$\Psi$($t$)⟩|$^{2}$', fontsize=10)
+        # axs[2, 0].tick_params(right=False)
+
+        #axs[0,0].text(0.81, 1, r'$t_{swp}$ = 1.00 $\mu$s', color='white')
+        axs[0,0].text(0.083, 1, r'$t_{swp}$ = 0.10 $\mu$s', color='white')
+
+        plt.subplots_adjust(hspace=0)
+        plt.subplots_adjust(top=0.95)
+
+        for ax in axs[:,0]:
+            ax.tick_params(axis='both', which='major', length=3)
+
+
+
+
+
 
 
         if save_pdf:
@@ -1014,7 +1109,7 @@ class PlotSingle(AdiabaticEvolution):
 
 
 if __name__ == "__main__":
-    t = 0.1
+    t = 0.101
     dt = 0.001
     n = 2
     δ_start = -24 * 2 * np.pi
@@ -1048,6 +1143,7 @@ if __name__ == "__main__":
     nine = ['linear'] * 9
     nine2 = ['linear flat'] * 4 + [1] + ['linear flat'] * 4
     nine3 = ['quench'] + ['linear flat'] * 8
+    nine4 =['quench'] * 9
 
     Z2 = [1 if i % 2 == 0 else 0 for i in range(n)]
     Zero = [0]*n
@@ -1058,12 +1154,28 @@ if __name__ == "__main__":
                          a=5.48,
                          Rabi=4 * 2 * np.pi
                          )
+
+    plotter.two_atom_blockade([['psi plus']], save_pdf=True)
+
     plotter.eigenenergies_lineplot_with_eigenstate_fidelities(show=True)
 
-    #plotter.lb_bound()
-    #plotter.eigenvalues_distance(show=True)
-
     plotter.colour_bar(show=True, save_pdf=True, cb=False)
+
+    plotter.detuning_shape(types = ['linear'], show=True, save_pdf=True)
+
+    plotter.eigenvalues_distance(show=True, save_pdf=True)
+    #plotter.eigenenergies_barchart(show=True, save_pdf=True, table=True, inset=True)
+
+
+
+
+
+
+
+    #plotter.lb_bound()
+
+
+
 
     plotter.colour_bar(show=True, type='concurrence', save_pdf=True, cb=False)
 
@@ -1071,7 +1183,7 @@ if __name__ == "__main__":
 
     #plotter.colour_bar(show=True, save_pdf=True)
 
-    plotter.eigenenergies_barchart(show=True, save_pdf=True, table=True, inset=True)
+
 
     #plotter.two_atom_blockade([[0,0],[1,1], ['psi plus']])
 

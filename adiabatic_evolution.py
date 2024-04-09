@@ -19,8 +19,8 @@ import rabi_regimes
 
 class AdiabaticEvolution(RydbergHamiltonian1D):
     def __init__(self, n, t, dt, δ_start, δ_end, a=5.48, rabi_osc=False, no_int=False, detuning_type='linear',
-                 single_addressing_list=None, initial_state_list=None, rabi_regime="constant", Rabi= 4*2 * np.pi):
-        super().__init__(n, a=a, Rabi=Rabi)
+                 single_addressing_list=None, initial_state_list=None, rabi_regime="constant", Rabi= 4*2 * np.pi, NN=False):
+        super().__init__(n, a=a, Rabi=Rabi, NN=NN)
         self.t = t
         self.dt = dt
         self.steps = int(t / dt)
@@ -71,13 +71,20 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
 
         return v
 
+    def bel_psi_plus(self):
+        v = np.zeros((4, 1))
+        v[1, 0] = 1 / (2 ** 0.5)
+        v[2, 0] = 1 / (2 ** 0.5)
+
+        return v
+
     def initial_state(self, state_list, bell=False):
         state_list = list(reversed(state_list))
         if not bell:
             v = self.col_basis_vectors(2)[state_list[0]]
             start = 1
         else:
-            v = self.bel_psi_minus()
+            v = self.bel_psi_plus()
             start=2
 
         for i in state_list[start:]:
@@ -149,6 +156,7 @@ class AdiabaticEvolution(RydbergHamiltonian1D):
 
             if entanglement_entropy:
                 rdm = self.reduced_density_matrix_half(ψ)
+                print(np.shape(rdm))
 
                 vne = self.entanglement_entropy(rdm)
 

@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 
-pos=0.05
+pos=0.01
 
 def global_detuning(t, dt, δ_start, δ_end, d_type='linear', position=pos):
     steps = int(t / dt)
@@ -86,12 +86,11 @@ def global_detuning(t, dt, δ_start, δ_end, d_type='linear', position=pos):
 
 
 def linear_detuning_quench(δ_start, δ_end, steps, position=pos, show=False):
-    linear_steps = math.floor(steps * position)
+    linear_steps = math.ceil(steps * position)
 
     sweep = np.linspace(δ_start, δ_end, linear_steps)
     quench = np.linspace(0,0, steps - linear_steps)
     detuning = np.hstack((sweep, quench))
-
     if show:
         x = np.arange(0, steps)
         plt.plot(x, detuning)
