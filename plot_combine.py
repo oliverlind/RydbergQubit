@@ -37,7 +37,7 @@ from matplotlib.animation import FFMpegWriter
 
 
 mpl.rcParams['animation.ffmpeg_path'] = '/opt/homebrew/bin/ffmpeg'
-mpl.rcParams['font.size'] = 11
+mpl.rcParams['font.size'] = 12
 mpl.rcParams['font.family'] = 'serif'
 mpl.rcParams["text.latex.preamble"] = r" \usepackage[T1]{fontenc} \usepackage[charter,cal=cmcal]{mathdesign}"
 mpl.rcParams["text.usetex"] = True
@@ -765,7 +765,7 @@ class CombinedPlots(PlotSingle):
             #     speed = r'$\Delta$$t_{q}$' + f'= {speed}' + '($\mu$s)'
             #
             # else:
-            speed = ''
+            speed =['No quench', 'Quench']
 
             for k, atom in enumerate(atom_list):
 
@@ -782,7 +782,7 @@ class CombinedPlots(PlotSingle):
                     axs.legend()
 
                 elif corr_type == 'VNE':
-                     data[f'VNE atom{atom} t_q = {single_addressing_list[0]}'] = singleplot.plot_entanglement_entropy_single_atom(atom, states=states, ax=axs[k], label=speed, data=True)
+                     data[f'VNE atom{atom} t_q = {single_addressing_list[0]}'] = singleplot.plot_entanglement_entropy_single_atom(atom, states=states, ax=axs[k], label=speed[i], data=True)
 
 
                      if i > 0:
@@ -827,6 +827,7 @@ class CombinedPlots(PlotSingle):
         axs[-1].set_yticklabels(['0.00', r'$ln(2)$'])
         axs[-1].yaxis.tick_right()
 
+
         for i in range(0, self.n-1):
             axs[i].set_xticks([])
             axs[i].set_yticks([])
@@ -838,6 +839,9 @@ class CombinedPlots(PlotSingle):
 
         #legend = ax.legend(loc='upper left')
         # legend.set_title(r'$\Delta$$t_{quench}$ ($\mu$s)')
+
+        axs[0].legend(loc='upper left', bbox_to_anchor=(0.15, 0.86), bbox_transform=plt.gcf().transFigure,
+                      facecolor='lightblue', fontsize=10, frameon=True)
 
         if save_df:
             path = 'Output CSV tables/qmi_data.csv'
@@ -1093,8 +1097,11 @@ class CombinedPlots(PlotSingle):
 
     def gs_vs_detuning(self, detunings, state, rabi_list=[4*2 * np.pi], save_pdf=False, inset=False):
 
-
         fig, ax = plt.subplots(1, 1, sharex=True, figsize=(4, 2.2))
+
+        ax.set_title(r'$N$ = 9')
+        ax.text(34, 0.5, r'$V_{NN}$', color='red')
+
 
         #gs = gridspec.GridSpec(2, 2, width_ratios=[0.05, 2.15, 1], height_ratios=[1, 1], hspace=0.3)
         #ax1 = fig.add_subplot(gs[0, 0])
@@ -1112,8 +1119,9 @@ class CombinedPlots(PlotSingle):
         single_addressing_list = ['linear'] * self.n
         intial_gs_fidelity_list = [0]*len(detunings)
 
+        Labels = ['Uncoupled', 'Coupled']
 
-        for rabi in rabi_list:
+        for j, rabi in enumerate(rabi_list):
 
             for i, detuning in enumerate(detunings):
                 print(detuning/self.two_pi)
@@ -1133,7 +1141,7 @@ class CombinedPlots(PlotSingle):
 
             # Plot
             ax.scatter(detunings / self.two_pi, intial_gs_fidelity_list, s=12, marker='x')
-            ax.plot(detunings/self.two_pi, intial_gs_fidelity_list)
+            ax.plot(detunings/self.two_pi, intial_gs_fidelity_list, label=Labels[j])
 
             if inset:
                 inset_ax.scatter(detunings / self.two_pi, intial_gs_fidelity_list, s=5, marker='x', label='Inset Graph')
@@ -1145,10 +1153,13 @@ class CombinedPlots(PlotSingle):
 
         ax.axvline(x=31.9, color='r', linestyle='--', linewidth=1, alpha=0.3)
         ax.set_ylim(0,1.1)
+        ax.set_xlim(-7, 120)
         ax.set_xlabel(r'$\Delta$/2$\pi$ (MHz)')
         ax.set_ylabel(r'|⟨$Z_{2}$|$\Psi_{0}$⟩|$^{2}$')
         ax.tick_params(right=False)
         ax.tick_params(top=False)
+        ax.tick_params(length=3)
+        ax.legend(loc='lower right', fontsize=10, bbox_to_anchor=(1, 0.2))
 
 
         if save_pdf:
@@ -1289,9 +1300,9 @@ class CombinedPlots(PlotSingle):
 
 
 if __name__ == "__main__":
-    t = 0.9
+    t = 0.02
     dt = 0.01
-    n = 7
+    n = 9
     δ_start = 31.85 * 2 * np.pi
     δ_end = 31.85 * 2 * np.pi
 
@@ -1329,24 +1340,30 @@ if __name__ == "__main__":
                             initial_state_list=Z2, rabi_regime='constant',
                             )
 
+    plotter.qmi_compare(9, [9, 8, 7, 6, 5, 4, 3, 2, 1], [1], corr_type='VNE', save_pdf=True)
+
+    plotter.gs_vs_detuning(np.arange(-5, 110, 2.5) * 2 * np.pi, Z2, rabi_list=[0, 4 * 2 * np.pi], save_pdf=True,
+                           inset=True)
+
+    plotter.NN_compare(np.array([31, 31.9,]) * 2 * np.pi, Z2, nine3, save_pdf=True)
+
     plotter.two_atom_sweeps_eigenenergies(save_pdf=True)
 
     plotter.area_law_test([Z2, Zero], seven2, np.array([-24, 24]) * 2 * np.pi, [0.4, 0.8], save_pdf=True)
 
     #plotter.multiple_entanglement_entropy([Z2, Zero], seven2, np.array([-24, 24]) * 2 * np.pi, save_pdf=True)
 
-    plotter.NN_compare(np.array([21, 24, 27, 30, 31.9, 34, 37]) * 2 * np.pi, Z2, nine3, save_pdf=True)
+
 
     #plotter.colorbar_state_fidelity([Zero], save_pdf=True)
     plotter.colorbars_vs_detunings(np.array([27, 30, 31.85, 34]) * 2 * np.pi, nine3, Z2, cm_type='rydberg',
                                     save_pdf=True)
 
-    plotter.qmi_compare(9, [9, 8, 7, 6, 5, 4, 3, 2, 1], [1], corr_type='VNE', save_pdf=True)
 
 
 
-    plotter.gs_vs_detuning(np.arange(-5, 110, 2.5) * 2 * np.pi, Z2, rabi_list=[0, 4 * 2 * np.pi], save_pdf=True,
-                           inset=True)
+
+
 
 
 

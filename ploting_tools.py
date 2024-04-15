@@ -114,7 +114,7 @@ def set_up_color_bar(n, data, times, ax, type='rydberg', color='viridis', colorb
     else:
         sys.exit()
 
-    cmap = plt.get_cmap(color)  # Choose a colormap for data sets
+    cmap = plt.get_cmap(color)
 
     for i, ind_data in enumerate(data):
         for j, value in enumerate(ind_data):
@@ -179,7 +179,6 @@ def end_eigenenergies_barchart(n, data, ax):
     cmap = plt.get_cmap(color)
     colors = [cmap(norm(value)) for value in data]
 
-    # Remove y-axis ticks
     ax.tick_params(axis='y', which='both', left=False, right=False)
     ax.set_yticks(energies)
     ax.set_yticklabels(labels)

@@ -26,7 +26,6 @@ def propagation_speed(data_list):
         l = np.array(data['l'])
         t_diff = np.array(data['t_diff'])
 
-        # Perform linear regression
         slope, intercept, r_value, p_value, std_err = linregress(t_diff, l)
 
         x_intercept = -intercept/slope
@@ -34,22 +33,20 @@ def propagation_speed(data_list):
         print(slope)
         print(x_intercept)
 
-        # Create scatter plot
+
         ax.scatter(t_diff[:], l[:], label='Data')
         ax.plot(t_diff[:], l[:], label='Data')
 
-        # Plot the line of best fit
         #ax.plot(t_diff, slope * t_diff + intercept, color='red', label='Line of Best Fit')
 
     ax.set_xlim(left=0)
     ax.set_ylim(bottom=0)
 
-    # Add labels and legend
     plt.ylabel('Sites travelled')
     plt.xlabel('t*')
     #plt.legend()
 
-    # Show plot
+
     plt.show()
 
 def propagation_speed2(data_list, legend_list, threshold_type='Time 3sd', save_pdf=False):
@@ -64,15 +61,14 @@ def propagation_speed2(data_list, legend_list, threshold_type='Time 3sd', save_p
         t_diff = np.array(data[threshold_type])
         t_diff2 = np.array(data['Time 1.1'])
 
-        # Perform linear regression
-        slope, intercept, r_value, p_value, std_err = linregress(t_diff[1:], l[1:])
+        slope, intercept, r_value, p_value, std_err = linregress(t_diff2[1:], l[1:])
+
+        print(slope)
+        print(std_err)
 
         x_intercept = -intercept/slope
 
         #print(slope)
-        print(x_intercept)
-
-        # Create scatter plot
 
         axs[1].scatter(t_diff[1:], l[1:], marker=markers[i], label=legend_list[i], s=20)
         axs[1].plot(t_diff[1:], l[1:])
@@ -89,9 +85,6 @@ def propagation_speed2(data_list, legend_list, threshold_type='Time 3sd', save_p
     axs[1].legend(loc='upper left', bbox_to_anchor=(1.08, 1.03), borderaxespad=0., title=r'$\Delta_{t=0}$/2$\pi$ (MHz)')
 
 
-        # Plot the line of best fit
-        #ax.plot(t_diff, slope * t_diff + intercept, color='red', label='Line of Best Fit')
-
     for ax in axs:
         ax.set_ylim(bottom=0)
         ax.tick_params(top=False)
@@ -107,7 +100,7 @@ def propagation_speed2(data_list, legend_list, threshold_type='Time 3sd', save_p
     plt.subplots_adjust(wspace=0.15)
 
 
-    # Add labels and legend
+
 
     # plt.xlabel('t*')
     #plt.legend()
@@ -115,7 +108,6 @@ def propagation_speed2(data_list, legend_list, threshold_type='Time 3sd', save_p
     if save_pdf:
         plt.savefig(f'Quick Save Plots/EE_velocity_plot.pdf', format='pdf', bbox_inches='tight', dpi=700)
 
-    # Show plot
     plt.show()
 
 

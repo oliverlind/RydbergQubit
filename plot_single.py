@@ -928,6 +928,7 @@ class PlotSingle(AdiabaticEvolution):
         print(f'Atom {j} VNE_av', np.average(vne_list))
 
 
+
         if show:
             plt.ylabel('VNE')
             plt.xlabel('Time (s)')
@@ -1083,7 +1084,7 @@ class PlotSingle(AdiabaticEvolution):
         # axs[2, 0].tick_params(right=False)
 
         #axs[0,0].text(0.81, 1, r'$t_{swp}$ = 1.00 $\mu$s', color='white')
-        axs[0,0].text(0.083, 1, r'$t_{swp}$ = 0.10 $\mu$s', color='white')
+        axs[0,0].text(0.83, 1, r'$t_{swp}$ = 1.00 $\mu$s', color='white')
 
         plt.subplots_adjust(hspace=0)
         plt.subplots_adjust(top=0.95)
@@ -1109,7 +1110,7 @@ class PlotSingle(AdiabaticEvolution):
 
 
 if __name__ == "__main__":
-    t = 0.101
+    t = 1.002
     dt = 0.001
     n = 2
     δ_start = -24 * 2 * np.pi
