@@ -24,7 +24,7 @@ from matplotlib.patches import Rectangle
 import data_analysis
 import detuning_regimes
 import rabi_regimes
-from adiabatic_evolution import AdiabaticEvolution
+from time_evolution import AdiabaticEvolution
 from rydberg_hamiltonian_1d import RydbergHamiltonian1D
 import data_analysis as da
 import config.config as cf

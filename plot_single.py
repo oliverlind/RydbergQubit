@@ -21,7 +21,7 @@ import matplotlib.gridspec as gridspec
 import data_analysis
 import detuning_regimes
 import rabi_regimes
-from adiabatic_evolution import AdiabaticEvolution
+from time_evolution import TimeEvolution
 from rydberg_hamiltonian_1d import RydbergHamiltonian1D
 import data_analysis as da
 import config.config as cf
@@ -46,7 +46,7 @@ mpl.rcParams['ytick.major.width'] = 1.0
 mpl.rcParams['axes.linewidth'] = 1.0
 
 
-class PlotSingle(AdiabaticEvolution):
+class PlotSingle(TimeEvolution):
     def __init__(self, n, t, dt, δ_start, δ_end, a=5.48, detuning_type=None, single_addressing_list=None,
                  initial_state_list=None, rabi_regime='constant', Rabi= 4*2 * np.pi, NN=False):
         super().__init__(n, t, dt, δ_start=δ_start, δ_end=δ_end, detuning_type=detuning_type,

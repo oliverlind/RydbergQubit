@@ -17,7 +17,7 @@ import rabi_regimes
 
 
 
-class AdiabaticEvolution(RydbergHamiltonian1D):
+class TimeEvolution(RydbergHamiltonian1D):
     def __init__(self, n, t, dt, δ_start, δ_end, a=5.48, rabi_osc=False, no_int=False, detuning_type='linear',
                  single_addressing_list=None, initial_state_list=None, rabi_regime="constant", Rabi= 4*2 * np.pi, NN=False):
         super().__init__(n, a=a, Rabi=Rabi, NN=NN)

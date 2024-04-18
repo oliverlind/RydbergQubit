@@ -18,7 +18,7 @@ import matplotlib.cm as cm
 import data_analysis
 import detuning_regimes
 import rabi_regimes
-from adiabatic_evolution import AdiabaticEvolution
+from time_evolution import AdiabaticEvolution
 from rydberg_hamiltonian_1d import RydbergHamiltonian1D
 import data_analysis as da
 import config.config as cf
@@ -960,7 +960,7 @@ class Plot(AdiabaticEvolution):
         binary_strings = ploting_tools.ascending_binary_strings(self.n)
 
         df.index = ['Energy Eigenvalue', 'Probability'] + binary_strings
-        path = 'Output CSV tables/data.csv'
+        path = '../Output CSV tables/data.csv'
 
         df.to_csv(path, index=True)
 
